@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Finding",
+  "description": "One finding of a review. The findings of a plan are one file, {\"findings\": [...]}. This file is the one authority on the fields, on their values and on who writes them: findings.py reads it at each run, and refuses to run when it holds a keyword that findings.py does not check.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "r<round>-<lens>-<number>: the round and the lens given to add, then a number that the reviewer gives its findings from 1, with no leading zero. Example: r1-correctness-2.",
+      "type": "string",
+      "pattern": "^r[1-9][0-9]*-[a-z][a-z0-9-]*-[1-9][0-9]*$(?!\\n)"
+    },
+    "file": {
+      "description": "The file that the finding is about, as a path relative to the root of the repository: it starts with neither / nor ~. Null when the finding is about no file.",
+      "type": ["string", "null"],
+      "pattern": "^[^/~]"
+    },
+    "line": {
+      "description": "The line of the file, from 1, or null. Always null when file is null.",
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "severity": {
+      "description": "blocking: merged as it is, the change breaks a stated requirement or a behaviour that worked, or a check that it adds cannot fail for what it claims. major: a concrete scenario in which the change fails outside its main case: a context, a failure path, or a claim with no evidence. minor: it would not change the decision to merge. A reviewer whose own instructions use other grades applies these three: a demonstrated defect by these definitions, missing evidence as major, a remark as minor.",
+      "enum": ["blocking", "major", "minor"]
+    },
+    "summary": {
+      "description": "What is wrong, in a sentence. At least one character that is not a space.",
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "failure_scenario": {
+      "description": "The concrete input or state under which the change fails, and what then happens. At least one character that is not a space.",
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "fix": {
+      "description": "What the reviewer proposes, not what was done. At least one character that is not a space.",
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "lens": {
+      "description": "The lens of the review that found it, as given to add: a lower-case letter, then lower-case letters, digits and hyphens.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$(?!\\n)"
+    },
+    "subject": {
+      "description": "What the finding is about: code, policy, carry-over or notes. An unsettled requirement is a finding of subject policy whose fix names the decision to take.",
+      "enum": ["code", "policy", "carry-over", "notes"]
+    },
+    "round_found": {
+      "description": "The review round that found it, from 1: the round given to add.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "origin": {
+      "description": "Where the defect came from, as the codebook defines each value. Null until the coordinator has classified the finding.",
+      "enum": ["first-iteration", "fix-round", "coordinator", "plan-or-brief", null]
+    },
+    "disclosed_before_review": {
+      "description": "Whether the author had disclosed the defect before the review. Null until assessed.",
+      "type": ["boolean", "null"]
+    },
+    "disposition": {
+      "description": "What became of the finding. It is open when it is added; x-roles says which role may then set which value.",
+      "enum": ["open", "fixed", "declined", "needs-user", "ruled", "deferred"]
+    },
+    "carry_over_of": {
+      "description": "The id of the finding of an earlier round that this one carries over, or null.",
+      "type": ["string", "null"]
+    }
+  },
+  "required": [
+    "id",
+    "file",
+    "line",
+    "severity",
+    "summary",
+    "failure_scenario",
+    "fix",
+    "lens",
+    "subject",
+    "round_found",
+    "origin",
+    "disclosed_before_review",
+    "disposition",
+    "carry_over_of"
+  ],
+  "additionalProperties": false,
+  "x-roles": {
+    "reviewer": {
+      "adds": ["id", "file", "line", "severity", "summary", "failure_scenario", "fix", "lens", "subject"]
+    },
+    "fixer": {
+      "sets": {"disposition": {"from": ["open"], "to": ["fixed", "declined"]}}
+    },
+    "coordinator": {
+      "sets": {"origin": {}, "disclosed_before_review": {}, "carry_over_of": {}, "disposition": {}}
+    }
+  }
+}
