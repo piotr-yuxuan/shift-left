@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -1226,6 +1227,27 @@ class Writers(CommandLine):
                 os.close(lock)
             self.assertEqual(writer.wait(timeout=60), 0)
         self.assertEqual(self.held(), [stored("r1-design-1", origin="coordinator")])
+
+    def test_a_lock_held_past_the_deadline_is_a_failure_that_names_the_directory(self):
+        before = self.hold(stored("r1-design-1"))
+        answer = {"findings": [reported("r1-design-2")]}
+        decide = functools.partial(findings.add, SCHEMA, answer=answer, round_found=1, lens="design")
+        lock = os.open(self.file.parent, os.O_RDONLY)
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            with mock.patch.dict(os.environ, self.environment, clear=True):
+                with mock.patch.object(findings, "LOCK_DEADLINE_SECONDS", 0.2):
+                    started = time.monotonic()
+                    with self.assertRaises(findings.Failure) as failure:
+                        findings.rewrite(self.file, decide)
+                    waited = time.monotonic() - started
+        finally:
+            os.close(lock)
+        self.assertGreaterEqual(waited, 0.2)
+        self.assertLess(waited, 10)
+        self.assertIn(str(self.file.parent), str(failure.exception))
+        self.assertEqual(os.listdir(self.file.parent), ["plan.json"])
+        self.assertEqual(self.file.read_bytes(), before)
 
     def test_twenty_writers_at_once_lose_nothing_and_leave_no_other_file(self):
         writers = [self.writer(f"r1-design-{number}") for number in range(1, 21)]

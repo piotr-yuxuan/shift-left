@@ -28,6 +28,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from collections import Counter
 from functools import partial
 from pathlib import Path
@@ -36,6 +37,9 @@ SCHEMA_FILE = Path(__file__).with_name("finding.schema.json")
 
 # The variables that choose a configuration file of git, and neither a repository nor a rule.
 KEPT_FOR_GIT = ("GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM")
+
+# How long a writer waits for the lock on the directory of the findings file before it gives up.
+LOCK_DEADLINE_SECONDS = 60
 
 TYPES = {
     "string": lambda value: isinstance(value, str),
@@ -454,7 +458,8 @@ def rewrite(path: Path, decide):
     content and what to print. Nothing is created unless git says that it ignores `path`: findings
     can quote a private repository, so a wrong yes would put private text in a commit. The directory
     of the file is locked from the read to the replacement, so that writers wait for each other and
-    no lock file is left.
+    no lock file is left; a writer that waits LOCK_DEADLINE_SECONDS for the lock gives up with a
+    failure.
     """
     nearest = path.parent
     while not nearest.is_dir():
@@ -476,7 +481,16 @@ def rewrite(path: Path, decide):
         path.parent.mkdir(parents=True, exist_ok=True)
     lock = os.open(path.parent, os.O_RDONLY)
     try:
-        fcntl.flock(lock, fcntl.LOCK_EX)
+        deadline = time.monotonic() + LOCK_DEADLINE_SECONDS
+        while True:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if time.monotonic() >= deadline:
+                    held = f"locked by another process for {LOCK_DEADLINE_SECONDS} seconds"
+                    raise Failure(f"{path.parent}: {held}") from None
+                time.sleep(0.05)
         document, output = decide(parse(path.read_bytes(), path) if path.exists() else None)
         temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
         try:
