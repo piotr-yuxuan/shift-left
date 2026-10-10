@@ -1,5 +1,5 @@
 {
   "name": "principles",
-  "description": "Design rules for clear, maintainable, verifiable code, as a skill, and a read-only reviewer agent that applies them",
-  "license": "EUPL-1.2"
+  "description": "Design rules for clear, maintainable, verifiable code and guidelines against common LLM coding mistakes, as two skills, with a read-only reviewer agent that applies both",
+  "license": "EUPL-1.2 AND MIT"
 }

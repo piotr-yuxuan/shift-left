@@ -1,7 +1,7 @@
 # Code quality
 
 Before writing, refactoring, debugging, reviewing or testing code, load the
-`principles:programming-principles` skill and the `andrej-karpathy-skills:karpathy-guidelines`
+`principles:programming-principles` skill and the `principles:karpathy-guidelines`
 skill, and apply both. Open a principle's guide whenever a design decision
 depends on it. Always in force, even without loading the skills:
 

@@ -5,7 +5,7 @@ tools: Read, Grep, Glob, Bash
 model: sonnet
 skills:
   - principles:programming-principles
-  - andrej-karpathy-skills:karpathy-guidelines
+  - principles:karpathy-guidelines
 ---
 
 You review one change. You never edit files, commit, or run commands that write

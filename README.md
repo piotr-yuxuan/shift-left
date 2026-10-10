@@ -10,11 +10,14 @@ quality forward to the moment code is written. Each plugin can be adopted alone.
 - The skill `principles:programming-principles`: sixteen design rules for clear,
   maintainable, verifiable code. Each rule has a guide with a definition, two worked
   examples and a review question, opened only when a decision depends on it.
+- The skill `principles:karpathy-guidelines`: four guidelines against the common
+  mistakes of a language model that writes code: think before coding, simplicity
+  first, surgical changes, goal-driven execution. It is copied unchanged from another
+  repository, under another licence: see the notice beside it.
 - The agent `principles:principles-reviewer`: a fast, read-only review of one change
-  against those rules, in one bounded pass.
+  against both skills, in one bounded pass.
 
-It needs nothing else. The reviewer also names a skill of a companion plugin, see
-below.
+It needs nothing else.
 
 ### `quality-ratchet`
 
@@ -56,22 +59,6 @@ From a local clone, `claude plugin marketplace add <clone>` registers the direct
 itself. Claude Code then loads the plugins in place, so an edit in the clone applies
 at the next session.
 
-### Optional companion
-
-The reviewer agent also lists the skill `andrej-karpathy-skills:karpathy-guidelines`,
-from another author's plugin, which `principles` does not declare as a dependency.
-That plugin is `andrej-karpathy-skills` of the marketplace `karpathy-skills`, at
-`https://github.com/forrestchang/andrej-karpathy-skills`; by the same pattern as
-above, and as untested here:
-
-```
-claude plugin marketplace add forrestchang/andrej-karpathy-skills
-claude plugin install andrej-karpathy-skills@karpathy-skills
-```
-
-Without it, Claude Code reports nothing about the missing skill when it validates and
-loads the plugin. The agent itself was not run without it.
-
 ### If a hook wrongly blocks
 
 Disable its plugin, and enable it again once the cause is fixed:
@@ -99,9 +86,10 @@ skip such an import when the file lies outside their working directory.
 
 ## Other tools
 
-The skill uses the standard `skills/<name>/SKILL.md` layout, which tools of other
+The skills use the standard `skills/<name>/SKILL.md` layout, which tools of other
 vendors read. This was not tested with any of them.
 
 ## Licence
 
-EUPL 1.2, see `LICENSE`.
+EUPL 1.2, see `LICENSE`. One file is under MIT: the skill `karpathy-guidelines` of the
+`principles` plugin, as the notice beside it says.
