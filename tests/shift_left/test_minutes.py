@@ -731,6 +731,7 @@ class Report(CommandLine):
             "nothing": "",
             "a list": "[]",
             "a number that is not json": '{"runId": "wf-a", "status": "completed", "startTime": NaN}',
+            "lists nested deeper than python reads": "[" * 100_000 + "]" * 100_000,
         }
         for label, content in contents.items():
             with self.subTest(label):
@@ -747,7 +748,9 @@ class Report(CommandLine):
     def test_a_transcript_of_the_wrong_shape_is_a_failure_that_names_the_file(self):
         lines = [json.dumps(line) for line in TRANSCRIPT]
         cut = '{"type": "assi ' + MARKER
+        deep = "[" * 100_000 + "]" * 100_000
         contents = {
+            "a line nested deeper than python reads": "\n".join(lines[:6] + [deep] + lines[6:]) + "\n",
             "a line in the middle that does not parse": "\n".join(lines[:6] + [cut] + lines[6:]) + "\n",
             "a first line that does not parse": "\n".join([cut] + lines) + "\n",
             "an empty line in the middle": "\n".join(lines[:6] + [""] + lines[6:]) + "\n",

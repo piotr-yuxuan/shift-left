@@ -88,7 +88,8 @@ def run_of(data: bytes) -> dict:
     """
     try:
         record = typed(json.loads(data), dict, "the run record")
-    except ValueError:
+    except (ValueError, RecursionError):
+        # RecursionError: lists or objects nested deeper than Python reads.
         raise Failure("not JSON") from None
     start = typed(record.get("startTime"), int, "startTime")
     try:
@@ -181,7 +182,7 @@ def records_of(data: bytes) -> list[dict]:
     for number, line in enumerate(lines, 1):
         try:
             records.append(typed(json.loads(line), dict, f"line {number}"))
-        except ValueError:
+        except (ValueError, RecursionError):
             if number < len(lines):
                 raise Failure(f"line {number}: not JSON") from None
     return records

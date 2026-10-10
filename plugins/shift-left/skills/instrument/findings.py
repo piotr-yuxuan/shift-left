@@ -430,12 +430,21 @@ def summary(schema: dict, document) -> dict:
 
 
 def parse(data: bytes, name):
-    """The JSON value that `data` holds in UTF-8; `name` says in a failure where it was read."""
+    """The JSON value that `data` holds in UTF-8; `name` says in a failure where it was read.
+
+    A value that could not be written back is a failure here, before any effect: an escape of JSON
+    can name half of a surrogate pair, which UTF-8 does not hold.
+    """
     try:
         # `int` refuses NaN and Infinity, which are not JSON and which Python would accept.
-        return json.loads(data.decode("utf-8"), parse_constant=int)
-    except ValueError:
+        value = json.loads(data.decode("utf-8"), parse_constant=int)
+        json.dumps(value, ensure_ascii=False).encode("utf-8")
+    except UnicodeEncodeError:
+        raise Failure(f"{name}: half of a surrogate pair, which UTF-8 does not hold") from None
+    except (ValueError, RecursionError):
+        # RecursionError: lists or objects nested deeper than Python reads.
         raise Failure(f"{name}: not JSON") from None
+    return value
 
 
 def rewrite(path: Path, decide):

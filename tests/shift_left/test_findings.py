@@ -650,6 +650,20 @@ class Add(CommandLine):
                 self.assertFailed(self.script(*arguments, answer=answer))
                 self.assertFalse(self.file.parent.exists())
 
+    def test_an_answer_that_cannot_be_written_or_read_is_a_failure_and_creates_nothing(self):
+        # JSON can name half of a surrogate pair by an escape, and UTF-8 does not hold it.
+        half = reported("r1-design-1", summary="half \ud83d of a pair")
+        answers = {
+            "half of a surrogate pair": json.dumps({"findings": [half]}),
+            "lists nested deeper than python reads": "[" * 100_000 + "]" * 100_000,
+        }
+        self.assertIn("half \\ud83d of a pair", answers["half of a surrogate pair"])
+        arguments = ["add", "--file", str(self.file), "--round", "1", "--lens", "design"]
+        for label, answer in answers.items():
+            with self.subTest(label):
+                self.assertFailed(self.script(*arguments, answer=answer))
+                self.assertFalse(self.file.parent.exists())
+
     def test_a_round_below_one_a_lens_outside_its_pattern_or_a_missing_argument_is_a_wrong_call(self):
         file, one = ["--file", str(self.file)], {"findings": [reported("r1-design-1")]}
         calls = [
@@ -993,9 +1007,13 @@ class Summary(CommandLine):
                 self.assertFailed(self.add(reported("r1-design-1")))
                 self.assertEqual(self.file.read_text(), content)
 
-    def test_a_file_that_is_not_text_is_a_failure_for_every_command_and_stays(self):
+    def test_a_file_that_cannot_be_read_or_written_back_is_a_failure_for_every_command_and_stays(self):
         valid = json.dumps({"findings": [stored("r1-design-1", summary="X")]}).encode("utf-8")
-        contents = {"a byte that is not UTF-8": valid.replace(b"X", b"\xff")}
+        contents = {
+            "a byte that is not UTF-8": valid.replace(b"X", b"\xff"),
+            "the escape of half of a surrogate pair": valid.replace(b"X", rb"\ud83d"),
+            "lists nested deeper than python reads": b"[" * 100_000 + b"]" * 100_000,
+        }
         self.file.parent.mkdir()
         for label, content in contents.items():
             with self.subTest(label):
