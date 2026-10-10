@@ -58,9 +58,10 @@ One file per plan, `{"findings": [...]}`, at a path that the caller chooses. Kee
 in a directory that git ignores, in a checkout that outlives the worktree of the
 plan: removing a worktree deletes its ignored files with it. Findings can quote
 private code, so `findings.py` refuses to write a file unless git says that it
-ignores it, whatever the `GIT_*` variables of the caller say, and a refused write
-creates nothing. A write replaces the whole file or changes nothing, and writers wait
-for each other.
+ignores it, and a refused write creates nothing. Any ignore rule counts, a personal
+one included; a variable of the caller that names another repository or injects a
+rule, such as `GIT_DIR`, is not passed to git. A write replaces the whole file or
+changes nothing, and writers wait for each other.
 
 ### Who runs what, and when
 
