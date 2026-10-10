@@ -1,0 +1,11 @@
+line-length = 104
+
+[format]
+# The guides are kept as they were written: their code samples are wrapped for reading.
+exclude = ["plugins/principles/skills/programming-principles/references/*.md"]
+
+[lint]
+select = ["E", "F", "B", "C901"]
+
+[lint.mccabe]
+max-complexity = 10
