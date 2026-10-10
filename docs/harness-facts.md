@@ -169,9 +169,22 @@ and the log says where each component was read from:
 
 What `minutes.py` of `shift-left` reads. Seen in the records that the harness keeps
 for the sessions of one machine; `<project>` stands for the directory that it keeps
-for a project, and `<session>` for the identifier of a session. The script refuses a
-record of another shape, so that a version of the harness that changes one of these
-facts shows as a failure and not as a wrong figure.
+for a project, and `<session>` for the identifier of a session.
+
+The script refuses a run record in which a key that it reads is missing or has
+another type, a `done` agent with no `durationMs` included. In a transcript it
+refuses a line that is not a JSON object, except a last line that does not parse; a
+`timestamp` that it reads and that is not a date with an offset; and `user` or
+`assistant` records of which none starts a turn. A version of the harness that drops
+or retypes a key of the run record or the `timestamp` of the `user` and `assistant`
+records, or that drops `turnOrigin`, shows as a failure.
+
+The script does not refuse a value that it does not know: an entry of
+`workflowProgress` of a type other than `workflow_phase` and `workflow_agent` is
+ignored, an agent in a state other than `done` counts as not finished, and a
+transcript record of another type or subtype is no event and no stop record. A
+version of the harness that renames one of these values gives wrong figures with
+status 0, so see these facts again after an upgrade.
 
 - **A run record exists only once its run has ended.** Seen, 41 run records: the
   record of a workflow run is `<project>/<session>/workflows/<runId>.json`. The

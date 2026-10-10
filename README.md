@@ -61,8 +61,12 @@ of the skill, so that what a plan cost and what its review found are read from d
 
 It needs `python3` (3.11 or later) on `PATH`; `findings.py` also needs `git` and a
 POSIX system. The shape of the run records and of the transcripts was observed with
-Claude Code 2.1.288, see `docs/harness-facts.md`: a record of another shape is
-refused, not misread.
+Claude Code 2.1.288, see `docs/harness-facts.md`. `minutes.py` refuses a run record
+in which a key that it reads is missing or has another type, and a transcript that
+holds `user` or `assistant` records of which none starts a turn. It does not refuse a
+value that it does not know: an entry of an unknown type is ignored, and an agent in
+a state other than `done` counts as not finished. A later version of Claude Code that
+renames such a value gives wrong figures, so see the facts again after an upgrade.
 
 ## Install
 
