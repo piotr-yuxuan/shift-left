@@ -27,3 +27,7 @@ commit and the intent. Fix its blocking findings or report them to the user.
 
 A repository's own instructions (AGENTS.md, CLAUDE.md) and linter configuration
 take precedence where they conflict with these rules; say when that happens.
+
+# Commits
+
+A commit message carries no `Co-Authored-By` trailer.
