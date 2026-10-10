@@ -45,22 +45,32 @@ and the log says where each component was read from:
 
 ## Where a plugin is loaded from
 
-- **A plugin of a marketplace added from a local directory loads in place.** Seen. A
-  throwaway marketplace in a directory, with one plugin holding one skill, was added
-  and installed. A second and a third skill were then added to the source directory,
-  with no reinstall.
-  - `installed_plugins.json` records an install path inside the plugin cache,
-    `<config>/plugins/cache/<marketplace>/<plugin>/<version>`, and that directory
-    holds a copy made at install time.
-  - A session does not read that copy: the log of a debug start names the source
-    directory as the skills path and counts three skills, when the copy holds fewer.
-    The log names the source directory for `hooks/hooks.json` as well; for agents and
-    language servers it gives a count and no path.
-  - `plugin details` reads the source directory too. `plugin update` refreshes the
-    copy from the source.
+- **A plugin of a marketplace added from a local directory: a CLI start reads it in
+  place, a session of the desktop app reads a cached copy.** Seen, in two settings.
+  - *A debug start of the CLI, with a scratch configuration.* A throwaway marketplace
+    in a directory, with one plugin holding one skill, was added and installed. A
+    second and a third skill were then added to the source directory, with no
+    reinstall. `installed_plugins.json` records an install path inside the plugin
+    cache, `<config>/plugins/cache/<marketplace>/<plugin>/<version>`, and that
+    directory holds a copy made at install time. The session does not read that copy:
+    its log names the source directory as the skills path and counts three skills,
+    when the copy holds fewer. The log names the source directory for
+    `hooks/hooks.json` as well; for agents and language servers it gives a count and
+    no path.
+  - *A session of the desktop app, with the user's configuration,* and this
+    repository registered from a clone. A loaded skill gives its base directory as the
+    cached copy, `<config>/plugins/cache/piotr-yuxuan/principles/<commit>/skills/<name>`,
+    in the main session and in an agent that names the skill. The report of the hook
+    names its command in the cached copy of `quality-ratchet`, and its plugin as
+    `quality-ratchet@inline`.
+  - `plugin details` reads the source directory. `plugin update` refreshes the copy
+    from the source: for a clone that moved to another commit it reports both commits
+    and makes a new directory for the new one.
 
-  So a clone registered this way is live configuration, uncommitted edits and the
-  checked-out branch included.
+  So in a desktop session the plugins are those of the commit that was installed or
+  last updated, and a merge in the clone reaches them only after `plugin update`.
+  Whether a CLI session with the user's own configuration reads in place, as the
+  scratch one does, was not observed.
 - **The path is kept as it was given.** Seen: a marketplace added through a path that
   holds a symbolic link is recorded, and read, through that path. A path with spaces
   and parentheses works.
@@ -87,6 +97,11 @@ and the log says where each component was read from:
   validate` passes, `plugin details` lists the agent, and the log of a debug start
   says nothing about the missing skill. Whether such an agent then runs normally was
   not observed.
+- **An agent receives the skills that its `skills:` list names.** Seen, in a session
+  of the desktop app: the reviewer agent of `principles`, told to make no tool call,
+  quoted one bullet of one skill word for word and gave the four section titles of the
+  other. Its transcript holds no tool call but the one that returns its answer, and
+  shows both skills under their `plugin:skill` names.
 
 ## Instructions
 
@@ -99,8 +114,10 @@ and the log says where each component was read from:
   a space in a path needs a backslash before it, and imports of user-scope files load
   without the dialog that project files get. The same section says that Cowork
   sessions skip an import of a user-scope file that resolves outside the session's
-  working directory. Not yet seen here; an import through a symbolic link in the path
-  is not documented.
+  working directory. Seen, in a session of the desktop app's Code tab: a user-level
+  `CLAUDE.md` that is one import line, an absolute path that goes through a symbolic
+  link to a directory, loads the file, and the session lists it among the user's
+  instructions. The Cowork case was not observed.
 - **`AGENTS.md` is read when no `CLAUDE.md` exists in the working directory or above
   it.** Doc: memory page, "When Claude Code reads AGENTS.md". The user-level
   `CLAUDE.md` does not count for that check. Every `AGENTS.md` in the working
@@ -118,14 +135,14 @@ and the log says where each component was read from:
   repository: with the variable replaced by a directory whose name holds spaces and
   parentheses, the command of `plugins/quality-ratchet/hooks/hooks.json` runs the
   script under bash, and without the quotes it does not.
-- **A hook after an edit runs in the main session and in a subagent.** Seen, with the
-  hook registered in the user settings, before it moved into a plugin. In a scratch git
-  repository, the main session and a subagent each made one edit that added one
-  bugbear problem to a file of their own; neither was told about the hook. The
-  transcript of each holds exactly one record with the report for its file: an
-  attachment of type `hook_blocking_error` for the event `PostToolUse`. The same probe
-  for the hook as shipped by the plugin, and for an agent started by a workflow, is
-  still to run.
+- **A hook after an edit runs in the main session and in a subagent, whether user
+  settings or a plugin register it.** Seen twice in a session of the desktop app:
+  with the hook in the user settings, then with the hook shipped by the plugin. In a
+  scratch git repository, the main session and a subagent each made one edit that
+  added one bugbear problem to a file of their own; neither was told about the hook.
+  Each time, the transcript of each gained exactly one record with the report for its
+  file: an attachment of type `hook_blocking_error` for the event `PostToolUse`. The
+  same probe for an agent started by a workflow is still to run.
 
 ## Removing
 

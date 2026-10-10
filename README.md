@@ -56,8 +56,14 @@ The same commands recreate a user configuration on a new machine: they record th
 marketplace and the enabled plugins in the user's `settings.json`.
 
 From a local clone, `claude plugin marketplace add <clone>` registers the directory
-itself. Claude Code then loads the plugins in place, so an edit in the clone applies
-at the next session.
+itself. A start of the CLI was then seen to read the plugins from the clone in place,
+and a session of the desktop app from a copy made at install time. After a change in
+the clone, refresh that copy to the commit of the clone, then restart the session:
+
+```
+claude plugin update principles@piotr-yuxuan
+claude plugin update quality-ratchet@piotr-yuxuan
+```
 
 ### If a hook wrongly blocks
 
