@@ -166,6 +166,11 @@ class Intervals(unittest.TestCase):
         self.assertEqual(minutes.minutes(1_710_000), 28.5)
         self.assertEqual(minutes.minutes(0), 0)
 
+    def test_minutes_are_rounded_as_round_does_and_not_half_up(self):
+        # round(ms / 60000, 1): 0.15 minute is a float just below it, and 0.25 is a tie.
+        self.assertEqual(minutes.minutes(9000), 0.1)
+        self.assertEqual(minutes.minutes(15000), 0.2)
+
     def test_an_instant_needs_an_offset(self):
         self.assertEqual(minutes.instant("2030-03-18T00:00:00Z"), T0)
         self.assertEqual(minutes.instant("2030-03-18T00:00:00.250Z"), T0 + 250)
@@ -228,6 +233,10 @@ class Stages(unittest.TestCase):
         # The run ends at 60: 30 minutes for the one, 10 and 1.5 for the two others.
         self.assertEqual(stages(one), {"Build": (1, 10, 10, 1, 30), "Check": (0, 0, 0, 2, 11.5)})
         self.assertEqual(stage_figures(one)["total"], {"wall_minutes": 10, "agent_minutes": 10})
+
+    def test_an_agent_is_finished_by_its_state_and_not_by_the_keys_that_it_has(self):
+        one = record("wf-a", 0, 10, agent("Build", 0, 1) | {"state": "error"})
+        self.assertEqual(stages(one), {"Build": (0, 0, 0, 1, 10)})
 
     def test_the_end_of_an_unfinished_agent_is_the_end_of_its_own_run(self):
         early = record("wf-a", 0, 20, agent("Build", 5), status="killed")
@@ -448,6 +457,12 @@ class Coordinator(unittest.TestCase):
                         minutes.timeline_of(records)
                     self.assertIn("line 2", str(failure.exception))
                     self.assertNotIn(MARKER, str(failure.exception))
+
+    def test_a_turn_starts_at_the_key_whatever_its_value(self):
+        for value in (None, ""):
+            with self.subTest(value=value):
+                records = [user(0, turnOrigin=value), assistant(3)]
+                self.assertEqual(coordinator_figures(records), (3, 3))
 
     def test_events_with_no_turn_marker_at_all_are_a_failure(self):
         for records in ([user(0), assistant(1)], [assistant(1), stop(2)], [user(0)]):
