@@ -131,7 +131,7 @@ def report(runs: list[dict]) -> dict:
     runs = sorted(runs, key=lambda run: (run["start"], run["run_id"]))
     if len({run["run_id"] for run in runs}) < len(runs):
         raise Failure("runId: the same run is given twice")
-    stages = {}
+    stages, finished = {}, []
     for run in runs:
         for title in run["phases"] + [agent["stage"] for agent in run["agents"]]:
             stages.setdefault(title, {"finished": [], "unfinished": [], "first_start": float("inf")})
@@ -142,7 +142,7 @@ def report(runs: list[dict]) -> dict:
                 stage["unfinished"].append((agent["start"], run["end"]))
             else:
                 stage["finished"].append((agent["start"], agent["end"]))
-    finished = [interval for stage in stages.values() for interval in stage["finished"]]
+                finished.append((agent["start"], agent["end"]))
     return {
         "runs": [
             {
@@ -205,10 +205,6 @@ def timeline_of(records: list[dict]) -> list[tuple[int, int, str]]:
         if time is None:
             raise Failure(f"line {number}: timestamp: not a date with an offset")
         timeline.append((time, number, "stop" if stop else "start" if "turnOrigin" in record else kind))
-    kinds = {kind for _, _, kind in timeline}
-    if kinds & {"user", "assistant"} and "start" not in kinds:
-        # A later harness may drop the key: no figure is better than zero minutes.
-        raise Failure("turnOrigin: no user or assistant record has this key")
     return sorted(timeline)
 
 
@@ -217,7 +213,8 @@ def coordinator(timeline: list[tuple[int, int, str]], start: int, until: int) ->
 
     A turn starts at a "start" event. It ends at its first stop record; failing that, at its last
     assistant event; failing that, at its start. An assistant event counts, as model time, the
-    interval from the event just before it to itself, cut to its turn and to the window.
+    interval from the event just before it to itself, cut to its turn and to the window. Events
+    with no turn at all are a failure.
     """
     turns = [{"spans": []}]  # The first holds what comes before any turn, and is left out.
     previous = None
@@ -231,6 +228,9 @@ def coordinator(timeline: list[tuple[int, int, str]], start: int, until: int) ->
             turns[-1]["last"] = time
             turns[-1]["spans"].append((previous, time))
         previous = time
+    if previous is not None and len(turns) == 1:
+        # A later harness may drop the key: no figure is better than zero minutes.
+        raise Failure("turnOrigin: no user or assistant record has this key")
     whole, model = [], []
     for turn in turns[1:]:
         end = min(turn.get("stop", turn["last"]), until)
@@ -273,8 +273,10 @@ def main() -> int:
             start = min(run["start"] for run in runs)
             if until < start:
                 raise Failure("--until: before the start of the first run")
-            timeline = parsed(arguments.transcript, lambda data: timeline_of(records_of(data)))
-            result["coordinator"] = coordinator(timeline, start, until)
+            result["coordinator"] = parsed(
+                arguments.transcript,
+                lambda data: coordinator(timeline_of(records_of(data)), start, until),
+            )
     except Failure as failure:
         print(f"minutes.py: {failure}", file=sys.stderr)
         return 2
