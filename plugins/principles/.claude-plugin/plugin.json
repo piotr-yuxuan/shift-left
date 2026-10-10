@@ -1,0 +1,5 @@
+{
+  "name": "principles",
+  "description": "Design rules for clear, maintainable, verifiable code, as a skill, and a read-only reviewer agent that applies them",
+  "license": "EUPL-1.2"
+}
