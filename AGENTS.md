@@ -5,18 +5,27 @@ plugins. `docs/harness-facts.md` records what was observed about Claude Code and
 
 ## A registered clone is live configuration
 
-Claude Code loads the plugins of a marketplace added from a local directory in place.
-Where a clone is registered that way, every file of that checkout applies at the next
-session, uncommitted edits and the checked-out branch included, and so does
-`instructions/global.md` where the user-level instructions import it. That clone is
-called the primary checkout.
+The clone that a user registers as a local-directory marketplace, and whose
+`instructions/global.md` the user-level instructions import, is called the primary
+checkout. What it holds reaches sessions in two ways:
+
+- `instructions/global.md` is read from the clone at each session start, as it is on
+  disk, uncommitted edits and the checked-out branch included.
+- The plugins were seen to be read from the clone in place by a start of the CLI, and
+  from a copy in the plugin cache by a session of the desktop app. That copy stays at
+  the commit that was installed until `claude plugin update <plugin>@piotr-yuxuan`
+  takes the commit that the clone is at.
+
+So a merge into `main` changes the instructions at once, and the plugins of a desktop
+session only after an update: in between, the instructions can be newer than the
+plugins.
 
 - Never write, switch branch, stash or merge in the primary checkout, except under
   `docs/work/` and to add a worktree.
 - One plan, one branch, one linked worktree, named after the plan:
   `git worktree add .worktree/NNN-slug -b NNN-slug`.
 - Never push, and never change the user's Claude Code configuration directory. The
-  owner merges into `main`, pushes and installs.
+  owner merges into `main`, pushes, and installs or updates the plugins.
 - To try a command that changes a configuration, use a scratch one:
   `env -i HOME=<scratch>/home PATH="$PATH" CLAUDE_CONFIG_DIR=<scratch>/config "$C" ...`
 
