@@ -116,9 +116,8 @@ def run_of(data: bytes) -> dict:
                 "end": None,
             }
             if typed(entry.get("state"), str, f"{path}.state") == "done":
-                agent["end"] = agent["start"] + typed(
-                    entry.get("durationMs"), int, path + ".durationMs"
-                )
+                duration = typed(entry.get("durationMs"), int, f"{path}.durationMs")
+                agent["end"] = agent["start"] + duration
             run["agents"].append(agent)
     return run
 
