@@ -157,8 +157,11 @@ class CommandLine(unittest.TestCase):
         return json.loads((file or self.file).read_text(encoding="utf-8"))["findings"]
 
     def copy(self, change) -> Path:
-        """The script of a copy of the skill whose schema file `change` has edited."""
-        target = Path(tempfile.mkdtemp(dir=self.scratch)) / "instrument"
+        """The script of a copy of the skill whose schema file `change` has edited.
+
+        The copy is alone under a path with a space and parentheses, as an installed plugin may be.
+        """
+        target = Path(tempfile.mkdtemp(prefix="a copy (1) ", dir=self.scratch)) / "instrument"
         shutil.copytree(SKILL, target, ignore=shutil.ignore_patterns("__pycache__"))
         schema = json.loads((target / "finding.schema.json").read_text(encoding="utf-8"))
         change(schema)
@@ -941,6 +944,13 @@ class Summary(CommandLine):
                 "add nothing": self.add(file=file),
                 "set": self.set("coordinator", update("r1-design-1", origin="coordinator"), file=file),
                 "set nothing": self.set("coordinator", file=file),
+                # The file is judged before the answer, so a faulty answer changes nothing here.
+                "add a faulty answer": self.add(
+                    reported("r3-design-1", line=0), round_found=3, file=file
+                ),
+                "set a faulty answer": self.set(
+                    "coordinator", update("r1-design-1", origin=MARKER), file=file
+                ),
             }
             for command, result in results.items():
                 with self.subTest(breaks=label, command=command):
@@ -1027,6 +1037,13 @@ class Guard(CommandLine):
         self.assertDone(self.add(reported("r1-design-2"), GIT_DIR=str(decoy / ".git")))
         self.assertEqual(len(self.held()), 2)
         self.assertEqual(sorted(os.listdir(decoy)), [".git"])
+
+    def test_a_file_that_a_rule_ignores_by_its_name_alone_is_written(self):
+        (self.repository / ".gitignore").write_text("*.findings.json\n")
+        file = self.repository / "open" / "plan.findings.json"
+        self.assertDone(self.add(reported("r1-design-1"), file=file))
+        self.assertEqual(self.held(file), [stored("r1-design-1")])
+        self.assertRefused(self.repository / "shut" / "plan.json", self.repository / "shut")
 
     def test_a_personal_ignore_rule_counts_through_the_files_that_git_is_told_to_read(self):
         rules = self.scratch / "ignore-all"
@@ -1292,10 +1309,12 @@ class Authority(CommandLine):
                 self.assertEveryCommandFails(copy)
                 self.assertFalse(self.file.parent.exists())
 
-    def test_the_script_runs_isolated_from_the_site_and_the_environment_of_python(self):
+    def test_a_copy_of_the_skill_runs_alone_and_isolated_from_the_site_of_python(self):
+        copy = self.copy(lambda schema: None)
+        self.assertRegex(str(copy), r" \(1\) ")
         arguments = ["add", "--file", str(self.file), "--round", "1", "--lens", "design"]
         result = subprocess.run(
-            [sys.executable, "-I", "-S", str(SCRIPT), *arguments],
+            [sys.executable, "-I", "-S", str(copy), *arguments],
             input=json.dumps({"findings": [reported("r1-design-1")]}),
             env=self.environment,
             cwd=self.scratch,
@@ -1343,6 +1362,13 @@ class Decisions(unittest.TestCase):
         ):
             with self.subTest(update=update), self.assertRaises(findings.Rejected):
                 findings.set_(SCHEMA, document, {"updates": [update]}, "fixer")
+
+    def test_the_round_and_the_disposition_of_a_new_finding_are_never_those_of_the_answer(self):
+        schema = json.loads(json.dumps(SCHEMA))
+        schema["x-roles"]["reviewer"]["adds"] += ["round_found", "disposition"]
+        given = reported("r2-design-1") | {"round_found": 9, "disposition": "fixed"}
+        document, _ = findings.add(schema, None, {"findings": [given]}, 2, "design")
+        self.assertEqual(document, {"findings": [stored("r2-design-1")]})
 
     def test_set_fails_without_a_file(self):
         with self.assertRaises(findings.Failure):

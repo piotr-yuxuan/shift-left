@@ -12,6 +12,7 @@ import importlib.util
 import json
 import os
 import random
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -287,6 +288,7 @@ class Stages(unittest.TestCase):
 
     def test_runs_are_in_order_of_start_with_their_status_their_start_in_utc_and_their_minutes(self):
         late = record("wf-late", 75.5, 12.5)
+        late["startTime"] += 999  # The start is given to the second, with no fraction.
         early = record("wf-early", -30, 100 / 60, status="killed")
         expected = [
             {
@@ -409,10 +411,11 @@ class Coordinator(unittest.TestCase):
             {"type": "user", "turnOrigin": "human"},
             {"timestamp": clock(6)},
             {"type": "system", "timestamp": clock(7)},
+            {"type": "system", "subtype": "stop_hook_summary"},
             assistant(9, isSidechain=False),
             user(15),
         ]
-        expected = [(at(0), 2, "start"), (at(9), 12, "assistant"), (at(15), 13, "user")]
+        expected = [(at(0), 2, "start"), (at(9), 13, "assistant"), (at(15), 14, "user")]
         self.assertEqual(minutes.timeline_of(records), expected)
         self.assertEqual(coordinator_figures(records), (9, 9))
 
@@ -749,6 +752,14 @@ class Report(CommandLine):
                 report = self.assertDone(self.window(self.first, transcript=transcript))
                 self.assertEqual(report["coordinator"], COORDINATOR)
 
+    def test_a_line_is_a_line_of_the_file_whatever_characters_its_text_holds(self):
+        # A line separator of Unicode inside a text is not the end of a record.
+        text = {"message": {"content": "one\u2028two\u2029three\u0085four"}}
+        lines = "".join(json.dumps(line | text, ensure_ascii=False) + "\n" for line in TRANSCRIPT)
+        self.assertIn("\u2028", lines)
+        report = self.assertDone(self.window(self.first, transcript=self.written("wide.jsonl", lines)))
+        self.assertEqual(report["coordinator"], COORDINATOR)
+
     def test_a_wrong_call_prints_nothing_on_standard_output(self):
         window = ["--transcript", self.transcript, "--until"]
         calls = [
@@ -767,9 +778,12 @@ class Report(CommandLine):
                 with self.subTest(call=call[1:], zone=zone):
                     self.assertWrongCall(self.script(*call, TZ=zone))
 
-    def test_the_script_runs_from_any_directory_with_an_empty_environment(self):
+    def test_a_copy_of_the_script_runs_alone_from_any_directory_with_an_empty_environment(self):
+        copy = self.scratch / "a copy (1)" / "minutes.py"
+        copy.parent.mkdir()
+        shutil.copy(SCRIPT, copy)
         result = subprocess.run(
-            [sys.executable, "-I", "-S", str(SCRIPT), self.first],
+            [sys.executable, "-I", "-S", str(copy), self.first],
             env={},
             cwd=self.scratch,
             capture_output=True,
