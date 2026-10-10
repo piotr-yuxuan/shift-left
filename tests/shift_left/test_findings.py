@@ -127,11 +127,19 @@ class CommandLine(unittest.TestCase):
     def git(self, *arguments: str) -> None:
         subprocess.run(["git", *arguments], env=self.environment, check=True, capture_output=True)
 
-    def script(self, *arguments: str, answer=None, script: Path = SCRIPT, **environment: str):
+    def script(
+        self,
+        *arguments: str,
+        answer=None,
+        script: Path = SCRIPT,
+        cwd: Path | None = None,
+        **environment: str,
+    ):
         """Run the script, or a copy of it, with `answer` on standard input."""
         return subprocess.run(
             [sys.executable, str(script), *arguments],
             input=answer if isinstance(answer, str) else json.dumps(answer),
+            cwd=cwd,
             env=self.environment | environment,
             capture_output=True,
             text=True,
@@ -321,7 +329,7 @@ class SchemaFile(unittest.TestCase):
                 self.assertNotIn("\n", property_schema["description"])
 
     def test_the_description_of_severity_defines_the_three_grades(self):
-        self.assertRegex(PROPERTIES["severity"]["description"], "(?i)blocking.*major.*minor")
+        self.assertRegex(PROPERTIES["severity"]["description"], "blocking: .+ major: .+ minor: .+")
 
     def test_the_enumerations_hold_the_stated_values(self):
         self.assertEqual(PROPERTIES["severity"]["enum"], SEVERITIES)
@@ -506,6 +514,11 @@ class Add(CommandLine):
 }
 """
         self.assertEqual(self.file.read_bytes(), expected.encode("utf-8"))
+
+    def test_the_file_is_utf_8_whatever_the_encoding_of_the_locale(self):
+        ascii_locale = {"LC_ALL": "C", "PYTHONCOERCECLOCALE": "0", "PYTHONUTF8": "0"}
+        self.assertDone(self.add(reported("r1-design-1", summary="Un résumé"), **ascii_locale))
+        self.assertIn('"summary": "Un résumé"'.encode("utf-8"), self.file.read_bytes())
 
     def test_add_takes_the_round_of_the_call_and_a_finding_about_no_file(self):
         given = reported("r3-design-1", file=None, line=None)
@@ -780,6 +793,7 @@ class Set(CommandLine):
             ("a carry-over to itself", [update("r2-design-1", carry_over_of="r2-design-1")], link),
             ("a carry-over to nothing", [update("r2-design-1", carry_over_of="r1-design-9")], link),
             ("a carry-over that is not text", [update("r2-design-1", carry_over_of=1)], link),
+            ("a carry-over that is not an id", [update("r2-design-1", carry_over_of=MARKER)], link),
             ("an unknown origin", [update("r2-design-1", origin=MARKER)], "[0].origin"),
             ("an unknown disposition", [update("r2-design-1", disposition=MARKER)], "[0].disposition"),
             (
@@ -867,6 +881,11 @@ class Summary(CommandLine):
         self.assertEqual(counted["dispositions"], dispositions)
         self.assertEqual(counted["open_serious"], 2)
         self.assertEqual(sorted(counted), ["dispositions", "open_serious", "rounds"])
+
+    def test_the_rounds_are_in_order_whatever_the_order_of_the_findings_in_the_file(self):
+        self.hold(stored("r2-design-1"), stored("r1-design-1"))
+        rounds = self.assertDone(self.summary())["rounds"]
+        self.assertEqual([counted["round"] for counted in rounds], [1, 2])
 
     def test_the_summary_of_a_file_with_no_finding(self):
         self.hold()
@@ -974,6 +993,18 @@ class Summary(CommandLine):
                 self.assertFailed(self.add(reported("r1-design-1")))
                 self.assertEqual(self.file.read_text(), content)
 
+    def test_a_file_that_is_not_text_is_a_failure_for_every_command_and_stays(self):
+        valid = json.dumps({"findings": [stored("r1-design-1", summary="X")]}).encode("utf-8")
+        contents = {"a byte that is not UTF-8": valid.replace(b"X", b"\xff")}
+        self.file.parent.mkdir()
+        for label, content in contents.items():
+            with self.subTest(label):
+                self.file.write_bytes(content)
+                self.assertFailed(self.summary())
+                self.assertFailed(self.set("coordinator", update("r1-design-1", origin="coordinator")))
+                self.assertFailed(self.add(reported("r1-design-2")))
+                self.assertEqual(self.file.read_bytes(), content)
+
     def test_without_a_file_the_summary_is_a_failure_and_creates_none(self):
         self.assertFailed(self.summary())
         self.assertFalse(self.file.parent.exists())
@@ -1009,6 +1040,24 @@ class Guard(CommandLine):
         )
         self.assertEqual(file.read_bytes(), before)
 
+    def test_a_file_that_git_tracks_is_refused_though_a_rule_ignores_its_path(self):
+        before = self.hold(stored("r1-design-1"))
+        self.git("-C", str(self.repository), "add", "--force", "kept/plan.json")
+        self.assertFailed(self.add(reported("r1-design-2")))
+        self.assertFailed(self.set("coordinator", update("r1-design-1", origin="coordinator")))
+        self.assertEqual(self.file.read_bytes(), before)
+
+    def test_a_relative_path_is_judged_as_the_absolute_path_of_the_file(self):
+        # Judged from its directory, `open/plan.json` would be `open/open/plan.json`.
+        (self.repository / ".gitignore").write_text("/kept/plan.json\n/open/open/\n")
+        (self.repository / "open").mkdir()
+        (self.repository / "kept").mkdir()
+        one = reported("r1-design-1")
+        self.assertFailed(self.add(one, file=Path("open", "plan.json"), cwd=self.repository))
+        self.assertEqual(os.listdir(self.repository / "open"), [])
+        self.assertDone(self.add(one, file=Path("kept", "plan.json"), cwd=self.repository))
+        self.assertEqual(self.held(), [stored("r1-design-1")])
+
     def test_an_ignore_rule_injected_by_the_environment_changes_nothing(self):
         rules = self.scratch / "ignore-all"
         rules.write_text("*\n")
@@ -1018,6 +1067,30 @@ class Guard(CommandLine):
             "GIT_CONFIG_VALUE_0": str(rules),
         }
         self.assertRefused(self.repository / "open" / "plan.json", self.repository / "open", **injected)
+        injected = {"GIT_CONFIG_PARAMETERS": f"'core.excludesFile={rules}'"}
+        self.assertRefused(self.repository / "open" / "plan.json", self.repository / "open", **injected)
+
+    def test_git_is_given_no_git_variable_of_the_caller_but_the_three_that_are_kept(self):
+        tools = self.scratch / "tools"
+        tools.mkdir()
+        seen = self.scratch / "seen"
+        # Stands for git: it writes its environment, and its status says that the file is ignored.
+        (tools / "git").write_text(f'#!/bin/sh\nenv > "{seen}"\n')
+        (tools / "git").chmod(0o755)
+        given = {
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_PARAMETERS": "'core.excludesFile=ignore-all'",
+            "GIT_INDEX_FILE": "index",
+            "GIT_COMMON_DIR": "common",
+            "GIT_INVENTED": "1",
+        }
+        path = os.pathsep.join([str(tools), self.environment["PATH"]])
+        self.assertDone(self.add(reported("r1-design-1"), PATH=path, **given))
+        names = [line.split("=")[0] for line in seen.read_text().splitlines()]
+        self.assertEqual(
+            sorted(name for name in names if name.startswith("GIT_")),
+            ["GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_SYSTEM"],
+        )
 
     def test_the_repository_is_the_one_of_the_file_whatever_git_dir_says(self):
         decoy = self.scratch / "decoy"
@@ -1058,6 +1131,15 @@ class Guard(CommandLine):
                 )
                 self.assertEqual(self.held(file), [stored("r1-design-1")])
 
+    def test_the_personal_ignore_file_that_git_finds_from_the_home_directory_counts(self):
+        del self.environment["GIT_CONFIG_GLOBAL"]
+        personal = Path(self.environment["HOME"], ".config", "git", "ignore")
+        personal.parent.mkdir(parents=True)
+        personal.write_text("plan.json\n")
+        file = self.repository / "open" / "plan.json"
+        self.assertDone(self.add(reported("r1-design-1"), file=file))
+        self.assertEqual(self.held(file), [stored("r1-design-1")])
+
     def test_the_variable_that_turns_the_system_configuration_off_is_kept(self):
         rules = self.scratch / "ignore-all"
         rules.write_text("*\n")
@@ -1077,9 +1159,17 @@ class Guard(CommandLine):
 
 
 class Writers(CommandLine):
-    def writer(self, identifier: str) -> subprocess.Popen:
-        """Start a writer that adds one finding; its answer is on its standard input already."""
-        arguments = ["add", "--file", str(self.file), "--round", "1", "--lens", "design"]
+    def writer(self, identifier: str, role: str | None = None) -> subprocess.Popen:
+        """Start a writer that adds one finding, or that sets the origin of one as `role`.
+
+        Its answer is on its standard input already.
+        """
+        if role is None:
+            arguments = ["add", "--file", str(self.file), "--round", "1", "--lens", "design"]
+            answer = {"findings": [reported(identifier)]}
+        else:
+            arguments = ["set", "--file", str(self.file), "--role", role]
+            answer = {"updates": [update(identifier, origin="coordinator")]}
         writer = subprocess.Popen(
             [sys.executable, str(SCRIPT), *arguments],
             stdin=subprocess.PIPE,
@@ -1088,7 +1178,7 @@ class Writers(CommandLine):
             env=self.environment,
             text=True,
         )
-        writer.stdin.write(json.dumps({"findings": [reported(identifier)]}))
+        writer.stdin.write(json.dumps(answer))
         writer.stdin.close()
         return writer
 
@@ -1105,6 +1195,19 @@ class Writers(CommandLine):
                 os.close(lock)
             self.assertEqual(writer.wait(timeout=60), 0)
         self.assertEqual(self.held(), [stored("r1-design-1")])
+
+    def test_a_writer_that_sets_waits_for_the_lock_as_one_that_adds(self):
+        self.hold(stored("r1-design-1"))
+        lock = os.open(self.file.parent, os.O_RDONLY)
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        with self.writer("r1-design-1", role="coordinator") as writer:
+            try:
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    writer.wait(timeout=2)
+            finally:
+                os.close(lock)
+            self.assertEqual(writer.wait(timeout=60), 0)
+        self.assertEqual(self.held(), [stored("r1-design-1", origin="coordinator")])
 
     def test_twenty_writers_at_once_lose_nothing_and_leave_no_other_file(self):
         writers = [self.writer(f"r1-design-{number}") for number in range(1, 21)]
@@ -1160,7 +1263,30 @@ class Authority(CommandLine):
         counted = self.assertDone(self.script("summary", "--file", str(self.file), script=copy))
         expected = [{"round": 1, "blocking": 0, "major": 0, "minor": 0, "critical": 1}]
         self.assertEqual(counted["rounds"], expected)
+        # Open, and neither blocking nor major.
+        self.assertEqual(counted["open_serious"], 0)
         self.assertRejected(self.script("summary", "--file", str(self.file)))
+
+    def test_a_subject_added_to_the_file_is_accepted_by_the_copy_alone(self):
+        copy = self.copy(lambda schema: schema["properties"]["subject"]["enum"].append("tests"))
+        about_tests = reported("r1-design-1", subject="tests")
+        self.assertRejected(self.add(about_tests))
+        self.assertDone(self.add(about_tests, script=copy))
+
+    def test_the_order_of_the_keys_of_a_finding_follows_the_file(self):
+        def put_the_lens_first(schema):
+            schema["properties"] = {"lens": schema["properties"]["lens"]} | schema["properties"]
+
+        self.assertDone(self.add(reported("r1-design-1"), script=self.copy(put_the_lens_first)))
+        expected = ["lens"] + [field for field in FIELDS if field != "lens"]
+        self.assertEqual(list(self.held()[0]), expected)
+
+    def test_the_lens_of_a_call_is_judged_by_the_pattern_of_the_file(self):
+        letters_only = {"pattern": "^[a-z]+$(?!\\n)"}
+        copy = self.copy(lambda schema: schema["properties"]["lens"].update(letters_only))
+        self.assertWrongCall(self.add(lens="a-b", script=copy))
+        self.assertFalse(self.file.parent.exists())
+        self.assertDone(self.add(lens="a-b"))
 
     def test_a_value_removed_from_an_enumeration_is_rejected_and_not_counted_by_the_copy(self):
         copy = self.copy(lambda schema: schema["properties"]["disposition"]["enum"].remove("deferred"))
@@ -1206,6 +1332,17 @@ class Authority(CommandLine):
         role = self.assertDone(self.script("schema", "--role", "fixer", script=copy))
         written = role["properties"]["updates"]["items"]["properties"]["disposition"]["enum"]
         self.assertEqual(written, ["fixed", "declined", "deferred"])
+
+    def test_a_role_that_may_change_a_field_from_no_value_changes_it_from_none(self):
+        def empty_the_values_to_change_from(schema):
+            schema["x-roles"]["fixer"]["sets"]["disposition"]["from"] = []
+
+        copy = self.copy(empty_the_values_to_change_from)
+        before = self.hold(stored("r1-design-1"))
+        fixed = update("r1-design-1", disposition="fixed")
+        errors = self.assertRejected(self.set("fixer", fixed, script=copy))
+        self.assertEqual([error["path"] for error in errors], ["answer.updates[0].disposition"])
+        self.assertEqual(self.file.read_bytes(), before)
 
     def test_a_role_added_to_the_file_is_a_role_of_the_copy_alone(self):
         def add_an_auditor(schema):
@@ -1263,6 +1400,7 @@ class Authority(CommandLine):
             "a keyword outside the subset at the top": lambda schema: schema.update(
                 {"minProperties": 1}
             ),
+            "a key that starts with x and not with x-": lambda schema: schema.update({"xnote": "text"}),
             "a keyword outside the subset below items": with_property("items", {"format": "date"}),
             "additional properties that are allowed": lambda schema: schema.update(
                 {"additionalProperties": True}
