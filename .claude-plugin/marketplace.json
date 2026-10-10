@@ -1,0 +1,38 @@
+{
+  "name": "piotr-yuxuan",
+  "owner": {
+    "name": "piotr-yuxuan"
+  },
+  "metadata": {
+    "description": "Small plugins that bring review quality forward to the moment code is written"
+  },
+  "plugins": [
+    {
+      "name": "principles",
+      "source": "./plugins/principles"
+    },
+    {
+      "name": "quality-ratchet",
+      "source": "./plugins/quality-ratchet"
+    },
+    {
+      "name": "basedpyright-lsp",
+      "description": "Python diagnostics and code navigation from the installed basedpyright language server",
+      "version": "1.0.0",
+      "source": "./plugins/basedpyright-lsp",
+      "strict": false,
+      "lspServers": {
+        "basedpyright": {
+          "command": "basedpyright-langserver",
+          "args": [
+            "--stdio"
+          ],
+          "extensionToLanguage": {
+            ".py": "python",
+            ".pyi": "python"
+          }
+        }
+      }
+    }
+  ]
+}
