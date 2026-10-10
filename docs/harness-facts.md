@@ -105,7 +105,9 @@ and the log says where each component was read from:
   it.** Doc: memory page, "When Claude Code reads AGENTS.md". The user-level
   `CLAUDE.md` does not count for that check. Every `AGENTS.md` in the working
   directory and the directories above it is read, so a session in a linked worktree
-  below a checkout reads both files.
+  below a checkout reads both files. Seen: a session whose working directory was a
+  checkout with no `AGENTS.md` received the `AGENTS.md` of a linked worktree below it
+  when it first read a file there.
 
 ## Hooks
 
@@ -127,7 +129,10 @@ and the log says where each component was read from:
 
 ## Removing
 
-- **Removing a local-directory marketplace leaves its directory alone.** Seen.
+- **Removing a local-directory marketplace leaves its directory alone.** Seen: a
+  throwaway marketplace was added from a directory, its plugin installed and
+  uninstalled, and the marketplace removed; the directory held the same six files
+  before and after.
 - **Uninstalling leaves the cached copy behind.** Seen: after `plugin uninstall`, the
   directory under `plugins/cache` is still there. Whether a later session removes it
   was not observed.

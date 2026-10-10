@@ -21,12 +21,13 @@ below.
 A hook that runs after each edit of a Python file. It runs Ruff with the repository's
 own configuration, plus McCabe complexity and the bugbear rules, on the edited file and
 on its committed version, and reports to Claude only the problems that the edit
-introduced. A function that is already over the complexity threshold may not grow.
+introduced. A function that is already over the complexity threshold may not grow; it
+is also reported when it is renamed, or when it shrinks and stays over the threshold.
 
-It needs `python3` (3.11 or later) and `git` on `PATH`, and `ruff` on `PATH` or in the
-`.venv` of the repository being edited. Without Ruff the hook reports its own failure
-at each Python edit. For a file that is new or outside a git repository, every problem
-counts as introduced.
+It needs `python3` (3.11 or later) and `git` on `PATH`, and Ruff: the `.venv/bin/ruff`
+of the repository being edited when there is one, otherwise the `ruff` on `PATH`.
+Without Ruff the hook reports its own failure at each Python edit. For a file that is
+new or outside a git repository, every problem counts as introduced.
 
 ### `basedpyright-lsp`
 
@@ -83,9 +84,10 @@ claude plugin enable quality-ratchet@piotr-yuxuan
 ## Always-on instructions
 
 A plugin cannot ship instructions that load into every session.
-`instructions/global.md` holds the user-level rules that go with these plugins. To use
-them, import the file from your user-level `CLAUDE.md`, with one line that gives its
-absolute path:
+`instructions/global.md` holds the user-level rules that go with these plugins. The
+file belongs to no plugin, so installing a plugin does not bring it: clone this
+repository, or copy the file, then import it from your user-level `CLAUDE.md` with one
+line that gives its absolute path, here from a clone:
 
 ```
 @<clone>/instructions/global.md

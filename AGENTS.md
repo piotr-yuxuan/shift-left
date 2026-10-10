@@ -32,8 +32,8 @@ called the primary checkout.
   other failure, a missing script included, into "allow". Every hook has a timeout
   that covers its worst case; the Python hook of `quality-ratchet` is the one recorded
   exception: its timeout of 90 seconds is below its worst case.
-- A move changes nothing but what is listed. Any other content change to a moved file
-  is a separate commit, made only after a test of the existing behaviour exists.
+- A move changes nothing but what its plan lists. Any other content change to a moved
+  file is a separate commit, made only after a test of the existing behaviour exists.
 
 ## Layout
 
