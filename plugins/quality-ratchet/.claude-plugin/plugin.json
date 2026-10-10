@@ -1,0 +1,5 @@
+{
+  "name": "quality-ratchet",
+  "description": "Lint hooks that report only the problems an edit introduced",
+  "license": "EUPL-1.2"
+}

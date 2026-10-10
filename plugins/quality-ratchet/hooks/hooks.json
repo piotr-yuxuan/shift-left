@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/python_quality_ratchet.py\"",
+            "timeout": 90,
+            "statusMessage": "Checking Python quality"
+          }
+        ]
+      }
+    ]
+  }
+}
