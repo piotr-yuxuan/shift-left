@@ -33,6 +33,10 @@
           }
         }
       }
+    },
+    {
+      "name": "shift-left",
+      "source": "./plugins/shift-left"
     }
   ]
 }
