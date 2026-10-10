@@ -470,6 +470,17 @@ class Coordinator(unittest.TestCase):
                 coordinator_figures(records)
             self.assertIn("turnOrigin", str(failure.exception))
 
+    def test_user_or_assistant_records_that_are_no_events_and_start_no_turn_are_a_failure(self):
+        transcripts = {
+            "sidechain records": [user(0, isSidechain=True), assistant(1, isSidechain=True)],
+            "records with no timestamp": [{"type": "user"}, {"type": "assistant"}],
+        }
+        for label, records in transcripts.items():
+            with self.subTest(label):
+                with self.assertRaises(minutes.Failure) as failure:
+                    coordinator_figures(records)
+                self.assertIn("turnOrigin", str(failure.exception))
+
     def test_a_transcript_with_no_event_has_no_coordinator_minute(self):
         records = [{"type": "attachment", "timestamp": clock(1)}, stop(2), {"type": "mode"}]
         self.assertEqual(coordinator_figures(records), (0, 0))
@@ -748,6 +759,10 @@ class Report(CommandLine):
             ],
             "no turn marker": [
                 {k: v for k, v in line.items() if k != "turnOrigin"} for line in TRANSCRIPT
+            ],
+            "sidechain records and no turn marker": [
+                user(0, isSidechain=True),
+                assistant(1, isSidechain=True),
             ],
         }
         for label, content in contents.items():

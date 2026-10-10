@@ -193,6 +193,8 @@ def timeline_of(records: list[dict]) -> list[tuple[int, int, str]]:
     An event is a record of type user or assistant that has a timestamp and is not a sidechain
     record. Its kind is its type, or "start" when it has the key turnOrigin. A "stop" is the system
     record that ends a turn. They are in order of time, and of line where the times are equal.
+    Records of type user or assistant are a failure when none of them starts a turn, whether or not
+    they are events.
     """
     timeline = []
     for number, record in enumerate(records, 1):
@@ -205,6 +207,10 @@ def timeline_of(records: list[dict]) -> list[tuple[int, int, str]]:
         if time is None:
             raise Failure(f"line {number}: timestamp: not a date with an offset")
         timeline.append((time, number, "stop" if stop else "start" if "turnOrigin" in record else kind))
+    turns = any(kind == "start" for _, _, kind in timeline)
+    if not turns and any(record.get("type") in ("user", "assistant") for record in records):
+        # A later harness may drop the key: no figure is better than zero minutes.
+        raise Failure("turnOrigin: no user or assistant record starts a turn")
     return sorted(timeline)
 
 
@@ -213,8 +219,7 @@ def coordinator(timeline: list[tuple[int, int, str]], start: int, until: int) ->
 
     A turn starts at a "start" event. It ends at its first stop record; failing that, at its last
     assistant event; failing that, at its start. An assistant event counts, as model time, the
-    interval from the event just before it to itself, cut to its turn and to the window. Events
-    with no turn at all are a failure.
+    interval from the event just before it to itself, cut to its turn and to the window.
     """
     turns = [{"spans": []}]  # The first holds what comes before any turn, and is left out.
     previous = None
@@ -228,9 +233,6 @@ def coordinator(timeline: list[tuple[int, int, str]], start: int, until: int) ->
             turns[-1]["last"] = time
             turns[-1]["spans"].append((previous, time))
         previous = time
-    if previous is not None and len(turns) == 1:
-        # A later harness may drop the key: no figure is better than zero minutes.
-        raise Failure("turnOrigin: no user or assistant record has this key")
     whole, model = [], []
     for turn in turns[1:]:
         end = min(turn.get("stop", turn["last"]), until)

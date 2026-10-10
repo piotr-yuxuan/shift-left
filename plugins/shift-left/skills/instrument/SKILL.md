@@ -176,8 +176,9 @@ Report both bounds. Where one figure is needed, use `model_minutes`, and read a 
 gap between the two as a sign of waiting.
 
 The transcript of a session that is still open can be read: a last line that is being
-written is left out. A transcript with events and no `turnOrigin` at all is refused,
-since no figure is better than a wrong zero.
+written is left out. A transcript that holds `user` or `assistant` records, events or
+not, of which none starts a turn is refused, since no figure is better than a wrong
+zero.
 
 ## Codebook
 
