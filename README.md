@@ -27,7 +27,7 @@ on its committed version, and reports to Claude only the problems that the edit
 introduced. A function that is already over the complexity threshold may not grow; it
 is also reported when it is renamed, or when it shrinks and stays over the threshold.
 
-It needs `python3` (3.11 or later) and `git` on `PATH`, and Ruff: the `.venv/bin/ruff`
+It needs `python3` (3.14 or later) and `git` on `PATH`, and Ruff: the `.venv/bin/ruff`
 of the repository being edited when there is one, otherwise the `ruff` on `PATH`.
 Without Ruff the hook reports its own failure at each Python edit. For a file that is
 new or outside a git repository, every problem counts as introduced.
@@ -59,7 +59,7 @@ of the skill, so that what a plan cost and what its review found are read from d
 - `codebook.md` defines the labels that a rater gives to a finding afterwards:
   category, origin, knowable and cheapest preventer.
 
-It needs `python3` (3.11 or later) on `PATH`; `findings.py` also needs `git` and a
+It needs `python3` (3.14 or later) on `PATH`; `findings.py` also needs `git` and a
 POSIX system. The shape of the run records and of the transcripts was observed with
 Claude Code 2.1.288, see `docs/harness-facts.md`. `minutes.py` refuses a run record
 in which a key that it reads is missing or has another type, and a transcript that
@@ -124,6 +124,29 @@ skip such an import when the file lies outside their working directory.
 
 The skills use the standard `skills/<name>/SKILL.md` layout, which tools of other
 vendors read. This was not tested with any of them.
+
+## Versions and releases
+
+`.version` holds the version of this repository, that is of the marketplace, and
+nothing else: `MAJOR.MINOR.PATCH` and a line break.
+
+Each push to `main` that passes the gate becomes a release, with no hand involved. The
+pipeline raises the patch number in a commit titled `Version X.Y.Z`, and makes on that
+commit the tag and the release `vX.Y.Z`. The notes of the release are the titles of
+the commits since the release before, merges left out. A deployment record of the tag,
+in the environment `release`, says which commit a client now fetches.
+
+No `.claude-plugin/plugin.json` carries a version: for Claude Code the commit is the
+version of a plugin, and each release is a new commit. So one command takes a release
+of `principles`, of `quality-ratchet` or of `coordinator`:
+
+```
+claude plugin update <plugin>@shift-left
+```
+
+The entry of `basedpyright-lsp` in the marketplace file keeps a version of its own,
+1.0.0. A release does not move that plugin: the same command answers that it is
+already at the latest version.
 
 ## Licence
 
