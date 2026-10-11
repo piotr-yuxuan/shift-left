@@ -49,6 +49,17 @@ class Failing(unittest.TestCase):
     def test_fails(self):
         self.fail("seeded")
 """
+# The `grep` of the machine, but for one search, which ends in error as a search does where it
+# cannot run: the search of files for an email address.
+FAILING_GREP = """\
+#!/usr/bin/env bash
+if [ "$1" = -r ]; then
+  for argument in "$@"; do
+    case "$argument" in *@*) exit 2 ;; esac
+  done
+fi
+exec "{grep}" "$@"
+"""
 
 
 def found_by(output: str, rule: str) -> list[str]:
@@ -327,6 +338,26 @@ class RefusedCalls(GateCase):
     def test_a_denylist_that_is_a_directory_fails_private(self):
         (self.tree / "docs" / "work" / "denylist.txt").mkdir(parents=True)
         self.assertFailsAt("private", self.gate(self.tree, "private"))
+
+    def test_a_search_of_git_that_ends_in_error_fails_its_check(self):
+        checks = ("contained", "dashes", "private")
+        for check in checks:
+            self.assertPasses(self.gate(self.tree, check))
+        # git cannot read an index that is none: its searches end in error and find nothing.
+        (self.tree / ".git" / "index").write_bytes(b"no index")
+        for check in checks:
+            with self.subTest(check=check):
+                self.assertFailsAt(check, self.gate(self.tree, check))
+
+    def test_a_search_behind_a_filter_that_ends_in_error_fails_its_check(self):
+        self.assertPasses(self.gate(self.tree, "messages"))
+        # The search of the messages for an address is the one whose result is filtered.
+        stand_in = self.scratch / "bin" / "grep"
+        stand_in.parent.mkdir()
+        stand_in.write_text(FAILING_GREP.format(grep=shutil.which("grep")))
+        stand_in.chmod(0o755)
+        path = f"{stand_in.parent}{os.pathsep}{os.environ['PATH']}"
+        self.assertFailsAt("messages", self.gate(self.tree, "messages", PATH=path))
 
     def test_without_a_cli_manifests_fails_unless_it_is_skipped(self):
         # A PATH that holds no `claude`, and still every tool that the gate needs.
