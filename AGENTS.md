@@ -1,7 +1,9 @@
 # Working in this repository
 
-This repository holds one Claude Code marketplace, `shift-left`, and a few small
-plugins. `docs/harness-facts.md` records what was observed about Claude Code and how.
+This repository holds one marketplace, `shift-left`, and a few small plugins for
+coding agents. They are written for Claude Code, and those that hold a skill are also
+packaged as the Agent Plugins standard asks. `docs/harness-facts.md` records what was
+observed about each client and about the standards, and how.
 
 ## A registered clone is live configuration
 
@@ -41,6 +43,28 @@ plugins.
   other failure, a missing script included, into "allow". Every hook has a timeout
   that covers its worst case; the Python hook of `quality-ratchet` is the one recorded
   exception: its timeout of 90 seconds is below its worst case.
+- Portable core, client adapters. A remedy has a core that needs no particular
+  client: a script with a decision function free of I/O and a contract on the command
+  line, and a skill that says when to run it. A hook, an agent definition or a
+  workflow is an adapter around the core, and it is the stronger enforcement where a
+  client offers one. A client gets an adapter only once the owner uses it, and each
+  adapter is tested through the documented contract of its client.
+- The files of one client stay where that client reads them, and they are not private
+  to it. Claude Code's are `.claude-plugin/`, `agents/` and `hooks/`, and other clients
+  are documented to read `agents/` and `hooks/hooks.json` too, one of them after every
+  tool call: the README has the table. So a hook kept in `hooks/hooks.json` checks the
+  name of the tool and the shape of its input itself, exits 0 on an event that it does
+  not recognise, and has a test that feeds it such events. What the Python hook of
+  `quality-ratchet` does with such an event is recorded with its date in
+  `docs/harness-facts.md`, under VS Code. A client with a namespace directory
+  gets its own files there, such as `com.github.copilot/`, and only on the owner's
+  word. Codex documents none: its data go under `extensions.com.openai` of the root
+  manifest, and its hook files stay at the root of the plugin. A plugin that has both
+  a root manifest and a hook therefore either tests that hook against the event that
+  Codex documents, or declares its hooks under `extensions.com.openai`, which replaces
+  the discovery of `hooks/hooks.json`, as `docs/harness-facts.md` records of the page
+  of Codex. Every adapter is tested through the documented contract of its client, as
+  a hook is.
 - A move changes nothing but what its plan lists. Any other content change to a moved
   file is a separate commit, made only after a test of the existing behaviour exists.
 
@@ -49,9 +73,11 @@ plugins.
 ```
 .claude-plugin/marketplace.json   one entry per plugin
 plugins/<name>/                   one self-contained plugin each
+plugins/<name>/plugin.json        the manifest of the standard, where there is a skill
 instructions/global.md            user-level rules, imported from a user-level CLAUDE.md
 tests/                            tests of the plugins' scripts, outside the plugins
-docs/harness-facts.md             what was observed about Claude Code
+tests/packaging/                  tests of the manifests and of the skills
+docs/harness-facts.md             what was observed about each client and the standards
 ruff.toml                         lint and format configuration
 .version                          the version of the marketplace, raised by the pipeline
 ci/                               the gate, and the scripts of a release
@@ -148,7 +174,8 @@ were written.
   repository. Write a real path as `<clone>` or `<scratch>`.
 - A commit message carries no `Co-Authored-By` trailer.
 - Nobody edits `.version` but the pipeline, and the owner for a new minor or major
-  version.
+  version; the `version` of each root `plugin.json` under `plugins/` is edited in the
+  same commit, since a test keeps them equal.
 - The title of the version commit of the pipeline, `Version X.Y.Z`, is the one
   exception to the rule on titles.
 - No other commit message holds a skip marker such as `[skip ci]`, which keeps the

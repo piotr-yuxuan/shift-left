@@ -6,7 +6,7 @@ not reported, and a function already over the complexity threshold may not grow.
 Ruff uses the repository's own configuration, plus C901 (McCabe complexity, threshold
 from that configuration or Ruff's default of 10) and B (bugbear).
 
-Exit 0: nothing new. Exit 2: the report on stderr goes back to Claude.
+Exit 0: nothing new. Exit 2: the report on stderr goes back to the agent.
 Exit 1: the hook itself failed; the user sees the message.
 """
 
