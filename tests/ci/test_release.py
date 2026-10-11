@@ -254,18 +254,28 @@ class Whole(unittest.TestCase):
 
     def answers(self, refused: str = "", release: bool = False, deployments=(), statuses=()) -> None:
         """Tell the stand-in what GitHub answers: it refuses the call that holds `refused`,
-        and holds the release, the deployment records and the statuses given."""
+        and holds for v0.0.2 the release, the deployment records and the statuses given.
+
+        It answers by what it is asked. A call that names another tag is told that this tag has
+        no release. A list of the records that does not ask for those of v0.0.2 in the
+        environment `release` gets the record 7, which is of another release and has a success.
+        """
         made = {"data": {"createCommitOnBranch": {"commit": {"oid": MADE}}}}
         held = {"data": {"repository": {"release": {"tagName": "v0.0.2"} if release else None}}}
+        none = {"data": {"repository": {"release": None}}}
+        the_records_asked_for = ["/deployments", "ref=v0.0.2", "environment=release"]
         rules = [
             {"when": [refused or "nothing"], "status": 1, "stderr": "gh: Bad Gateway (HTTP 502)\n"},
             {"when": ["createCommitOnBranch"], "stdout": json.dumps(made)},
             {"when": ["release create"], "stdout": "https://github.invalid/owner/name/v0.0.2\n"},
             {"when": ["POST", "/statuses"], "stdout": json.dumps({"state": "success"})},
             {"when": ["POST", "/deployments"], "stdout": json.dumps({"id": 41})},
-            {"when": ["release(tagName"], "stdout": json.dumps(held)},
+            {"when": ["release(tagName", '"v0.0.2"'], "stdout": json.dumps(held)},
+            {"when": ["release(tagName"], "stdout": json.dumps(none)},
+            {"when": ["/deployments/7/statuses"], "stdout": json.dumps([{"state": "success"}])},
             {"when": ["/statuses"], "stdout": json.dumps(list(statuses))},
-            {"when": ["/deployments"], "stdout": json.dumps(list(deployments))},
+            {"when": the_records_asked_for, "stdout": json.dumps(list(deployments))},
+            {"when": ["/deployments"], "stdout": json.dumps([{"id": 7}])},
         ]
         (self.scratch / "gh" / "answers.json").write_text(json.dumps(rules))
 
@@ -387,12 +397,18 @@ class Whole(unittest.TestCase):
         made = self.push("Version 0.0.2\n\n[skip ci]", **{".version": "0.0.2\n"})
         self.git(self.owner, "tag", "v0.0.2", made)
         self.git(self.owner, "push", "--quiet", "--tags", "origin")
-        self.answers(release=True, deployments=[{"id": 58}], statuses=[])
-        result = self.release()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        (status,) = [call for call in self.calls() if call["write"] != "read"]
-        self.assertEqual(status["write"], "status")
-        self.assertIn("repos/owner/name/deployments/58/statuses", status["arguments"])
+        cases = {
+            "no status": [],
+            "statuses, none of them a success": [{"state": "error"}, {"state": "pending"}],
+        }
+        for name, statuses in cases.items():
+            with self.subTest(name):
+                self.answers(release=True, deployments=[{"id": 58}], statuses=statuses)
+                result = self.release()
+                self.assertEqual(result.returncode, 0, result.stderr)
+                (status,) = [call for call in self.calls() if call["write"] != "read"]
+                self.assertEqual(status["write"], "status")
+                self.assertIn("repos/owner/name/deployments/58/statuses", status["arguments"])
 
     def test_a_release_that_is_complete_is_left_alone(self):
         made = self.push("Version 0.0.2\n\n[skip ci]", **{".version": "0.0.2\n"})
