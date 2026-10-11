@@ -461,6 +461,15 @@ read as page text on 2026-10-11.
   runs. The page tells authors to check the input of the event inside the script.
   A hook of a Claude-format plugin gets `${CLAUDE_PLUGIN_ROOT}` expanded in its
   command and set in its environment.
+- **What the Python hook of `quality-ratchet` does with an event of another tool.**
+  Seen on 2026-10-11, Python 3.14.7, outside any client: the script was run by hand
+  on a scratch copy, with an event on standard input. It reads `tool_input.file_path`
+  and no name of a tool. An event that names no file, or a file that is no Python
+  file, ends with status 0 and prints nothing. An event of the tool `Read` that names
+  a Python file is checked as an edit of that file is. An event whose `tool_input` is
+  a string or `null`, and no object, ends with status 1 and a traceback. So on that
+  date the hook did not do what `AGENTS.md` asks of a hook kept in
+  `hooks/hooks.json`.
 - **How a plugin is added.** Doc. "Configure plugin marketplaces": the setting
   `chat.plugins.marketplaces` names marketplaces, each a git repository, as
   `owner/repo`, as a git address, or as a `file:///` address of a repository already
