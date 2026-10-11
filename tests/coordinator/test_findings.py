@@ -24,7 +24,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-SKILL = Path(__file__).resolve().parents[2] / "plugins" / "shift-left" / "skills" / "instrument"
+SKILL = Path(__file__).resolve().parents[2] / "plugins" / "coordinator" / "skills" / "instrument"
 SCRIPT = SKILL / "findings.py"
 SCHEMA = json.loads((SKILL / "finding.schema.json").read_text(encoding="utf-8"))
 PROPERTIES = SCHEMA["properties"]

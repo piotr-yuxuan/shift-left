@@ -59,7 +59,7 @@ and the log says where each component was read from:
     no path.
   - *A session of the desktop app, with the user's configuration,* and this
     repository registered from a clone. A loaded skill gives its base directory as the
-    cached copy, `<config>/plugins/cache/piotr-yuxuan/principles/<commit>/skills/<name>`,
+    cached copy, `<config>/plugins/cache/<marketplace>/principles/<commit>/skills/<name>`,
     in the main session and in an agent that names the skill. The report of the hook
     names its command in the cached copy of `quality-ratchet`, and its plugin as
     `quality-ratchet@inline`.
@@ -89,6 +89,46 @@ and the log says where each component was read from:
   `basedpyright-lsp` declares its language server, the plugin directory holds no
   `plugin.json`, and `plugin details` lists the server. Doc: plugin manifest
   reference, "Marketplace entries and the manifest".
+
+## A marketplace that changes its name
+
+`<old>` and `<new>` stand for the name in `marketplace.json` before and after the
+change.
+
+- **A registration keeps the name it was made under.** Seen on 2026-10-11, Claude
+  Code 2.1.288, with scratch commands. A clone of this repository was added as a
+  marketplace while its `marketplace.json` named it `<old>`, and three of its plugins
+  were installed. A commit that names it `<new>` was then checked out in the clone.
+  `plugin marketplace list` still shows `<old>`, and `plugin list --json` shows each
+  `<plugin>@<old>` enabled with no error. `plugin update <plugin>@<old>` takes the new
+  commit, and a plugin that was not installed yet installs as `<plugin>@<old>`.
+  `plugin install <plugin>@<new>` fails with "not found in marketplace", and
+  `plugin update` and `plugin disable` of `<plugin>@<new>` exit 1. A debug start in
+  the clone still reads `hooks/hooks.json` from the clone and registers the hook, and
+  its log counts the skills, the agent and the language server.
+- **The new name is taken by removing the marketplace and adding it again.** Seen on
+  2026-10-11, Claude Code 2.1.288, with scratch commands, from the state of the entry
+  above. In this order, `plugin uninstall <plugin>@<old>` for each plugin,
+  `plugin marketplace remove <old>`, `plugin marketplace add <clone>` and
+  `plugin install <plugin>@<new>` for each plugin: every command exits 0.
+  `settings.json` then holds only the ids `<plugin>@<new>` and the marketplace
+  `<new>`; a key that these commands do not own, and the mode of the file, are as
+  before. The directory `<config>/plugins/cache/<old>/` stays behind, and each version
+  directory in it has gained a file `.orphaned_at`. `plugin uninstall` of a plugin
+  that is not installed exits 1. `plugin marketplace remove` alone also uninstalls the
+  plugins of the marketplace, and says so: seen with a throwaway marketplace. It then
+  deletes the folder `<config>/plugins/data/<plugin>-<marketplace>/` of each of them,
+  and says that it deletes their data where it can; after
+  `plugin uninstall --keep-data` the removal leaves that folder: seen with the same
+  marketplace and a folder made by hand, with one file in it. A start removes the
+  file `.orphaned_at` from a cached copy that `installed_plugins.json` names again:
+  seen with the same marketplace, by one debug start made once `settings.json`,
+  `installed_plugins.json` and `known_marketplaces.json` were put back from copies
+  made before the uninstall; until that start the file was still there.
+- **A plugin may have the name of its marketplace.** Seen on 2026-10-11, Claude Code
+  2.1.288, with scratch commands: a throwaway marketplace in a directory, whose one
+  plugin has the name of the marketplace, passes `plugin validate`, and the plugin
+  installs as `<name>@<name>`. `plugin list --json` shows it enabled with no error.
 
 ## Skills that an agent names
 
@@ -153,21 +193,21 @@ and the log says where each component was read from:
   "Base directory for this skill: <absolute path>", and each could list and run files
   under that path. The path is in the cached copy of the plugin, at the commit that
   was installed or last updated (see "Where a plugin is loaded from"). The same with
-  a skill of `shift-left` is still to be seen, after its first install.
+  a skill of `coordinator` is still to be seen, after its first install.
 - **The shell of an agent has no variable that names the plugin or the project.**
   Seen: `CLAUDE_PLUGIN_ROOT` and `CLAUDE_PROJECT_DIR` are unset in the shell of an
   agent. Doc: plugin manifest reference, "Where each variable resolves": the variables
   are not in the environment of the commands that Claude runs through its shell tool,
   in the main session or in a subagent, and a `${...}` reference in the body of a
   skill is replaced by the path when the skill is loaded. That replacement was not
-  observed, and the skill of `shift-left` does not use it.
+  observed, and the skill of `coordinator` does not use it.
 - **A `bin/` directory.** Doc: plugin manifest reference, "Standard layout": the
   files of a plugin's `bin/` directory are on the `PATH` of the shell tool while the
   plugin is enabled. Not observed, and no plugin of this repository relies on it.
 
 ## Workflow runs and transcripts
 
-What `minutes.py` of `shift-left` reads. Seen in the records that the harness keeps
+What `minutes.py` of `coordinator` reads. Seen in the records that the harness keeps
 for the sessions of one machine; `<project>` stands for the directory that it keeps
 for a project, and `<session>` for the identifier of a session.
 
@@ -242,7 +282,7 @@ see these facts again after an upgrade.
 
 ## Other tools
 
-What the scripts of `shift-left` and their tests rely on outside Claude Code.
+What the scripts of `coordinator` and their tests rely on outside Claude Code.
 
 - **`git check-ignore` answers for a file that does not exist yet.** Seen, git
   2.54.0, in a scratch repository: `git check-ignore -q <absolute path>`, run from the

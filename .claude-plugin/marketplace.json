@@ -1,5 +1,5 @@
 {
-  "name": "piotr-yuxuan",
+  "name": "shift-left",
   "owner": {
     "name": "piotr-yuxuan"
   },
@@ -35,8 +35,8 @@
       }
     },
     {
-      "name": "shift-left",
-      "source": "./plugins/shift-left"
+      "name": "coordinator",
+      "source": "./plugins/coordinator"
     }
   ]
 }

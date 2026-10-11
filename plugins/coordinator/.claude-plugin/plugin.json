@@ -1,5 +1,5 @@
 {
-  "name": "shift-left",
+  "name": "coordinator",
   "description": "Instruments for bringing review forward: one schema and one file per plan for what review found, and the minutes that workflow runs and their coordinator cost",
   "license": "EUPL-1.2"
 }
