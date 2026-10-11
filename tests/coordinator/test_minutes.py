@@ -20,7 +20,7 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-SKILL = Path(__file__).resolve().parents[2] / "plugins" / "shift-left" / "skills" / "instrument"
+SKILL = Path(__file__).resolve().parents[2] / "plugins" / "coordinator" / "skills" / "instrument"
 SCRIPT = SKILL / "minutes.py"
 START = datetime(2030, 3, 18, tzinfo=timezone.utc)
 T0 = 1_900_022_400_000  # START, in milliseconds since the epoch
