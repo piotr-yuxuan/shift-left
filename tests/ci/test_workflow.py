@@ -118,6 +118,10 @@ class Workflow(unittest.TestCase):
 
     def test_gate_runs_the_gate_script_without_the_cli(self):
         self.assertEqual(values(self.jobs["gate"], "run")[-1], "ci/gate.sh --no-cli")
+        # The step is this one line, the last of its job: it has no key of its own, such as
+        # a condition, with which the job would pass though the gate failed or did not run.
+        last = [line.strip() for line in self.jobs["gate"] if line.strip()][-1]
+        self.assertEqual(last, "- run: ci/gate.sh --no-cli")
 
     def test_release_runs_the_release_script_alone_and_gives_it_the_token(self):
         release = self.jobs["release"]
