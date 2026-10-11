@@ -1351,6 +1351,13 @@ class Authority(CommandLine):
         self.assertFalse(self.file.parent.exists())
         self.assertDone(self.add(lens="a-b"))
 
+    def test_the_number_of_an_id_is_judged_by_the_pattern_of_the_file_alone(self):
+        any_digits = {"pattern": "^r[1-9][0-9]*-[a-z][a-z0-9-]*-[0-9]+$(?!\\n)"}
+        copy = self.copy(lambda schema: schema["properties"]["id"].update(any_digits))
+        with_a_leading_zero = reported("r1-design-01")
+        self.assertRejected(self.add(with_a_leading_zero))
+        self.assertDone(self.add(with_a_leading_zero, script=copy))
+
     def test_a_value_removed_from_an_enumeration_is_rejected_and_not_counted_by_the_copy(self):
         copy = self.copy(lambda schema: schema["properties"]["disposition"]["enum"].remove("deferred"))
         self.hold(stored("r1-design-1"))

@@ -397,11 +397,12 @@ def add(schema: dict, document, answer, round_found: int, lens: str) -> tuple[di
 
     `document` is the content of the file, or None when there is no file yet. Each finding takes
     the round as `round_found`, "open" as `disposition`, and null for every other field that the
-    reviewer does not add.
+    reviewer does not add. Of an id, this checks the round and the lens before the last hyphen; the
+    shape of the number after it is the pattern of the schema file alone.
     """
     entries = entries_of(schema, {"findings": []} if document is None else document)
     reject_if(validate(answer, role_schema(schema, ADDING_ROLE), "answer"))
-    expected_id = re.compile(rf"r{round_found}-{re.escape(lens)}-[1-9][0-9]*")
+    expected_head = f"r{round_found}-{lens}"
     errors, added = [], []
     for index, given in enumerate(answer["findings"]):
         path = f"answer.findings[{index}]"
@@ -409,8 +410,8 @@ def add(schema: dict, document, answer, round_found: int, lens: str) -> tuple[di
         finding |= {"round_found": round_found, "disposition": "open"}
         if finding["lens"] != lens:
             errors.append({"path": f"{path}.lens", "rule": "the lens given to add"})
-        if not (isinstance(finding["id"], str) and expected_id.fullmatch(finding["id"])):
-            rule = "r<round>-<lens>-<number>, with the round and the lens given to add"
+        if not (isinstance(finding["id"], str) and finding["id"].rpartition("-")[0] == expected_head):
+            rule = "the round and the lens given to add, before the last hyphen"
             errors.append({"path": f"{path}.id", "rule": rule})
         errors += validate(finding, schema, path)
         entries.append((path, finding))
