@@ -56,10 +56,11 @@ TYPES = {
 }
 
 # What the code itself needs of the schema file, written in the subset: the fields that its rules
-# name, the values that the summary counts, and the role whose answer `add` takes.
+# name, each required of a finding and of the type that the rule assumes, the values that the
+# summary counts, and the role whose answer `add` takes.
 SCHEMA_FORM = {
     "type": "object",
-    "required": ["properties", "x-roles"],
+    "required": ["properties", "required", "x-roles"],
     "properties": {
         "properties": {
             "type": "object",
@@ -74,10 +75,34 @@ SCHEMA_FORM = {
                 "severity",
             ],
             "properties": {
-                "severity": {"type": "object", "required": ["enum"]},
-                "disposition": {"type": "object", "required": ["enum"]},
+                "id": {
+                    "type": "object",
+                    "required": ["type"],
+                    "properties": {"type": {"enum": ["string"]}},
+                },
+                "round_found": {
+                    "type": "object",
+                    "required": ["type"],
+                    "properties": {"type": {"enum": ["integer"]}},
+                },
+                "carry_over_of": {
+                    "type": "object",
+                    "required": ["type"],
+                    "properties": {"type": {"enum": [["string", "null"]]}},
+                },
+                "severity": {
+                    "type": "object",
+                    "required": ["enum"],
+                    "properties": {"enum": {"items": {"type": "string"}}},
+                },
+                "disposition": {
+                    "type": "object",
+                    "required": ["enum"],
+                    "properties": {"enum": {"items": {"type": "string"}}},
+                },
             },
         },
+        "required": {"type": "array"},
         "x-roles": {
             "type": "object",
             "required": [ADDING_ROLE],
@@ -244,14 +269,22 @@ def outside_subset(schema, path: str):
 def usable(schema) -> dict:
     """`schema`, the content of the schema file, when this script can enforce all of it.
 
-    A rule that the code would ignore is a failure: a keyword outside the subset, or a right under
-    "x-roles" that is not in the form {"adds": [fields]} or {"sets": {field: {"from", "to"}}}.
-    Only ADDING_ROLE may hold "adds", since `add` takes its answer alone, and a role that adds sets
-    nothing, since `set` reads "sets" of a role that has no "adds".
+    A rule that the code would ignore is a failure: a keyword outside the subset, a field that a
+    rule of this script names and that is not required or not of the type that the rule assumes, or
+    a right under "x-roles" that is not in the form {"adds": [fields]} or
+    {"sets": {field: {"from", "to"}}}. Only ADDING_ROLE may hold "adds", since `add` takes its
+    answer alone, and a role that adds sets nothing, since `set` reads "sets" of a role that has no
+    "adds".
     """
     faults = [{"path": path, "rule": "outside the subset"} for path in outside_subset(schema, "schema")]
     faults = faults or validate(schema, SCHEMA_FORM, "schema")
     if not faults:
+        named = SCHEMA_FORM["properties"]["properties"]["required"]
+        faults += [
+            {"path": "schema.required", "rule": f"names {name}"}
+            for name in named
+            if name not in schema["required"]
+        ]
         change = {
             "type": "object",
             "properties": {"from": {"type": "array"}, "to": {"type": "array"}},

@@ -1472,6 +1472,7 @@ class Authority(CommandLine):
             "a list of types with an unknown one": with_property("type", ["string", "text"]),
             "no type in a list of types": with_property("type", []),
             "a pattern that is not a regular expression": with_property("pattern", "("),
+            "a pattern that is not text": with_property("pattern", 3),
             "a minimum that is not an integer": with_property("minimum", "1"),
             "required names that are not a list": lambda schema: schema.update({"required": "id"}),
             "an enumeration that is not a list": with_property("enum", "open"),
@@ -1494,6 +1495,24 @@ class Authority(CommandLine):
             "no reviewer": lambda schema: schema["x-roles"].pop("reviewer"),
             "no roles": lambda schema: schema.pop("x-roles"),
             "no severity": lambda schema: schema["properties"].pop("severity"),
+            # The rules of the script read these fields of every finding, and assume their types.
+            "a field that a rule names and that is not required": lambda schema: schema[
+                "required"
+            ].remove("carry_over_of"),
+            "no required fields": lambda schema: schema.pop("required"),
+            "an id with no type": lambda schema: schema["properties"]["id"].pop("type"),
+            "a round of another type": lambda schema: schema["properties"]["round_found"].update(
+                {"type": "string"}
+            ),
+            "a carry-over of another type": lambda schema: schema["properties"]["carry_over_of"].update(
+                {"type": "string"}
+            ),
+            "a severity that is not text": lambda schema: schema["properties"]["severity"][
+                "enum"
+            ].append(3),
+            "a disposition that is not text": lambda schema: schema["properties"]["disposition"][
+                "enum"
+            ].append(None),
             "an empty schema": lambda schema: schema.clear(),
         }
         self.hold(stored("r1-design-1"))
