@@ -10,8 +10,8 @@ probes of a client again after an upgrade of it that touches plugins or hooks.
   given.
 - *Static* means read in the files of an installed client, or run from them outside
   the client, and not observed in a running one.
-- *Doc* means the documentation page was read on that date, as page text; the page
-  and its section are named.
+- *Doc* means the documentation page was read on that date; the page and its section
+  are named. Where the head of a section says so, the page was read as page text.
 
 ## Claude Code
 
@@ -376,7 +376,7 @@ that `plugin list` prints, in the counts of the log.
 Nothing below was seen in a running VS Code: no window was opened and no account was
 used. The page is "Agent plugins in VS Code",
 `code.visualstudio.com/docs/agent-customization/agent-plugins`, dated 2026-10-07 and
-read on 2026-10-11.
+read as page text on 2026-10-11.
 
 - **A root `plugin.json` that declares the schema of the standard sets the format of
   the plugin.** Doc: "Plugin formats". VS Code detects the format of a plugin from
@@ -463,7 +463,7 @@ read on 2026-10-11.
 Nothing was seen: the client is not installed on the machine of these probes. The
 page is "GitHub Copilot CLI plugin reference",
 `docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference`,
-read on 2026-10-11.
+read as page text on 2026-10-11.
 
 - **A root manifest of the standard takes precedence over the other manifests.**
   Doc: "File locations". For Agent Plugins 1.0.0 or 1.1.0 the manifest is
@@ -502,7 +502,7 @@ read on 2026-10-11.
 ## Codex
 
 Nothing was seen: no probe ran. The page is "Package your plugin",
-`developers.openai.com/plugins/build/plugins`, read on 2026-10-11.
+`developers.openai.com/plugins/build/plugins`, read as page text on 2026-10-11.
 
 - **The root `plugin.json` is the portable entry point, and other manifests are
   accepted.** Doc: "Plugin structure": the page calls the root `plugin.json` the
@@ -533,8 +533,8 @@ Nothing was seen: no probe ran. The page is "Package your plugin",
 
 ### Agent Plugins 1.0.0
 
-Read on 2026-10-11: the specification, `agent-plugins.org/specification`, which gives
-its version as 1.0.0 and its status as published; its manifest schema,
+Read as page text on 2026-10-11: the specification, `agent-plugins.org/specification`,
+which gives its version as 1.0.0 and its status as published; its manifest schema,
 `agent-plugins.org/schemas/1.0.0/plugin.schema.json`; and its list of compatible
 clients, `agent-plugins.org/compatible-clients`.
 
@@ -581,7 +581,7 @@ clients, `agent-plugins.org/compatible-clients`.
 
 ### Agent Skills
 
-Read on 2026-10-11: the specification, `agentskills.io/specification`.
+Read as page text on 2026-10-11: the specification, `agentskills.io/specification`.
 
 - **The front matter of a `SKILL.md`.** Doc: "SKILL.md format", "Frontmatter". `name`
   and `description` are required; `license`, `compatibility`, `metadata` and
