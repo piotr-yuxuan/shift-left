@@ -10,12 +10,15 @@ Every directory `skills/<name>/` of every plugin is taken as a skill, and its `S
 a directory there that holds none ends the tests in error.
 
 The front matter is YAML, and the standard library reads none. So these tests read only lines of
-the form `<key>: <value>`, with one of the six keys, said once, and a value that a reader of lines
-and a YAML reader give as the same string: it starts with an ASCII letter; holds no colon followed
-by a space, no colon at its end and no `#` after a space; has printable characters only and no
-space at either end; and is not a word that YAML reads as a boolean or as null. Anything else
-fails as "outside the subset this test reads", which does not say that it is invalid: a quoted, a
-nested or a multi-line value is outside, and so is a name that starts with a digit.
+the form `<key>: <value>`, with one of the five keys whose value is a string, said once, and a
+value that a reader of lines and a YAML reader give as the same string: it starts with an ASCII
+letter; holds no colon followed by a space, no colon at its end and no `#` after a space; has
+printable characters only and no space at either end; and is not a word that YAML reads as a
+boolean or as null. Anything else fails as "outside the subset this test reads", which does not
+say that it is invalid: a quoted, a nested or a multi-line value is outside, and so is a name that
+starts with a digit. The sixth key, `metadata`, is outside in every form: the specification makes
+it a map from text to text, which no line of this form holds, and a line `metadata: <value>` would
+give a string where a map is asked.
 """
 
 import re
@@ -25,7 +28,7 @@ from pathlib import Path
 PLUGINS = Path(__file__).resolve().parents[2] / "plugins"
 SKILLS = sorted(path for path in PLUGINS.glob("*/skills/*") if path.is_dir())
 
-KEYS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+KEYS = {"name", "description", "license", "compatibility", "allowed-tools"}
 PLAIN_VALUE = re.compile(r"[A-Za-z](?:(?!: | #).)*(?<![ :])")
 YAML_WORDS = {"true", "false", "yes", "no", "on", "off", "y", "n", "null"}
 SUBSET = "outside the subset this test reads"
