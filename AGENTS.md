@@ -65,15 +65,17 @@ working here does not load it a second time as project instructions.
 
 ## Commands
 
-Before a handoff, an agent runs the gate, which runs every check of this section. The
-pipeline runs the same script at each push. Its header says how to run one check alone,
-and how it finds the CLI:
+Before a handoff, an agent runs the gate, which runs every check of this section and
+four more. The pipeline runs the same script at each push. Its header describes each
+check, and says how to run one alone and how it finds the CLI:
 
 ```
 ci/gate.sh
 ```
 
-The checks below are what it runs, each as a single command.
+The commands below are what four of its eight checks run: `tests`, `lint`, `manifests`
+and `contained`. The four others have no command here: `dashes`, `private` and `version`
+read the tracked files, and `messages` reads the commit messages that no tag reaches.
 
 `C` is the Claude Code CLI. In a desktop session `claude` is not on `PATH` and the CLI
 is at `$CLAUDE_CODE_EXECPATH`, so set it at the start of each command:
