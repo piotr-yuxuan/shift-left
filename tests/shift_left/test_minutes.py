@@ -391,6 +391,10 @@ class Coordinator(unittest.TestCase):
         records = [user(0), assistant(2), turn(5), assistant(6), stop(7)]
         self.assertEqual(coordinator_figures(records), (1, 2))
 
+    def test_a_stop_record_before_the_first_turn_ends_no_turn(self):
+        records = [stop(1), turn(5), assistant(6), assistant(8)]
+        self.assertEqual(coordinator_figures(records), (3, 3))
+
     def test_both_figures_are_cut_to_the_window(self):
         before = [turn(-5), assistant(-1), assistant(3), stop(4)]
         after = [turn(50), assistant(58), assistant(65), stop(70)]

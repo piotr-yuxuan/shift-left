@@ -30,6 +30,7 @@ Exit 2: the script could not do its job, or the call was wrong; standard output 
 import argparse
 import json
 import sys
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -39,6 +40,21 @@ TYPE_NAMES = {int: "an integer", str: "a string", list: "a list", dict: "an obje
 
 class Failure(Exception):
     """The script cannot do its job: status 2, and one line on standard error."""
+
+
+@dataclass
+class Turn:
+    """A turn of the main session, with its times in milliseconds.
+
+    `last` is the time of its last assistant event, or its start when it has none. `stop` is the
+    time of its first stop record, or None. `spans` holds, for each of its assistant events, the
+    interval from the event just before it to itself.
+    """
+
+    start: int
+    last: int
+    stop: int | None = None
+    spans: list[tuple[int, int]] = field(default_factory=list)
 
 
 def typed(value, kind: type, path: str):
@@ -231,23 +247,26 @@ def coordinator(timeline: list[tuple[int, int, str]], start: int, until: int) ->
     assistant event; failing that, at its start. An assistant event counts, as model time, the
     interval from the event just before it to itself, cut to its turn and to the window.
     """
-    turns = [{"spans": []}]  # The first holds what comes before any turn, and is left out.
-    previous = None
+    turns, previous = [], None
     for time, _, kind in timeline:
-        if kind == "stop":
-            turns[-1].setdefault("stop", time)
-            continue
         if kind == "start":
-            turns.append({"start": time, "last": time, "spans": []})
-        elif kind == "assistant":
-            turns[-1]["last"] = time
-            turns[-1]["spans"].append((previous, time))
+            turns.append(Turn(start=time, last=time))
+        if not turns:
+            continue  # What comes before the first start belongs to no turn.
+        turn = turns[-1]
+        if kind == "stop":
+            if turn.stop is None:
+                turn.stop = time
+            continue
+        if kind == "assistant":
+            turn.last = time
+            turn.spans.append((previous, time))
         previous = time
     whole, model = [], []
-    for turn in turns[1:]:
-        end = min(turn.get("stop", turn["last"]), until)
-        whole.append((max(turn["start"], start), end))
-        model += [(max(begin, start), min(finish, end)) for begin, finish in turn["spans"]]
+    for turn in turns:
+        end = min(turn.last if turn.stop is None else turn.stop, until)
+        whole.append((max(turn.start, start), end))
+        model += [(max(begin, start), min(finish, end)) for begin, finish in turn.spans]
     return {
         "window_minutes": minutes(until - start),
         "model_minutes": minutes(union(model)),
