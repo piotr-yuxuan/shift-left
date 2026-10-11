@@ -35,8 +35,8 @@
       }
     },
     {
-      "name": "shift-left",
-      "source": "./plugins/shift-left"
+      "name": "coordinator",
+      "source": "./plugins/coordinator"
     }
   ]
 }
