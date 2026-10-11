@@ -331,7 +331,14 @@ class SchemaFile(unittest.TestCase):
                 self.assertNotIn("\n", property_schema["description"])
 
     def test_the_description_of_severity_defines_the_three_grades(self):
-        self.assertRegex(PROPERTIES["severity"]["description"], "blocking: .+ major: .+ minor: .+")
+        definitions = {
+            "blocking": "merged as it is, the change breaks a stated requirement",
+            "major": "a concrete scenario in which the change fails outside its main case",
+            "minor": "it would not change the decision to merge",
+        }
+        for grade, definition in definitions.items():
+            with self.subTest(grade):
+                self.assertIn(f"{grade}: {definition}", PROPERTIES["severity"]["description"])
 
     def test_the_enumerations_hold_the_stated_values(self):
         self.assertEqual(PROPERTIES["severity"]["enum"], SEVERITIES)
@@ -552,6 +559,7 @@ class Add(CommandLine):
 
     def test_a_faulty_answer_is_rejected_whole_and_creates_nothing(self):
         one = reported("r1-design-1")
+        of_the_call = "the round and the lens given to add, before the last hyphen"
         cases = [
             (
                 "a scenario of spaces only",
@@ -583,16 +591,26 @@ class Add(CommandLine):
             ("an unknown subject", [one | {"subject": None}], "[0].subject", "enum"),
             ("an absolute path", [one | {"file": "/" + MARKER}], "[0].file", "pattern"),
             ("a path from the home directory", [one | {"file": "~/" + MARKER}], "[0].file", "pattern"),
-            ("a line of no file", [one | {"file": None}], "[0].line", None),
-            ("an id that ends in a line break", [one | {"id": "r1-design-1\n"}], "[0].id", None),
-            ("an id of another round", [one | {"id": "r2-design-1"}], "[0].id", None),
-            ("an id of another lens", [one | {"id": "r1-security-1"}], "[0].id", None),
-            ("an id of a longer lens", [one | {"id": "r1-design-extra-1"}], "[0].id", None),
-            ("an id of a lens that goes on", [one | {"id": "r1-design-2-1"}], "[0].id", None),
-            ("an id numbered zero", [one | {"id": "r1-design-0"}], "[0].id", None),
-            ("an id with a leading zero", [one | {"id": "r1-design-01"}], "[0].id", None),
-            ("a lens other than the one of the call", [one | {"lens": "security"}], "[0].lens", None),
-            ("the same id twice", [reported("r1-design-2"), one, one], "[2].id", None),
+            ("a line of no file", [one | {"file": None}], "[0].line", "null when file is null"),
+            ("an id that ends in a line break", [one | {"id": "r1-design-1\n"}], "[0].id", "pattern"),
+            ("an id of another round", [one | {"id": "r2-design-1"}], "[0].id", of_the_call),
+            ("an id of another lens", [one | {"id": "r1-security-1"}], "[0].id", of_the_call),
+            ("an id of a longer lens", [one | {"id": "r1-design-extra-1"}], "[0].id", of_the_call),
+            ("an id of a lens that goes on", [one | {"id": "r1-design-2-1"}], "[0].id", of_the_call),
+            ("an id numbered zero", [one | {"id": "r1-design-0"}], "[0].id", "pattern"),
+            ("an id with a leading zero", [one | {"id": "r1-design-01"}], "[0].id", "pattern"),
+            (
+                "a lens other than the one of the call",
+                [one | {"lens": "security"}],
+                "[0].lens",
+                "the lens given to add",
+            ),
+            (
+                "the same id twice",
+                [reported("r1-design-2"), one, one],
+                "[2].id",
+                "unique among the findings",
+            ),
             ("a finding that is text", [MARKER], "[0]", "type"),
             (
                 "a faulty finding after a valid one",
@@ -606,7 +624,7 @@ class Add(CommandLine):
                 errors = self.assertRejected(self.add(*given))
                 found = [error for error in errors if error["path"] == "answer.findings" + path]
                 self.assertTrue(found, errors)
-                self.assertIn(rule or found[0]["rule"], [error["rule"] for error in found])
+                self.assertIn(rule, [error["rule"] for error in found])
                 self.assertFalse(self.file.parent.exists())
 
     def test_an_answer_of_another_shape_is_rejected(self):
