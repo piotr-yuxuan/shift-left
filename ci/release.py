@@ -41,7 +41,8 @@ ENVIRONMENT = "release"
 # The message of a version commit is this title, a blank line and this marker.
 TITLE = "Version {}"
 MARKER = "[skip ci]"
-# Seconds that one call of git or of gh may last.
+# Seconds that one call of git or of gh may last. The job that runs the script bounds the
+# whole run, with `timeout-minutes` in the workflow file.
 TIMEOUT = 120
 # What the two variables of the pipeline must hold.
 COMMIT = re.compile(r"[0-9a-f]{40}")

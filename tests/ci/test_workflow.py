@@ -4,7 +4,8 @@ The standard library reads no YAML, so each test reads the lines of the file. Th
 expectations are what the pipeline must not lose without a test failing: code of others named
 by its commit, Ruff at a written version, a token that can only read outside the job that
 releases, and a job `release` that runs only after a `gate` that passed, only for a push to
-`main` of a repository that is no fork, one at a time, and that names no environment.
+`main` of a repository that is no fork, one at a time, and that names no environment; and a
+deadline for each job.
 """
 
 import re
@@ -100,6 +101,13 @@ class Workflow(unittest.TestCase):
         self.assertEqual(len(concurrency), 2)
         self.assertRegex(concurrency[0], r"^group: \S+$")
         self.assertEqual(concurrency[1], "cancel-in-progress: false")
+
+    def test_each_job_has_a_deadline_of_less_than_an_hour(self):
+        # Without one a job may last six hours, and `release` holds its group all that time.
+        for name, job in self.jobs.items():
+            with self.subTest(job=name):
+                (minutes,) = values(job, "timeout-minutes")
+                self.assertLess(int(minutes), 60)
 
     def test_both_jobs_run_on_the_named_image_with_the_whole_history_and_python_3_14(self):
         for name, job in self.jobs.items():

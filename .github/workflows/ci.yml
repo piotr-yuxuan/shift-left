@@ -16,6 +16,8 @@ jobs:
     # when it comes from a fork, so that no branch is checked twice.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     runs-on: ubuntu-24.04
+    # A deadline: without one, a step that hangs holds its job for six hours.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -32,6 +34,9 @@ jobs:
     needs: gate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !github.event.repository.fork
     runs-on: ubuntu-24.04
+    # A deadline: a release that hangs would hold the group below, and so every later
+    # release, for six hours. A second run finishes a release that was cut short.
+    timeout-minutes: 10
     permissions:
       contents: write
       deployments: write
