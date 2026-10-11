@@ -144,6 +144,127 @@ and the log says where each component was read from:
   file: an attachment of type `hook_blocking_error` for the event `PostToolUse`. The
   same probe for an agent started by a workflow is still to run.
 
+## Scripts that a skill brings
+
+- **An agent that loads a skill of a plugin is told where the skill is, and can run
+  the files beside it.** Seen, in a session of the desktop app, with a skill of
+  another plugin: on loading the skill, the main session, a subagent and an agent
+  started by a workflow were each shown one line,
+  "Base directory for this skill: <absolute path>", and each could list and run files
+  under that path. The path is in the cached copy of the plugin, at the commit that
+  was installed or last updated (see "Where a plugin is loaded from"). The same with
+  a skill of `shift-left` is still to be seen, after its first install.
+- **The shell of an agent has no variable that names the plugin or the project.**
+  Seen: `CLAUDE_PLUGIN_ROOT` and `CLAUDE_PROJECT_DIR` are unset in the shell of an
+  agent. Doc: plugin manifest reference, "Where each variable resolves": the variables
+  are not in the environment of the commands that Claude runs through its shell tool,
+  in the main session or in a subagent, and a `${...}` reference in the body of a
+  skill is replaced by the path when the skill is loaded. That replacement was not
+  observed, and the skill of `shift-left` does not use it.
+- **A `bin/` directory.** Doc: plugin manifest reference, "Standard layout": the
+  files of a plugin's `bin/` directory are on the `PATH` of the shell tool while the
+  plugin is enabled. Not observed, and no plugin of this repository relies on it.
+
+## Workflow runs and transcripts
+
+What `minutes.py` of `shift-left` reads. Seen in the records that the harness keeps
+for the sessions of one machine; `<project>` stands for the directory that it keeps
+for a project, and `<session>` for the identifier of a session.
+
+The script refuses a run record in which a key that it reads is missing or has
+another type, a `done` agent with no `durationMs` included. In a transcript it
+refuses a line that is not a JSON object, except a last line that does not parse; a
+`timestamp` that it reads and that is not a date with an offset; and `user` or
+`assistant` records of which none starts a turn. A version of the harness that drops
+or retypes a key of the run record, that retypes a `timestamp` that the script
+reads, that drops the `timestamp` of the `user` records that start turns or of every
+`user` and `assistant` record, or that drops `turnOrigin`, shows as a failure.
+
+The script does not refuse a value that it does not know: an entry of
+`workflowProgress` of a type other than `workflow_phase` and `workflow_agent` is
+ignored, an agent in a state other than `done` counts as not finished, and a
+transcript record of another type or subtype is no event and no stop record. Nor
+does it refuse a `user` or `assistant` record with no `timestamp`, which is no
+event. A version of the harness that renames one of these values, or that drops the
+`timestamp` of the `assistant` records alone, gives wrong figures with status 0, so
+see these facts again after an upgrade.
+
+- **A run record exists only once its run has ended.** Seen, 41 run records: the
+  record of a workflow run is `<project>/<session>/workflows/<runId>.json`. The
+  transcripts of the agents of the run are in
+  `<project>/<session>/subagents/workflows/<runId>/`, and the transcript of the main
+  session is `<project>/<session>.jsonl`. The copy of the script of the run may be
+  under the directory of another project.
+- **What a run record holds.** Seen, 41 run records and 546 agents: `runId`, `status`
+  (`completed` or `killed`), `startTime` and `durationMs` in milliseconds, and
+  `workflowProgress`, a list of entries. An entry of type `workflow_phase` has `index`
+  and `title`. An entry of type `workflow_agent` has `phaseTitle`, `state`,
+  `startedAt`, and `durationMs` exactly when its `state` is `done`. The top-level
+  `timestamp` is the end of the run. The record names no version of the harness. Its
+  `label`, `promptPreview`, `resultPreview`, `summary`, `logs`, `result`, `script` and
+  `error` hold text of the session, which may be private.
+- **A killed run.** Seen, 7 killed runs: an agent that was running when its run was
+  killed stays with `state` `progress` and no `durationMs`. A phase that was declared
+  and never reached has a phase entry and no agent.
+- **Agents, phases and runs overlap.** Seen: the agents of one phase overlap without
+  starting together, phases overlap each other, the runs of one session overlap, and
+  labels repeat inside a run. `durationMs` counts from `startedAt`: an agent can wait
+  in a queue for minutes before it starts. An agent that the harness tried again, and
+  a run that was resumed, were not seen.
+- **The records of a main transcript.** Seen, 6 transcripts: records of type `user`
+  and `assistant` carry `timestamp`, an ISO 8601 string that ends in `Z`. So do
+  records of type `system`, `attachment` and `queue-operation`; records of other
+  types carry none. The order of the lines is not the order of time. No record gives
+  the duration of a turn. The transcript of a session is being written while that
+  session reads it.
+- **The turns of the main session.** Seen: a turn starts at a `user` record that has
+  the key `turnOrigin`, and ends at a `system` record of subtype `stop_hook_summary`,
+  which carries a `timestamp`; 91 of 91 completed turns have both. The values of
+  `turnOrigin` seen in the 6 transcripts are `human`, `task_notification` and `peer`.
+  Whether the stop record exists when no Stop hook is configured is not known.
+- **Subagent records are not mixed into the main transcript.** Seen: `isSidechain` is
+  false on every record of the 6 transcripts.
+- **What the workflow tool answers.** Seen, in the 6 transcripts: the result of the
+  workflow tool is a structured object with `runId`, `taskId`, `transcriptDir` and
+  `scriptPath`. The run record is `workflows/<runId>.json` three directories above
+  `transcriptDir`, for 41 of 41 runs that had ended.
+- **A workflow script cannot read a file.** Doc: the skill `workflow-authoring` that
+  the harness bundles and loads in a session, where it describes the body of a script:
+  no access to the file system or to the Node.js API. Seen, in an earlier workflow
+  run: a script that read a file failed at that read.
+- **An agent call of a workflow script can carry a JSON Schema.** Seen: the harness
+  validates the answer of the agent against the schema that the script passes. Which
+  keywords of the schema the harness enforces was not determined.
+- **A message that the user sends while a workflow runs is shown to its agents.**
+  Seen, in a run of two agents: a message that the user sent to the main session
+  during the run appeared in the context of both agents, and each reported it as a
+  request that it had not carried out.
+
+## Other tools
+
+What the scripts of `shift-left` and their tests rely on outside Claude Code.
+
+- **`git check-ignore` answers for a file that does not exist yet.** Seen, git
+  2.54.0, in a scratch repository: `git check-ignore -q <absolute path>`, run from the
+  nearest directory above the path that exists, exits 0 for a path that an ignore
+  rule covers, 1 for a path that none covers and 128 outside a repository, whether or
+  not the file and its parents exist. An ignore rule given through
+  `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_0` and `GIT_CONFIG_VALUE_0` changes the answer.
+  A repository that is reached through a symbolic link is answered for; a path that
+  enters the repository through a symbolic link from outside exits 128.
+- **`git worktree remove` deletes the ignored files of the worktree.** Seen, git
+  2.54.0, in a scratch repository: a linked worktree that held one ignored file and
+  no other change was removed without `--force`, and the file with it.
+- **Three traps of Python.** Seen, Python 3.14: `isinstance(True, int)` is true;
+  `json.loads` accepts `NaN`; `re.search` lets `$` match before a final line break.
+- **`datetime.fromisoformat` reads a `Z` suffix.** Seen, Python 3.14. Doc: library
+  reference, `datetime.fromisoformat`, "Changed in version 3.11": from that version.
+- **A lock on a directory.** Seen, Linux, local file system: `fcntl.flock` on a
+  descriptor of a directory excludes another process that locks the same directory,
+  the `flock` command included, and creates no file.
+- **jq prints a number as it was written.** Seen, jq 1.8.2: `30.0` stays `30.0`, so it
+  does not compare equal to `30` as text.
+
 ## Removing
 
 - **Removing a local-directory marketplace leaves its directory alone.** Seen: a

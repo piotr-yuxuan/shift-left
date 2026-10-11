@@ -87,6 +87,7 @@ Manifests; each command must exit 0:
 "$C" plugin validate .
 "$C" plugin validate plugins/principles
 "$C" plugin validate plugins/quality-ratchet
+"$C" plugin validate plugins/shift-left
 ```
 
 Self-containment of the plugins. The first command prints nothing; the second prints

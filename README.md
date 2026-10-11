@@ -40,6 +40,34 @@ from the basedpyright language server.
 It needs `basedpyright-langserver` on `PATH`. Do not enable `pyright-lsp` at the same
 time, or diagnostics are reported twice.
 
+### `shift-left`
+
+The skill `shift-left:instrument`: two scripts that an agent runs from the directory
+of the skill, so that what a plan cost and what its review found are read from data.
+
+- `findings.py` keeps the findings of the reviews of one plan in one JSON file. One
+  schema file, `finding.schema.json`, is the authority on the fourteen fields of a
+  finding, on their values and on which role writes which: reviewer, fixer or
+  coordinator. The script prints the schema of the answer of each role, rejects an
+  answer that breaks the schema or a rule, and summarises the file. It writes a file
+  whole or not at all, and only where git ignores it, since findings can quote
+  private code.
+- `minutes.py` reads the cost of ended workflow runs from the records that Claude
+  Code keeps: wall minutes and agent minutes per stage, the agents that did not
+  finish, and two bounds of the coordinator's minutes from the transcript of the main
+  session.
+- `codebook.md` defines the labels that a rater gives to a finding afterwards:
+  category, origin, knowable and cheapest preventer.
+
+It needs `python3` (3.11 or later) on `PATH`; `findings.py` also needs `git` and a
+POSIX system. The shape of the run records and of the transcripts was observed with
+Claude Code 2.1.288, see `docs/harness-facts.md`. `minutes.py` refuses a run record
+in which a key that it reads is missing or has another type, and a transcript that
+holds `user` or `assistant` records of which none starts a turn. It does not refuse a
+value that it does not know: an entry of an unknown type is ignored, and an agent in
+a state other than `done` counts as not finished. A later version of Claude Code that
+renames such a value gives wrong figures, so see the facts again after an upgrade.
+
 ## Install
 
 These commands are untested until this repository is first pushed. What was tested is
@@ -50,6 +78,7 @@ claude plugin marketplace add piotr-yuxuan/claude-plugin
 claude plugin install principles@piotr-yuxuan
 claude plugin install quality-ratchet@piotr-yuxuan
 claude plugin install basedpyright-lsp@piotr-yuxuan
+claude plugin install shift-left@piotr-yuxuan
 ```
 
 The same commands recreate a user configuration on a new machine: they record the
@@ -63,6 +92,7 @@ the clone, refresh that copy to the commit of the clone, then restart the sessio
 ```
 claude plugin update principles@piotr-yuxuan
 claude plugin update quality-ratchet@piotr-yuxuan
+claude plugin update shift-left@piotr-yuxuan
 ```
 
 ### If a hook wrongly blocks
