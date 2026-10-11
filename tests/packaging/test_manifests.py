@@ -16,9 +16,10 @@ The rules of this repository:
   component of the standard that this repository ships.
 - A root manifest holds `$schema`, `name`, `version`, `description`, `license` and `repository`.
 - `.claude-plugin/plugin.json` stays beside it for Claude Code, which reads no other. The two agree
-  on the name, which is the name of the directory, and on the licence. The root description is not
-  empty, and is the other one or its beginning. It is meant to stop before what a client of the
-  standard does not get: where it stops is not checked.
+  on the licence. The root description is not empty, and is the other one or its beginning. It is
+  meant to stop before what a client of the standard does not get: where it stops is not checked.
+- The name in a manifest is the name of the directory of its plugin: in a root manifest, and in
+  every `.claude-plugin/plugin.json`, that of a plugin with no root manifest included.
 - The version of a root manifest is the content of the file `.version`. For Claude Code the commit
   is the version of a plugin: no `.claude-plugin/plugin.json` carries a version, and neither does
   the marketplace entry of a plugin that has a root manifest.
@@ -79,13 +80,20 @@ class Manifests(unittest.TestCase):
             with self.subTest(plugin=plugin.name):
                 root = read_json(plugin / "plugin.json")
                 claude_code = read_json(plugin / ".claude-plugin" / "plugin.json")
-                self.assertEqual((root["name"], claude_code["name"]), (plugin.name, plugin.name))
+                self.assertEqual(root["name"], plugin.name)
                 self.assertEqual(root["license"], claude_code["license"])
                 self.assertNotEqual(root["description"], "", "the root description is empty")
                 self.assertTrue(
                     claude_code["description"].startswith(root["description"]),
                     f"{root['description']!r} is not the beginning of {claude_code['description']!r}",
                 )
+
+    def test_the_name_in_a_manifest_of_claude_code_is_the_name_of_the_directory(self):
+        for plugin in PLUGINS:
+            manifest = plugin / ".claude-plugin" / "plugin.json"
+            if manifest.is_file():
+                with self.subTest(plugin=plugin.name):
+                    self.assertEqual(read_json(manifest)["name"], plugin.name)
 
     def test_a_root_manifest_carries_the_version_that_the_file_version_holds(self):
         version_file = ROOT / ".version"
