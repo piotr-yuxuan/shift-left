@@ -228,9 +228,10 @@ see these facts again after an upgrade.
   workflow tool is a structured object with `runId`, `taskId`, `transcriptDir` and
   `scriptPath`. The run record is `workflows/<runId>.json` three directories above
   `transcriptDir`, for 41 of 41 runs that had ended.
-- **A workflow script cannot read a file.** Doc: what the harness documents of the
-  scripts of its workflow tool says so. Seen, in an earlier workflow run: a script
-  that read a file failed at that read.
+- **A workflow script cannot read a file.** Doc: the skill `workflow-authoring` that
+  the harness bundles and loads in a session, where it describes the body of a script:
+  no access to the file system or to the Node.js API. Seen, in an earlier workflow
+  run: a script that read a file failed at that read.
 - **An agent call of a workflow script can carry a JSON Schema.** Seen: the harness
   validates the answer of the agent against the schema that the script passes. Which
   keywords of the schema the harness enforces was not determined.
