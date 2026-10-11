@@ -320,6 +320,10 @@ class Stages(unittest.TestCase):
         self.assertEqual(stage_figures(late, early)["runs"], expected)
         self.assertEqual(stage_figures(early, late)["runs"], expected)
 
+    def test_runs_that_start_at_the_same_time_are_in_one_order_whatever_the_order_given(self):
+        one, other = record("wf-a", 0, 10), record("wf-b", 0, 20)
+        self.assertEqual(stage_figures(one, other)["runs"], stage_figures(other, one)["runs"])
+
     def test_the_same_run_given_twice_is_a_failure(self):
         with self.assertRaises(minutes.Failure):
             stage_figures(record("wf-a", 0, 10), record("wf-b", 0, 10), record("wf-a", 5, 10))
