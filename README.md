@@ -92,6 +92,7 @@ the clone, refresh that copy to the commit of the clone, then restart the sessio
 ```
 claude plugin update principles@piotr-yuxuan
 claude plugin update quality-ratchet@piotr-yuxuan
+claude plugin update shift-left@piotr-yuxuan
 ```
 
 ### If a hook wrongly blocks
