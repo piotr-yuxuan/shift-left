@@ -58,9 +58,10 @@ back_links=16
 dashes=(-F -e $'\xe2\x80\x93' -e $'\xe2\x80\x94')
 # A home directory path. The brackets keep each pattern from matching its own line.
 home=(-E -e '/ho[m]e/' -e '/Use[r]s/')
-# An email address. A line that holds an allowed address does not count.
-email=(-E -e '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
-allowed='git@github\.com|noreply@anthropic\.com|@users\.noreply\.github\.com|@example\.invalid'
+# An email address. A search prints each address alone, after a colon and at the end of a
+# line. An address that is allowed does not count: two addresses, and those of two domains.
+email=(-o -E -e '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+allowed='(:git@github\.com|:noreply@anthropic\.com|@users\.noreply\.github\.com|@example\.invalid)$'
 # The strings of the denylist, once read_denylist has run.
 denylist=()
 

@@ -29,6 +29,14 @@ CHECKS = ["tests", "lint", "contained", "dashes", "private", "version", "message
 DASHES = {"U+2013": chr(0x2013), "U+2014": chr(0x2014)}
 HOME_PATHS = ("/ho" + "me/someone/project", "/Use" + "rs/someone/project")
 ADDRESS = "someone" + "@" + "example.org"
+# Addresses that are not allowed; the last two only hold one that is.
+NOT_ALLOWED = (ADDRESS, "not-" + "git@github.com", "tests@example.invalid" + ".example.org")
+ALLOWED = (
+    "git@github.com",
+    "noreply@anthropic.com",
+    "12345+someone@users.noreply.github.com",
+    "tests@example.invalid",
+)
 DENIED = "A-STRING-OF-THE-DENYLIST"
 TRAILER = "co-authored-by: Someone <tests@example.invalid>"
 
@@ -194,7 +202,12 @@ class SeededDefects(GateCase):
                 self.assertSeedFails("private", tree, **{"notes.md": f"It is in {path}.\n"})
 
     def test_an_address_that_is_not_allowed_fails_private(self):
-        self.assertSeedFails("private", **{"notes.md": f"Write to {ADDRESS}.\n"})
+        for number, address in enumerate(NOT_ALLOWED):
+            with self.subTest(number=number):
+                tree = self.repository(self.scratch / f"address-{number}")
+                # On a line that holds an allowed address too: the rule reads addresses.
+                text = f"Write to tests@example.invalid or to {address}.\n"
+                self.assertSeedFails("private", tree, **{"notes.md": text})
 
     def test_a_string_of_the_denylist_fails_private_from_a_linked_worktree(self):
         self.denylist(f"\n{DENIED}\n")
@@ -246,12 +259,17 @@ class SeededDefects(GateCase):
                 self.assertEqual(found_by(result.stdout, rule), [seeded])
 
     def test_an_address_that_is_not_allowed_in_a_message_fails_messages(self):
-        self.assertPasses(self.gate(self.tree, "messages"))
-        seeded = self.commit(self.tree, f"Thank them\n\nReported by {ADDRESS}.")
-        result = self.gate(self.tree, "messages")
-        self.assertFailsAt("messages", result)
-        rule = "an email address that is not allowed in the message of a commit"
-        self.assertEqual(found_by(result.stdout, rule), [f"{seeded}:Reported by {ADDRESS}."])
+        for number, address in enumerate(NOT_ALLOWED):
+            with self.subTest(number=number):
+                tree = self.repository(self.scratch / f"address-{number}")
+                self.assertPasses(self.gate(tree, "messages"))
+                # On a line that holds an allowed address too: the rule reads addresses.
+                message = f"Thank them\n\nReported by {address}, relayed by git@github.com."
+                seeded = self.commit(tree, message)
+                result = self.gate(tree, "messages")
+                self.assertFailsAt("messages", result)
+                rule = "an email address that is not allowed in the message of a commit"
+                self.assertEqual(found_by(result.stdout, rule), [f"{seeded}:{address}"])
 
     def test_a_string_of_the_denylist_in_a_message_fails_messages(self):
         self.denylist(f"{DENIED}\n")
@@ -316,6 +334,11 @@ class PassingCases(GateCase):
         self.commit(self.tree, "State the rule on the Co-Authored-By trailer")
         self.commit(self.tree, "Co-Authored-By: is the key of the trailer")
         self.assertPasses(self.gate(self.tree, "messages"))
+
+    def test_the_addresses_that_are_allowed_pass_private_and_messages(self):
+        text = "".join(f"Write to {address}.\n" for address in ALLOWED)
+        self.commit(self.tree, f"Name the addresses\n\n{text}", **{"notes.md": text})
+        self.assertPasses(self.gate(self.tree, "private", "messages"))
 
     def test_without_a_denylist_the_checks_say_that_they_found_no_file(self):
         for check in ("private", "messages"):
