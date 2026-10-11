@@ -202,24 +202,6 @@ def read(pushed: str) -> Found:
     )
 
 
-def recorded(repository: str, tag: str) -> dict:
-    """What GitHub holds of the release of a tag, as fields of Found."""
-    owner, name = repository.split("/")
-    variables = {"owner": owner, "name": name, "tag": tag}
-    release = api("graphql", body={"query": RELEASE_QUERY, "variables": variables})
-    listing = ("--method", "GET", f"repos/{repository}/deployments")
-    deployments = api(*listing, "-f", f"ref={tag}", "-f", f"environment={ENVIRONMENT}")
-    # The record of a tag is the latest that names it. Its status is there when one of its
-    # statuses is a success, whatever came after: a later release leaves `inactive` as the latest.
-    deployment = deployments[0]["id"] if deployments else None
-    statuses = api(f"repos/{repository}/deployments/{deployment}/statuses") if deployments else []
-    return {
-        "release": release["data"]["repository"]["release"] is not None,
-        "deployment": deployment,
-        "success": any(status["state"] == "success" for status in statuses),
-    }
-
-
 def carry_out(repository: str, found: Found, decision: Decision) -> None:
     """Make the writes of a decision, in their order. A call that is refused raises."""
     tag = f"v{decision.version}"
@@ -276,7 +258,23 @@ def main() -> int:
     if decision.made:
         # An earlier run made the version commit: what GitHub holds of its release is read,
         # and the decision is made again with it.
-        found = replace(found, **recorded(repository, f"v{decision.version}"))
+        tag = f"v{decision.version}"
+        owner, name = repository.split("/")
+        variables = {"owner": owner, "name": name, "tag": tag}
+        release = api("graphql", body={"query": RELEASE_QUERY, "variables": variables})
+        listing = ("--method", "GET", f"repos/{repository}/deployments")
+        deployments = api(*listing, "-f", f"ref={tag}", "-f", f"environment={ENVIRONMENT}")
+        # The record of a tag is the latest that names it. Its status is there when one of its
+        # statuses is a success, whatever came after: a later release leaves `inactive` as the
+        # latest.
+        deployment = deployments[0]["id"] if deployments else None
+        statuses = api(f"repos/{repository}/deployments/{deployment}/statuses") if deployments else []
+        found = replace(
+            found,
+            release=release["data"]["repository"]["release"] is not None,
+            deployment=deployment,
+            success=any(status["state"] == "success" for status in statuses),
+        )
         decision = decide(found)
     carry_out(repository, found, decision)
     if decision.made and not decision.writes:
