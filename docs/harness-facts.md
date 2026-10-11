@@ -615,6 +615,19 @@ Read as page text on 2026-10-11: the specification, `agentskills.io/specificatio
   value only when it starts with an ASCII letter, holds no colon followed by a space,
   no colon at its end and no `#` after a space, has printable characters only and no
   space at either end, and is not a word that YAML reads as a boolean or as null.
-  12000 distinct values that this rule accepts, drawn at random from the special
-  characters of YAML, were written as such lines and read by `yq`: each came back as
-  the same string.
+  The comparison put each candidate to the reader of the tests itself, loaded from
+  its file, and not to a copy of its rule. A candidate was one draw among the 52
+  ASCII letters, lower case first, and twenty words; then 0 to 11 draws among the
+  same letters, the ten digits, the space, the characters
+  ``-?:,[]{}#&*!|>'"%@`~=<.\/_+$^();``, the letters U+00E9, U+00DF and U+4E2D, and
+  the same words, each list in the order given here. The words: `true`, `false`,
+  `null`, `yes`, `no`, `on`, `off`, `y`, `n`, `nan`, `NaN`, `inf`, `None`, `e1`,
+  `0x1f`, `a:b`, a colon then a space, a space then `#`, `---` and `...`. With the
+  generator `random.Random(14)` of Python, by `choice` for the first draw,
+  `randrange(12)` for the number of the others and `choices` for them, 15804
+  candidates were drawn before the reader had accepted 12000 distinct ones. Those
+  were written as lines `v<n>: <value>` of one file, which `yq -o=json .` read: each
+  came back as the same string. The run can fail: on a copy of the tests whose
+  reader has no list of words it reported `true`, `false` and `null` as read
+  otherwise, and on a copy whose reader lets a `#` follow a space, 596 values, each
+  read only as far as the `#`.
