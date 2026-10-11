@@ -237,7 +237,7 @@ class SeededDefects(GateCase):
         self.assertSeedFails("version", **{".version": "1.0\n"})
 
     def test_a_trailer_on_the_second_of_three_commits_after_a_tag_fails_messages(self):
-        self.git(self.tree, "tag", "v0.0.1")
+        self.git(self.tree, "tag", "0.0.1")
         self.assertPasses(self.gate(self.tree, "messages"))
         self.commit(self.tree, "First")
         second = self.commit(self.tree, f"Second\n\n{TRAILER}")
@@ -331,12 +331,12 @@ class PassingCases(GateCase):
         self.assertNotIn("== contained", result.stdout.splitlines())
 
     def test_a_version_that_is_behind_a_tag_passes_version(self):
-        self.git(self.tree, "tag", "v0.0.1")
+        self.git(self.tree, "tag", "0.0.1")
         self.assertPasses(self.gate(self.tree, "version"))
 
     def test_a_trailer_on_a_commit_that_a_tag_reaches_passes_messages(self):
         self.commit(self.tree, f"Before the tag\n\n{TRAILER}")
-        self.git(self.tree, "tag", "v0.0.1")
+        self.git(self.tree, "tag", "0.0.1")
         self.commit(self.tree, "After the tag")
         self.assertPasses(self.gate(self.tree, "messages"))
 

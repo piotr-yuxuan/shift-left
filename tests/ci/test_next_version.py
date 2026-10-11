@@ -33,9 +33,9 @@ class NextVersion(unittest.TestCase):
     def test_the_patch_number_is_raised_by_one(self):
         cases = (
             ("0.0.0\n", (), "0.0.1\n"),
-            ("0.1.9\n", ("v0.1.9",), "0.1.10\n"),
-            ("1.0.0\n", ("v0.9.4",), "1.0.1\n"),
-            ("0.0.0\n", ("v0.0.10",), "0.0.1\n"),
+            ("0.1.9\n", ("0.1.9",), "0.1.10\n"),
+            ("1.0.0\n", ("0.9.4",), "1.0.1\n"),
+            ("0.0.0\n", ("0.0.10",), "0.0.1\n"),
         )
         for text, tags, expected in cases:
             with self.subTest(text=text, tags=tags):
@@ -64,7 +64,7 @@ class NextVersion(unittest.TestCase):
                 self.assertEqual(len(result.stderr.splitlines()), 1, result.stderr)
 
     def test_the_tag_of_the_next_version_is_refused(self):
-        result = self.next_version("0.1.9\n", "v0.1.10")
+        result = self.next_version("0.1.9\n", "0.1.10")
         self.assertEqual(result.returncode, 2, result.stdout)
         self.assertEqual(result.stdout, "")
         self.assertEqual(len(result.stderr.splitlines()), 1, result.stderr)

@@ -8,7 +8,7 @@ token from `GH_TOKEN`. A release is four writes, made in this order:
 
     commit      the version commit on `main`: `.version` at the next patch version, and the
                 top-level `version` of each `plugins/<name>/plugin.json`
-    release     the release `vX.Y.Z` with its tag, on the version commit
+    release     the release `X.Y.Z` with its tag, on the version commit
     deployment  a deployment record of that tag, in the environment `release`
     status      the status `success` of that record
 
@@ -135,8 +135,8 @@ def decide(found: Found) -> Decision:
         or not after.changed <= files.keys()
     ):
         return Decision(version, files, None, ())
-    if found.tags.get(f"v{version}", after.hash) != after.hash:
-        raise ValueError(f"the tag v{version} is on another commit than the version commit")
+    if found.tags.get(version, after.hash) != after.hash:
+        raise ValueError(f"the tag {version} is on another commit than the version commit")
     there = {
         "release": found.release,
         "deployment": found.deployment is not None,
@@ -204,7 +204,7 @@ def read(pushed: str) -> Found:
 
 def carry_out(repository: str, found: Found, decision: Decision) -> None:
     """Make the writes of a decision, in their order. A call that is refused raises."""
-    tag = f"v{decision.version}"
+    tag = decision.version
     commit, deployment = decision.made, found.deployment
     if "commit" in decision.writes:
         additions = [
@@ -258,7 +258,7 @@ def main() -> int:
     if decision.made:
         # An earlier run made the version commit: what GitHub holds of its release is read,
         # and the decision is made again with it.
-        tag = f"v{decision.version}"
+        tag = decision.version
         owner, name = repository.split("/")
         variables = {"owner": owner, "name": name, "tag": tag}
         release = api("graphql", body={"query": RELEASE_QUERY, "variables": variables})
@@ -278,7 +278,7 @@ def main() -> int:
         decision = decide(found)
     carry_out(repository, found, decision)
     if decision.made and not decision.writes:
-        print(f"release: v{decision.version} exists, with its deployment record: nothing to do")
+        print(f"release: {decision.version} exists, with its deployment record: nothing to do")
     elif not decision.writes:
         print(f"release: main has moved since {pushed} and its next commit is no version commit")
         print("release: nothing is released by this run; the run of the newer push releases")

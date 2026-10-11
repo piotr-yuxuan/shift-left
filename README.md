@@ -234,7 +234,7 @@ nothing else: `MAJOR.MINOR.PATCH` and a line break.
 
 Each push to `main` that passes the gate becomes a release, with no hand involved. The
 pipeline raises the patch number in a commit titled `Version X.Y.Z`, and makes on that
-commit the tag and the release `vX.Y.Z`. The notes of the release are the titles of
+commit the tag and the release `X.Y.Z`. The notes of the release are the titles of
 the commits since the release before, merges left out. A deployment record of the tag,
 in the environment `release`, says which commit a client now fetches.
 

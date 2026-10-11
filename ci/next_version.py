@@ -5,7 +5,7 @@
 `<file>` holds the current version, in the one form that is accepted: `MAJOR.MINOR.PATCH`,
 three numbers with no leading zero, and a line break. The script prints the same version with
 its patch number raised by one, and a line break. It never runs git: the tags that exist are
-its arguments, each as git names it, such as `v0.1.9`.
+its arguments, each as git names it, such as `0.1.9`.
 
 Status 0: the next version is on standard output.
 Status 2, with one line on standard error: the call names no file, the file cannot be read,
@@ -29,8 +29,8 @@ def next_version(text: str, tags: list[str]) -> str:
         raise ValueError("the version is not MAJOR.MINOR.PATCH, with no leading zero and a line break")
     major, minor, patch = match.groups()
     following = f"{major}.{minor}.{int(patch) + 1}"
-    if f"v{following}" in tags:
-        raise ValueError(f"the tag v{following} exists already")
+    if following in tags:
+        raise ValueError(f"the tag {following} exists already")
     return following
 
 
