@@ -30,8 +30,10 @@ Both scripts end with one of three statuses.
 - 2: the script could not do its job, or the call was wrong. Standard output is
   empty and standard error says why in one line.
 
-Neither script prints the text of a finding, of a run record or of a transcript: an
-error names a path and a rule, never the value that it met.
+Neither script prints the text of a finding or of a transcript: an error names a path
+and a rule, never the value that it met. Of a run record, `minutes.py` prints the
+identifier, the status and the phase titles as they are, and no other text. Phase
+titles come from the script of the workflow, so they must hold no private text.
 
 ## Findings
 
