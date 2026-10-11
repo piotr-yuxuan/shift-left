@@ -190,6 +190,10 @@ class SeededDefects(GateCase):
     def test_one_back_link_more_than_the_number_fails_contained(self):
         self.assertSeedFails("contained", **{"plugins/second/guide/references/rule.md": BACK_LINK})
 
+    def test_one_back_link_fewer_than_the_number_fails_contained(self):
+        guide = "plugins/first/skills/guide/references/rule-00.md"
+        self.assertSeedFails("contained", **{guide: "A guide that lost its link.\n"})
+
     def test_a_unicode_dash_in_a_tracked_file_fails_dashes(self):
         for name, dash in DASHES.items():
             with self.subTest(dash=name):
