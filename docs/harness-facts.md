@@ -427,6 +427,26 @@ read as page text on 2026-10-11.
   `https://agent-plugins.org/schemas/` and ends with `/plugin.schema.json`. This
   shows what is read, never that a component works. The check to repeat after an
   upgrade of VS Code is this run.
+
+  The script of that run is not in the repository: the run is made again from this
+  description. Minified names change with each version, so each piece is found by
+  what its code holds, the same in the two versions. The region starts at the `var`
+  that is given the address of the manifest schema and ends with the function that
+  holds `e.exclusive||` and `for(let r of e.paths)`. In it, the function that picks
+  the format is the `async function` of two parameters whose body starts with
+  `return await` and tests the root manifest, then `.plugin/plugin.json`, then
+  `.claude-plugin/plugin.json`; the one that reads the manifest starts with
+  `if(o.format===3)`; the one that reads what a manifest declares for a component
+  starts with `if(s.manifestExtensionNamespace)`; the one that gives the paths of a
+  component starts with `let r=o.componentPaths?.[e]`. The two functions outside the
+  region stand together: one returns what `o.readFile(s)` gave, parsed, the other
+  `await o.resolve(s),!0`. The default path of each component is read in the method
+  that calls one function with `"commands"`, `"skills"`, `"agents"`, `"rules"`,
+  `"automations"`, `"hooks"` and `"mcpServers"`, in that order, the last with
+  `".mcp.json"`; the run left `"automations"` out. When a piece is not found the
+  bundle has another shape, and the run reports nothing. Whoever makes the run again
+  checks first that each directory exists: the code of VS Code reads a directory that
+  does not exist as a plugin with no manifest, as it reads `basedpyright-lsp`.
 - **A marketplace file is looked for at four paths.** Static, the same bundles, by
   reading: `marketplace.json`, `.plugin/marketplace.json`,
   `.github/plugin/marketplace.json` and `.claude-plugin/marketplace.json`, listed in
