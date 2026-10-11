@@ -296,7 +296,8 @@ def usable(schema) -> dict:
                 "adds": {"type": "array", "items": {"enum": list(schema["properties"])}},
                 "sets": {
                     "type": "object",
-                    "properties": dict.fromkeys(schema["properties"], change),
+                    # The id says which finding an update is about: no role sets it.
+                    "properties": {name: change for name in schema["properties"] if name != "id"},
                     "additionalProperties": False,
                 },
             },

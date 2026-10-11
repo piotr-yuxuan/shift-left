@@ -1523,6 +1523,7 @@ class Authority(CommandLine):
                 "reviewer", {"adds": REVIEWER_FIELDS, "sets": {"carry_over_of": {}}}
             ),
             "adds on a role other than the reviewer": with_role("auditor", {"adds": ["id", "lens"]}),
+            "a role that sets the id": with_role("fixer", {"sets": {"id": {}}}),
             "no reviewer": lambda schema: schema["x-roles"].pop("reviewer"),
             "no roles": lambda schema: schema.pop("x-roles"),
             "no severity": lambda schema: schema["properties"].pop("severity"),
