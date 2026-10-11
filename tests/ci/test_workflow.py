@@ -3,8 +3,8 @@
 The standard library reads no YAML, so each test reads the lines of the file. The
 expectations are what the pipeline must not lose without a test failing: code of others named
 by its commit, Ruff at a written version, a token that can only read outside the job that
-releases, and a job `release` that runs only after `gate`, only for a push to `main` of a
-repository that is no fork, one at a time, and that names no environment.
+releases, and a job `release` that runs only after a `gate` that passed, only for a push to
+`main` of a repository that is no fork, one at a time, and that names no environment.
 """
 
 import re
@@ -51,6 +51,9 @@ class Workflow(unittest.TestCase):
     def test_the_jobs_are_gate_and_release(self):
         self.assertEqual(list(self.jobs), ["gate", "release"])
 
+    def test_the_pipeline_starts_at_a_push_to_any_branch_and_at_a_pull_request(self):
+        self.assertEqual(under(self.top, "on"), ["push:", 'branches: ["**"]', "pull_request:"])
+
     def test_every_action_is_one_of_github_named_by_a_full_commit_hash(self):
         actions = values(self.lines, "uses")
         self.assertEqual(len(actions), 4)
@@ -75,12 +78,19 @@ class Workflow(unittest.TestCase):
         release = self.jobs["release"]
         self.assertEqual(values(release, "needs"), ["gate"])
         (condition,) = values(release, "if")
-        for term in ("github.event_name == 'push'", "github.ref == 'refs/heads/main'"):
-            self.assertIn(term, condition)
-        self.assertIn("!github.event.repository.fork", condition)
-        # Never the name of the repository, which has changed once already.
-        self.assertNotIn("github.repository", condition)
-        self.assertNotIn("||", condition)
+        # These three terms and no other. One more could be the name of the repository, which
+        # has changed once already, or a status function such as `always()`, with which the job
+        # no longer waits for a gate that passed.
+        terms = {
+            "github.event_name == 'push'",
+            "github.ref == 'refs/heads/main'",
+            "!github.event.repository.fork",
+        }
+        self.assertEqual(set(condition.split(" && ")), terms)
+
+    def test_a_step_that_fails_fails_its_job(self):
+        # With this key on the step of the gate, `release` would run after a gate that failed.
+        self.assertNotIn("continue-on-error", "\n".join(self.lines))
 
     def test_release_names_no_environment(self):
         self.assertNotIn("environment", "\n".join(self.jobs["release"]))
