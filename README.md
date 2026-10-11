@@ -1,6 +1,6 @@
-# claude-plugin
+# shift-left
 
-A Claude Code marketplace, `piotr-yuxuan`, with a few small plugins that bring review
+A Claude Code marketplace, `shift-left`, with a few small plugins that bring review
 quality forward to the moment code is written. Each plugin can be adopted alone.
 
 ## Plugins
@@ -40,9 +40,9 @@ from the basedpyright language server.
 It needs `basedpyright-langserver` on `PATH`. Do not enable `pyright-lsp` at the same
 time, or diagnostics are reported twice.
 
-### `shift-left`
+### `coordinator`
 
-The skill `shift-left:instrument`: two scripts that an agent runs from the directory
+The skill `coordinator:instrument`: two scripts that an agent runs from the directory
 of the skill, so that what a plan cost and what its review found are read from data.
 
 - `findings.py` keeps the findings of the reviews of one plan in one JSON file. One
@@ -74,11 +74,11 @@ These commands are untested until this repository is first pushed. What was test
 an install from a local clone and from a local git source.
 
 ```
-claude plugin marketplace add piotr-yuxuan/claude-plugin
-claude plugin install principles@piotr-yuxuan
-claude plugin install quality-ratchet@piotr-yuxuan
-claude plugin install basedpyright-lsp@piotr-yuxuan
-claude plugin install shift-left@piotr-yuxuan
+claude plugin marketplace add piotr-yuxuan/shift-left
+claude plugin install principles@shift-left
+claude plugin install quality-ratchet@shift-left
+claude plugin install basedpyright-lsp@shift-left
+claude plugin install coordinator@shift-left
 ```
 
 The same commands recreate a user configuration on a new machine: they record the
@@ -90,9 +90,9 @@ and a session of the desktop app from a copy made at install time. After a chang
 the clone, refresh that copy to the commit of the clone, then restart the session:
 
 ```
-claude plugin update principles@piotr-yuxuan
-claude plugin update quality-ratchet@piotr-yuxuan
-claude plugin update shift-left@piotr-yuxuan
+claude plugin update principles@shift-left
+claude plugin update quality-ratchet@shift-left
+claude plugin update coordinator@shift-left
 ```
 
 ### If a hook wrongly blocks
@@ -100,8 +100,8 @@ claude plugin update shift-left@piotr-yuxuan
 Disable its plugin, and enable it again once the cause is fixed:
 
 ```
-claude plugin disable quality-ratchet@piotr-yuxuan
-claude plugin enable quality-ratchet@piotr-yuxuan
+claude plugin disable quality-ratchet@shift-left
+claude plugin enable quality-ratchet@shift-left
 ```
 
 ## Always-on instructions
