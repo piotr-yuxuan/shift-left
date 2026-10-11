@@ -15,7 +15,7 @@ both are read from files and not from memory.
 
 Loading this skill shows its base directory, written `<base>` below. Run the scripts
 from it as shown, with the path in double quotes, since it may hold spaces. They need
-`python3`, 3.11 or later, and nothing outside the standard library; they depend on no
+`python3`, 3.14 or later, and nothing outside the standard library; they depend on no
 variable of the harness and on no working directory. `findings.py` also needs `git`
 and a POSIX system.
 
