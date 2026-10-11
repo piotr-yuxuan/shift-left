@@ -90,6 +90,38 @@ and the log says where each component was read from:
   `plugin.json`, and `plugin details` lists the server. Doc: plugin manifest
   reference, "Marketplace entries and the manifest".
 
+## A marketplace that changes its name
+
+`<old>` and `<new>` stand for the name in `marketplace.json` before and after the
+change.
+
+- **A registration keeps the name it was made under.** Seen on 2026-10-11, Claude
+  Code 2.1.288, with scratch commands. A clone of this repository was added as a
+  marketplace while its `marketplace.json` named it `<old>`, and three of its plugins
+  were installed. A commit that names it `<new>` was then checked out in the clone.
+  `plugin marketplace list` still shows `<old>`, and `plugin list --json` shows each
+  `<plugin>@<old>` enabled with no error. `plugin update <plugin>@<old>` takes the new
+  commit, and a plugin that was not installed yet installs as `<plugin>@<old>`.
+  `plugin install <plugin>@<new>` fails with "not found in marketplace", and
+  `plugin update` and `plugin disable` of `<plugin>@<new>` exit 1. A debug start in
+  the clone still reads `hooks/hooks.json` from the clone and registers the hook, and
+  its log counts the skills, the agent and the language server.
+- **The new name is taken by removing the marketplace and adding it again.** Seen on
+  2026-10-11, Claude Code 2.1.288, with scratch commands, from the state of the entry
+  above. In this order, `plugin uninstall <plugin>@<old>` for each plugin,
+  `plugin marketplace remove <old>`, `plugin marketplace add <clone>` and
+  `plugin install <plugin>@<new>` for each plugin: every command exits 0.
+  `settings.json` then holds only the ids `<plugin>@<new>` and the marketplace
+  `<new>`; a key that these commands do not own, and the mode of the file, are as
+  before. The directory `<config>/plugins/cache/<old>/` stays behind, and each version
+  directory in it has gained a file `.orphaned_at`. `plugin uninstall` of a plugin
+  that is not installed exits 1. `plugin marketplace remove` alone also uninstalls the
+  plugins of the marketplace, and says so: seen with a throwaway marketplace.
+- **A plugin may have the name of its marketplace.** Seen on 2026-10-11, Claude Code
+  2.1.288, with scratch commands: a throwaway marketplace in a directory, whose one
+  plugin has the name of the marketplace, passes `plugin validate`, and the plugin
+  installs as `<name>@<name>`. `plugin list --json` shows it enabled with no error.
+
 ## Skills that an agent names
 
 - **A missing skill is not reported.** Seen: an agent whose `skills:` list names one
