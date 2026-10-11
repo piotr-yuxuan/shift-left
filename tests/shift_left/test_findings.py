@@ -18,6 +18,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -1264,6 +1265,9 @@ class Writers(CommandLine):
         decide = functools.partial(findings.add, SCHEMA, answer=answer, round_found=1, lens="design")
         lock = os.open(self.file.parent, os.O_RDONLY)
         fcntl.flock(lock, fcntl.LOCK_EX)
+        # A writer that outwaits its deadline gets the lock in the end, writes, and fails the test.
+        release = threading.Timer(5, fcntl.flock, (lock, fcntl.LOCK_UN))
+        release.start()
         try:
             with mock.patch.dict(os.environ, self.environment, clear=True):
                 with mock.patch.object(findings, "LOCK_DEADLINE_SECONDS", 0.2):
@@ -1272,6 +1276,8 @@ class Writers(CommandLine):
                         findings.rewrite(self.file, decide)
                     waited = time.monotonic() - started
         finally:
+            release.cancel()
+            release.join()
             os.close(lock)
         self.assertGreaterEqual(waited, 0.2)
         self.assertLess(waited, 10)
