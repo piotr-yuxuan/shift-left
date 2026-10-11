@@ -147,16 +147,15 @@ def decide(found: Found) -> Decision:
 
 def run(*command: str, stdin: str = "") -> str:
     """The standard output of a command. A command that fails or lasts too long raises."""
+    # As bytes: read as text, the CR LF line ends of a file would come out as LF.
     done = subprocess.run(
         command,
-        input=stdin,
+        input=stdin.encode(errors="surrogateescape"),
         capture_output=True,
         check=True,
         timeout=TIMEOUT,
-        encoding="utf-8",
-        errors="surrogateescape",
     )
-    return done.stdout
+    return done.stdout.decode(errors="surrogateescape")
 
 
 def api(*arguments: str, body: object = None) -> object:
@@ -293,7 +292,7 @@ if __name__ == "__main__":
         sys.exit(main())
     except subprocess.SubprocessError as error:
         for stream in (error.stdout, error.stderr):
-            if isinstance(stream, str):
-                sys.stderr.write(stream)
+            if isinstance(stream, bytes):
+                sys.stderr.write(stream.decode(errors="replace"))
         print(f"release: {error}", file=sys.stderr)
         sys.exit(1)

@@ -246,7 +246,8 @@ class Whole(unittest.TestCase):
         """Commit `files` in the clone of the owner and push its branch and tags; the commit."""
         for path, text in files.items():
             (self.owner / path).parent.mkdir(parents=True, exist_ok=True)
-            (self.owner / path).write_text(text)
+            # As bytes, so that a file keeps the line ends that its case gives it.
+            (self.owner / path).write_bytes(text.encode())
         self.git(self.owner, "add", "--all")
         self.git(self.owner, "commit", "--quiet", "--message", message)
         self.git(self.owner, "push", "--quiet", "--tags", "origin", "HEAD")
@@ -451,19 +452,26 @@ class Whole(unittest.TestCase):
         self.assertRefused(self.release())
 
     def test_a_version_of_another_form_is_refused(self):
-        self.pushed = self.push("Break the version", **{".version": "1.0\n"})
-        self.assertRefused(self.release())
+        for version in ("1.0\n", "0.0.1\r\n"):
+            with self.subTest(version=version):
+                self.pushed = self.push("Break the version", **{".version": version})
+                self.assertRefused(self.release())
 
     def test_a_root_manifest_keeps_every_byte_but_its_top_level_version(self):
-        self.pushed = self.push("Add a root manifest", **{"plugins/first/plugin.json": MANIFEST})
-        result = self.release()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        change = json.loads(self.calls()[0]["stdin"])["variables"]["input"]
-        sent = {
-            addition["path"]: base64.b64decode(addition["contents"], validate=True).decode()
-            for addition in change["fileChanges"]["additions"]
-        }
-        self.assertEqual(sent, {".version": "0.0.2\n", "plugins/first/plugin.json": MANIFEST_AT_0_0_2})
+        # Its line ends are bytes like the others: those of another system are kept too.
+        for line_end in ("\n", "\r\n"):
+            with self.subTest(line_end=line_end):
+                manifest = {"plugins/first/plugin.json": MANIFEST.replace("\n", line_end)}
+                self.pushed = self.push("Set a root manifest", **manifest)
+                result = self.release()
+                self.assertEqual(result.returncode, 0, result.stderr)
+                change = json.loads(self.calls()[0]["stdin"])["variables"]["input"]
+                sent = {
+                    addition["path"]: base64.b64decode(addition["contents"], validate=True)
+                    for addition in change["fileChanges"]["additions"]
+                }
+                at_0_0_2 = MANIFEST_AT_0_0_2.replace("\n", line_end).encode()
+                self.assertEqual(sent, {".version": b"0.0.2\n", "plugins/first/plugin.json": at_0_0_2})
 
     def test_a_root_manifest_with_no_top_level_version_is_refused(self):
         manifest = '{"extensions": {"version": "0.0.0"}}\n'
