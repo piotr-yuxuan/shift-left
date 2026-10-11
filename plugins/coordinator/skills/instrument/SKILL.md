@@ -13,7 +13,8 @@ both are read from files and not from memory.
 - `minutes.py` reads the minutes of ended workflow runs, per stage, and the minutes
   of the coordinator.
 
-Loading this skill shows its base directory, written `<base>` below. Run the scripts
+`<base>` below is the directory that holds this file; Claude Code shows it when it
+loads the skill. Run the scripts
 from it as shown, with the path in double quotes, since it may hold spaces. They need
 `python3`, 3.14 or later, and nothing outside the standard library; they depend on no
 variable of the harness and on no working directory. `findings.py` also needs `git`
@@ -112,6 +113,9 @@ Every command first checks the whole file, so one that was edited by hand and br
 the schema or a rule is rejected until it is corrected.
 
 ## Minutes
+
+`minutes.py` reads records that only Claude Code writes: in another client there is
+nothing for it to read.
 
 The harness writes the record of a workflow run when the run ends, so a run cannot
 report its own minutes: run `minutes.py` afterwards.
