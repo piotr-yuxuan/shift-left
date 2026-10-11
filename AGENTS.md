@@ -53,6 +53,9 @@ instructions/global.md            user-level rules, imported from a user-level C
 tests/                            tests of the plugins' scripts, outside the plugins
 docs/harness-facts.md             what was observed about Claude Code
 ruff.toml                         lint and format configuration
+.version                          the version of the marketplace, raised by the pipeline
+ci/                               the gate, and the scripts of a release
+.github/workflows/ci.yml          the pipeline: the gate, then a release from main
 docs/work/                        ignored: plans, notes, measurements
 .worktree/                        ignored: one linked worktree per plan
 ```
@@ -61,6 +64,18 @@ docs/work/                        ignored: plans, notes, measurements
 working here does not load it a second time as project instructions.
 
 ## Commands
+
+Before a handoff, an agent runs the gate, which runs every check of this section and
+four more. The pipeline runs the same script at each push. Its header describes each
+check, and says how to run one alone and how it finds the CLI:
+
+```
+ci/gate.sh
+```
+
+The commands below are what four of its eight checks run: `tests`, `lint`, `manifests`
+and `contained`. The four others have no command here: `dashes`, `private` and `version`
+read the tracked files, and `messages` reads the commit messages that no tag reaches.
 
 `C` is the Claude Code CLI. In a desktop session `claude` is not on `PATH` and the CLI
 is at `$CLAUDE_CODE_EXECPATH`, so set it at the start of each command:
@@ -98,6 +113,13 @@ git grep -n -F '../' -- plugins | grep -v -F '](../SKILL.md)'
 git grep -c -F '](../SKILL.md)' -- plugins | wc -l
 ```
 
+The scope of a branch is read with three dots, since `main` gains a commit at each
+release and two dots would list `.version`:
+
+```
+git diff --stat main...HEAD
+```
+
 ## Tests
 
 - Python `unittest` from the standard library, in `tests/` at the root.
@@ -125,6 +147,12 @@ were written.
   user name, no email address other than a commit identity, nothing from another
   repository. Write a real path as `<clone>` or `<scratch>`.
 - A commit message carries no `Co-Authored-By` trailer.
+- Nobody edits `.version` but the pipeline, and the owner for a new minor or major
+  version.
+- The title of the version commit of the pipeline, `Version X.Y.Z`, is the one
+  exception to the rule on titles.
+- No other commit message holds a skip marker such as `[skip ci]`, which keeps the
+  pipeline from running.
 
 ## When a hook or a guard wrongly blocks
 
