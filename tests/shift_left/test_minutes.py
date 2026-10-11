@@ -244,6 +244,10 @@ class Stages(unittest.TestCase):
         # 20 - 5 in the first run, and 90 - 40 in the second.
         self.assertEqual(stages(late, early), {"Build": (1, 5, 5, 2, 65)})
 
+    def test_a_duration_of_zero_and_an_unfinished_agent_at_the_end_of_its_run_are_read(self):
+        one = record("wf-a", 0, 0, agent("Build", 0, 0), agent("Build", 0))
+        self.assertEqual(stages(one), {"Build": (1, 0, 0, 1, 0)})
+
     def test_a_phase_with_no_agent_is_listed_with_zeros_after_the_others(self):
         one = record("wf-a", 0, 60, phase("Ship"), phase("Build"), phase("Lint"), agent("Build", 0, 10))
         self.assertEqual(
@@ -716,6 +720,17 @@ class Report(CommandLine):
                 "a duration not whole",
                 entry(1, having(durationMs=1.5)),
                 "workflowProgress[1].durationMs",
+            ),
+            ("a duration below zero", having(durationMs=-60000), "durationMs"),
+            (
+                "a duration of an agent below zero",
+                entry(1, having(durationMs=-300000)),
+                "workflowProgress[1].durationMs",
+            ),
+            (
+                "an unfinished agent that starts after the end of its run",
+                entry(2, having(startedAt=at(70))),
+                "workflowProgress[2].startedAt",
             ),
         ]
         for label, change, path in cases:

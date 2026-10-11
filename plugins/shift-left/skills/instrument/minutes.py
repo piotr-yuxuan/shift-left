@@ -48,6 +48,13 @@ def typed(value, kind: type, path: str):
     return value
 
 
+def lasting(value, path: str) -> int:
+    """`value`, when it is a duration as the harness writes one at `path`: an integer of 0 or more."""
+    if typed(value, int, path) < 0:
+        raise Failure(f"{path}: below zero")
+    return value
+
+
 def instant(text) -> int | None:
     """The milliseconds since the epoch of an ISO 8601 date with an offset or Z; None for any other."""
     try:
@@ -84,7 +91,7 @@ def run_of(data: bytes) -> dict:
     """A run record, reduced to what the report reads. A failure names the key that is wrong.
 
     An agent has the title of its phase, its start and, when it is done, its end; the end of an
-    agent that did not finish is None.
+    agent that did not finish is None, and such an agent starts no later than the end of its run.
     """
     try:
         record = typed(json.loads(data), dict, "the run record")
@@ -101,7 +108,7 @@ def run_of(data: bytes) -> dict:
         "status": typed(record.get("status"), str, "status"),
         "started_at": started_at.isoformat(timespec="seconds") + "Z",
         "start": start,
-        "end": start + typed(record.get("durationMs"), int, "durationMs"),
+        "end": start + lasting(record.get("durationMs"), "durationMs"),
         "phases": [],
         "agents": [],
     }
@@ -117,8 +124,10 @@ def run_of(data: bytes) -> dict:
                 "end": None,
             }
             if typed(entry.get("state"), str, f"{path}.state") == "done":
-                duration = typed(entry.get("durationMs"), int, f"{path}.durationMs")
-                agent["end"] = agent["start"] + duration
+                agent["end"] = agent["start"] + lasting(entry.get("durationMs"), f"{path}.durationMs")
+            elif agent["start"] > run["end"]:
+                rule = "after the end of the run, in an agent that did not finish"
+                raise Failure(f"{path}.startedAt: {rule}")
             run["agents"].append(agent)
     return run
 
