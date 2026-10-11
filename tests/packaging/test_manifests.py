@@ -18,6 +18,9 @@ The rules of this repository:
 - `.claude-plugin/plugin.json` stays beside it for Claude Code, which reads no other. The two agree
   on the name, which is the name of the directory, and on the licence. The root description is the
   other one or its beginning: it stops before what a client of the standard does not get.
+- The version of a root manifest is the content of the file `.version`. For Claude Code the commit
+  is the version of a plugin: no `.claude-plugin/plugin.json` carries a version, and neither does
+  the marketplace entry of a plugin that has a root manifest.
 """
 
 import json
@@ -81,6 +84,27 @@ class Manifests(unittest.TestCase):
                     claude_code["description"].startswith(root["description"]),
                     f"{root['description']!r} is not the beginning of {claude_code['description']!r}",
                 )
+
+    def test_a_root_manifest_carries_the_version_that_the_file_version_holds(self):
+        version_file = ROOT / ".version"
+        self.assertTrue(version_file.is_file(), "there is no file .version at the root")
+        version = version_file.read_text(encoding="utf-8").strip()
+        for plugin in WITH_ROOT_MANIFEST:
+            with self.subTest(plugin=plugin.name):
+                self.assertEqual(read_json(plugin / "plugin.json").get("version"), version)
+
+    def test_no_manifest_of_claude_code_carries_a_version(self):
+        for plugin in PLUGINS:
+            manifest = plugin / ".claude-plugin" / "plugin.json"
+            if manifest.is_file():
+                with self.subTest(plugin=plugin.name):
+                    self.assertNotIn("version", read_json(manifest))
+
+    def test_no_marketplace_entry_of_a_plugin_with_a_root_manifest_carries_a_version(self):
+        for entry in ENTRIES:
+            if (ROOT / entry["source"] / "plugin.json").is_file():
+                with self.subTest(plugin=entry["name"]):
+                    self.assertNotIn("version", entry)
 
 
 if __name__ == "__main__":
