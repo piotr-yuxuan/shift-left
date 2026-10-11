@@ -54,9 +54,9 @@ plugins.
   are documented to read `agents/` and `hooks/hooks.json` too, one of them after every
   tool call: the README has the table. So a hook kept in `hooks/hooks.json` checks the
   name of the tool and the shape of its input itself, exits 0 on an event that it does
-  not recognise, and has a test that feeds it such events. The Python hook of
-  `quality-ratchet` does not yet: it checks no tool name, and it ends with status 1 on
-  an event whose `tool_input` is not an object. A client with a namespace directory
+  not recognise, and has a test that feeds it such events. What the Python hook of
+  `quality-ratchet` does with such an event is recorded with its date in
+  `docs/harness-facts.md`, under VS Code. A client with a namespace directory
   gets its own files there, such as `com.github.copilot/`, and only on the owner's
   word. Codex documents none: its data go under `extensions.com.openai` of the root
   manifest, and its hook files stay at the root of the plugin. A plugin that has both
