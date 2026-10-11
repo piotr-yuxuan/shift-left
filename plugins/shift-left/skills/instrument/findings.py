@@ -26,6 +26,7 @@ import fcntl
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import time
@@ -455,11 +456,12 @@ def rewrite(path: Path, decide):
     """Replace the findings file `path` by what `decide` makes of it, and return what to print.
 
     `decide` takes the content of the file, or None when there is no file, and returns the new
-    content and what to print. Nothing is created unless git says that it ignores `path`: findings
-    can quote a private repository, so a wrong yes would put private text in a commit. The directory
-    of the file is locked from the read to the replacement, so that writers wait for each other and
-    no lock file is left; a writer that waits LOCK_DEADLINE_SECONDS for the lock gives up with a
-    failure.
+    content and what to print. Nothing is created unless git says that it ignores `path` and the
+    temporary file beside it that the write goes through: findings can quote a private repository,
+    so a wrong yes would put private text in a commit. The directory of the file is locked from the
+    read to the replacement, so that writers wait for each other and no lock file is left; a writer
+    that waits LOCK_DEADLINE_SECONDS for the lock gives up with a failure. A file that exists keeps
+    its mode.
     """
     nearest = path.parent
     while not nearest.is_dir():
@@ -469,13 +471,15 @@ def rewrite(path: Path, decide):
         for name, value in os.environ.items()
         if not name.startswith("GIT_") or name in KEPT_FOR_GIT
     }
-    try:
-        command = ["git", "check-ignore", "-q", str(path)]
-        ignored = subprocess.run(command, cwd=nearest, env=environment, capture_output=True, timeout=10)
-    except (OSError, subprocess.TimeoutExpired):
-        ignored = None
-    if ignored is None or ignored.returncode != 0:
-        raise Failure(f"{path}: git does not say that it ignores this file")
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    for candidate in (path, temporary):
+        command = ["git", "check-ignore", "-q", str(candidate)]
+        try:
+            subprocess.run(
+                command, cwd=nearest, env=environment, capture_output=True, timeout=10, check=True
+            )
+        except (OSError, subprocess.SubprocessError):
+            raise Failure(f"{candidate}: git does not say that it ignores this file") from None
     if nearest != path.parent:
         decide(None)  # An answer that is rejected leaves no directory behind.
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -491,11 +495,13 @@ def rewrite(path: Path, decide):
                     held = f"locked by another process for {LOCK_DEADLINE_SECONDS} seconds"
                     raise Failure(f"{path.parent}: {held}") from None
                 time.sleep(0.05)
-        document, output = decide(parse(path.read_bytes(), path) if path.exists() else None)
-        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        existing = path.stat() if path.exists() else None
+        document, output = decide(None if existing is None else parse(path.read_bytes(), path))
         try:
             text = json.dumps(document, indent=2, ensure_ascii=False) + "\n"
             temporary.write_text(text, encoding="utf-8")
+            if existing is not None:
+                os.chmod(temporary, stat.S_IMODE(existing.st_mode))
             os.replace(temporary, path)
         finally:
             temporary.unlink(missing_ok=True)

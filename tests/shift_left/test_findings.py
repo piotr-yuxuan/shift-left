@@ -14,6 +14,7 @@ import importlib.util
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -1068,7 +1069,7 @@ class Guard(CommandLine):
 
     def test_a_relative_path_is_judged_as_the_absolute_path_of_the_file(self):
         # Judged from its directory, `open/plan.json` would be `open/open/plan.json`.
-        (self.repository / ".gitignore").write_text("/kept/plan.json\n/open/open/\n")
+        (self.repository / ".gitignore").write_text("/kept/\n/open/open/\n")
         (self.repository / "open").mkdir()
         (self.repository / "kept").mkdir()
         one = reported("r1-design-1")
@@ -1131,11 +1132,22 @@ class Guard(CommandLine):
         self.assertEqual(sorted(os.listdir(decoy)), [".git"])
 
     def test_a_file_that_a_rule_ignores_by_its_name_alone_is_written(self):
-        (self.repository / ".gitignore").write_text("*.findings.json\n")
+        (self.repository / ".gitignore").write_text("*.findings.json*\n")
         file = self.repository / "open" / "plan.findings.json"
         self.assertDone(self.add(reported("r1-design-1"), file=file))
         self.assertEqual(self.held(file), [stored("r1-design-1")])
         self.assertRefused(self.repository / "shut" / "plan.json", self.repository / "shut")
+
+    def test_a_file_whose_temporary_file_git_does_not_ignore_is_refused(self):
+        # The write goes through `.<name>.<pid>.tmp` beside the file, which this rule does not cover.
+        (self.repository / ".gitignore").write_text("plan.json\n")
+        self.assertRefused(self.repository / "open" / "plan.json", self.repository / "open")
+        before = self.hold(stored("r1-design-1"), file=self.repository / "made" / "plan.json")
+        result = self.add(reported("r1-design-2"), file=self.repository / "made" / "plan.json")
+        self.assertFailed(result)
+        self.assertIn(".tmp", result.stderr)
+        self.assertEqual(os.listdir(self.repository / "made"), ["plan.json"])
+        self.assertEqual((self.repository / "made" / "plan.json").read_bytes(), before)
 
     def test_a_personal_ignore_rule_counts_through_the_files_that_git_is_told_to_read(self):
         rules = self.scratch / "ignore-all"
@@ -1154,7 +1166,7 @@ class Guard(CommandLine):
         del self.environment["GIT_CONFIG_GLOBAL"]
         personal = Path(self.environment["HOME"], ".config", "git", "ignore")
         personal.parent.mkdir(parents=True)
-        personal.write_text("plan.json\n")
+        personal.write_text("*plan.json*\n")
         file = self.repository / "open" / "plan.json"
         self.assertDone(self.add(reported("r1-design-1"), file=file))
         self.assertEqual(self.held(file), [stored("r1-design-1")])
@@ -1263,6 +1275,17 @@ class Writers(CommandLine):
         self.assertRejected(self.add(reported("r1-design-1")))
         self.assertDone(self.add(reported("r1-design-2")))
         self.assertEqual(os.listdir(self.file.parent), ["plan.json"])
+
+    def test_a_file_that_exists_keeps_its_mode(self):
+        self.hold(stored("r1-design-1"))
+        self.file.chmod(0o600)
+        mask = os.umask(0o022)  # Under which a new file would be 0644.
+        try:
+            self.assertDone(self.add(reported("r1-design-2")))
+        finally:
+            os.umask(mask)
+        self.assertEqual(stat.S_IMODE(self.file.stat().st_mode), 0o600)
+        self.assertEqual(len(self.held()), 2)
 
     def test_the_new_content_replaces_the_file_from_a_temporary_file_of_the_same_directory(self):
         before = self.hold(stored("r1-design-1"))
