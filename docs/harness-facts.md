@@ -59,7 +59,7 @@ and the log says where each component was read from:
     no path.
   - *A session of the desktop app, with the user's configuration,* and this
     repository registered from a clone. A loaded skill gives its base directory as the
-    cached copy, `<config>/plugins/cache/piotr-yuxuan/principles/<commit>/skills/<name>`,
+    cached copy, `<config>/plugins/cache/<marketplace>/principles/<commit>/skills/<name>`,
     in the main session and in an agent that names the skill. The report of the hook
     names its command in the cached copy of `quality-ratchet`, and its plugin as
     `quality-ratchet@inline`.
@@ -153,21 +153,21 @@ and the log says where each component was read from:
   "Base directory for this skill: <absolute path>", and each could list and run files
   under that path. The path is in the cached copy of the plugin, at the commit that
   was installed or last updated (see "Where a plugin is loaded from"). The same with
-  a skill of `shift-left` is still to be seen, after its first install.
+  a skill of `coordinator` is still to be seen, after its first install.
 - **The shell of an agent has no variable that names the plugin or the project.**
   Seen: `CLAUDE_PLUGIN_ROOT` and `CLAUDE_PROJECT_DIR` are unset in the shell of an
   agent. Doc: plugin manifest reference, "Where each variable resolves": the variables
   are not in the environment of the commands that Claude runs through its shell tool,
   in the main session or in a subagent, and a `${...}` reference in the body of a
   skill is replaced by the path when the skill is loaded. That replacement was not
-  observed, and the skill of `shift-left` does not use it.
+  observed, and the skill of `coordinator` does not use it.
 - **A `bin/` directory.** Doc: plugin manifest reference, "Standard layout": the
   files of a plugin's `bin/` directory are on the `PATH` of the shell tool while the
   plugin is enabled. Not observed, and no plugin of this repository relies on it.
 
 ## Workflow runs and transcripts
 
-What `minutes.py` of `shift-left` reads. Seen in the records that the harness keeps
+What `minutes.py` of `coordinator` reads. Seen in the records that the harness keeps
 for the sessions of one machine; `<project>` stands for the directory that it keeps
 for a project, and `<session>` for the identifier of a session.
 
@@ -242,7 +242,7 @@ see these facts again after an upgrade.
 
 ## Other tools
 
-What the scripts of `shift-left` and their tests rely on outside Claude Code.
+What the scripts of `coordinator` and their tests rely on outside Claude Code.
 
 - **`git check-ignore` answers for a file that does not exist yet.** Seen, git
   2.54.0, in a scratch repository: `git check-ignore -q <absolute path>`, run from the
