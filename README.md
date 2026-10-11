@@ -223,8 +223,9 @@ Both are recorded in `docs/harness-facts.md`.
 | Install from a path, one plugin directory | *seen*: Claude Code 2.1.288, 2026-10-11 (probe Q1): for one session, with `--plugin-dir` | *by its documentation* (its page, "Use local plugins", 2026-10-11): the setting `chat.pluginLocations`. Not run | *by its documentation* (its page, "Plugin specification for install command", 2026-10-11): a local path. Not run | *not known* |
 
 The other clients on the list as it was read on 2026-10-11, OpenHands, NanoClaw, Grok
-Bot, Cursor, OpenClaw, Hermes Agent and Kiro, and GitHub Copilot outside its CLI, have
-the three skills *by the standard* and every other row *not known*.
+Bot, Cursor, OpenClaw, Hermes Agent and Kiro, with ChatGPT, which the list names in one
+entry with Codex, and GitHub Copilot outside its CLI, have the three skills *by the
+standard* and every other row *not known*.
 
 ## Versions and releases
 
