@@ -176,15 +176,18 @@ another type, a `done` agent with no `durationMs` included. In a transcript it
 refuses a line that is not a JSON object, except a last line that does not parse; a
 `timestamp` that it reads and that is not a date with an offset; and `user` or
 `assistant` records of which none starts a turn. A version of the harness that drops
-or retypes a key of the run record or the `timestamp` of the `user` and `assistant`
-records, or that drops `turnOrigin`, shows as a failure.
+or retypes a key of the run record, that retypes a `timestamp` that the script
+reads, that drops the `timestamp` of the `user` records that start turns or of every
+`user` and `assistant` record, or that drops `turnOrigin`, shows as a failure.
 
 The script does not refuse a value that it does not know: an entry of
 `workflowProgress` of a type other than `workflow_phase` and `workflow_agent` is
 ignored, an agent in a state other than `done` counts as not finished, and a
-transcript record of another type or subtype is no event and no stop record. A
-version of the harness that renames one of these values gives wrong figures with
-status 0, so see these facts again after an upgrade.
+transcript record of another type or subtype is no event and no stop record. Nor
+does it refuse a `user` or `assistant` record with no `timestamp`, which is no
+event. A version of the harness that renames one of these values, or that drops the
+`timestamp` of the `assistant` records alone, gives wrong figures with status 0, so
+see these facts again after an upgrade.
 
 - **A run record exists only once its run has ended.** Seen, 41 run records: the
   record of a workflow run is `<project>/<session>/workflows/<runId>.json`. The
@@ -216,15 +219,25 @@ status 0, so see these facts again after an upgrade.
   session reads it.
 - **The turns of the main session.** Seen: a turn starts at a `user` record that has
   the key `turnOrigin`, and ends at a `system` record of subtype `stop_hook_summary`,
-  which carries a `timestamp`; 91 of 91 completed turns have both. Whether the stop
-  record exists when no Stop hook is configured is not known.
+  which carries a `timestamp`; 91 of 91 completed turns have both. The values of
+  `turnOrigin` seen in the 6 transcripts are `human`, `task_notification` and `peer`.
+  Whether the stop record exists when no Stop hook is configured is not known.
 - **Subagent records are not mixed into the main transcript.** Seen: `isSidechain` is
   false on every record of the 6 transcripts.
-- **A workflow script cannot read a file.** Seen. It can pass a JSON Schema to an
-  agent call, and the harness validates the answer of the agent against it. Which
-  keywords of the schema the harness enforces is not known.
+- **What the workflow tool answers.** Seen, in the 6 transcripts: the result of the
+  workflow tool is a structured object with `runId`, `taskId`, `transcriptDir` and
+  `scriptPath`. The run record is `workflows/<runId>.json` three directories above
+  `transcriptDir`, for 41 of 41 runs that had ended.
+- **A workflow script cannot read a file.** Doc: what the harness documents of the
+  scripts of its workflow tool says so. Seen, in an earlier workflow run: a script
+  that read a file failed at that read.
+- **An agent call of a workflow script can carry a JSON Schema.** Seen: the harness
+  validates the answer of the agent against the schema that the script passes. Which
+  keywords of the schema the harness enforces was not determined.
 - **A message that the user sends while a workflow runs is shown to its agents.**
-  Seen.
+  Seen, in a run of two agents: a message that the user sent to the main session
+  during the run appeared in the context of both agents, and each reported it as a
+  request that it had not carried out.
 
 ## Other tools
 
