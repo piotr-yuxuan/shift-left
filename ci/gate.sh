@@ -31,10 +31,10 @@
 #
 # The trailer is read as git reads trailers, in any letter case; it is not searched as text.
 #
-# The denylist is docs/work/denylist.txt of the main worktree, one string per line. It is
-# not tracked, and a fresh clone has none. `private` and `messages` print
-# `denylist: <n> strings searched`, or `denylist: no file found`; they print no string of it
-# and not its path.
+# The denylist is docs/work/denylist.txt of the main worktree, one string per line, without
+# the blanks that end the line. It is not tracked, and a fresh clone has none. `private` and
+# `messages` print `denylist: <n> strings searched`, or `denylist: no file found`; they
+# print no string of it and not its path.
 #
 # The CLI is $C, else $CLAUDE_CODE_EXECPATH, else `claude` on PATH. Without one the check
 # `manifests` fails. With --no-cli it is skipped, and prints `skipped, as --no-cli asks`.
@@ -114,13 +114,17 @@ read_denylist() {
   file="${file%%$'\n'*}"
   file="${file#worktree }/docs/work/denylist.txt"
   denylist=()
-  if [ ! -e "$file" ]; then
+  # A link to no file is there: it goes to the search, which ends in error.
+  if [ ! -e "$file" ] && [ ! -L "$file" ]; then
     echo "  denylist: no file found"
     return 0
   fi
   search grep -s . "$file"
   [ "$?" -le 1 ] || return 1
   while IFS= read -r string; do
+    # Without the blanks that end the line, the CR of a CR LF line break among them: with
+    # them the string would be counted, and found nowhere.
+    string="${string%"${string##*[![:space:]]}"}"
     [ -z "$string" ] || denylist+=(-e "$string")
   done <<<"$found"
   echo "  denylist: $((${#denylist[@]} / 2)) strings searched"

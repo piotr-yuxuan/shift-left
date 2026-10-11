@@ -141,10 +141,11 @@ class GateCase(unittest.TestCase):
         self.git(tree, "commit", "--quiet", "--allow-empty", "--message", message)
         return self.git(tree, "rev-parse", "HEAD")
 
-    def denylist(self, text: str) -> None:
-        """The denylist of the main worktree, which git does not track."""
-        (self.tree / "docs" / "work").mkdir(parents=True)
-        (self.tree / "docs" / "work" / "denylist.txt").write_text(text)
+    def denylist(self, text: str, tree: Path | None = None) -> None:
+        """The denylist of a main worktree, which git does not track; its line ends as given."""
+        tree = tree or self.tree
+        (tree / "docs" / "work").mkdir(parents=True)
+        (tree / "docs" / "work" / "denylist.txt").write_bytes(text.encode())
 
     def gate(self, tree: Path, *arguments: str, **environment: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
@@ -210,18 +211,23 @@ class SeededDefects(GateCase):
                 self.assertSeedFails("private", tree, **{"notes.md": text})
 
     def test_a_string_of_the_denylist_fails_private_from_a_linked_worktree(self):
-        self.denylist(f"\n{DENIED}\n")
-        linked = self.scratch / "linked"
-        self.git(self.tree, "worktree", "add", "--quiet", "-b", "work", str(linked))
-        control = self.gate(linked, "private")
-        self.assertPasses(control)
-        self.assertIn("  denylist: 1 strings searched", control.stdout.splitlines())
-        self.commit(linked, "Seed", **{"notes.md": f"It names {DENIED}.\n"})
-        result = self.gate(linked, "private")
-        self.assertFailsAt("private", result)
-        # Neither a string of the denylist nor its path is printed.
-        self.assertNotIn(DENIED, result.stdout + result.stderr)
-        self.assertNotIn("denylist.txt", result.stdout + result.stderr)
+        # An empty line is no string. And a string is the same whatever ends its line: the line
+        # break of another system, or a blank left after it.
+        for number, line_end in enumerate(("\n", "\r\n", " \n", "\t\n")):
+            with self.subTest(line_end=line_end):
+                tree = self.repository(self.scratch / f"main-{number}")
+                self.denylist(f"\n{DENIED}{line_end}", tree)
+                linked = self.scratch / f"linked-{number}"
+                self.git(tree, "worktree", "add", "--quiet", "-b", "work", str(linked))
+                control = self.gate(linked, "private")
+                self.assertPasses(control)
+                self.assertIn("  denylist: 1 strings searched", control.stdout.splitlines())
+                self.commit(linked, "Seed", **{"notes.md": f"It names {DENIED}.\n"})
+                result = self.gate(linked, "private")
+                self.assertFailsAt("private", result)
+                # Neither a string of the denylist nor its path is printed.
+                self.assertNotIn(DENIED, result.stdout + result.stderr)
+                self.assertNotIn("denylist.txt", result.stdout + result.stderr)
 
     def test_a_version_of_two_numbers_fails_version(self):
         self.assertSeedFails("version", **{".version": "1.0\n"})
@@ -360,6 +366,11 @@ class RefusedCalls(GateCase):
 
     def test_a_denylist_that_is_a_directory_fails_private(self):
         (self.tree / "docs" / "work" / "denylist.txt").mkdir(parents=True)
+        self.assertFailsAt("private", self.gate(self.tree, "private"))
+
+    def test_a_denylist_that_is_a_link_to_no_file_fails_private(self):
+        (self.tree / "docs" / "work").mkdir(parents=True)
+        (self.tree / "docs" / "work" / "denylist.txt").symlink_to(self.scratch / "missing")
         self.assertFailsAt("private", self.gate(self.tree, "private"))
 
     def test_a_search_of_git_that_ends_in_error_fails_its_check(self):
