@@ -16,8 +16,9 @@ The rules of this repository:
   component of the standard that this repository ships.
 - A root manifest holds `$schema`, `name`, `version`, `description`, `license` and `repository`.
 - `.claude-plugin/plugin.json` stays beside it for Claude Code, which reads no other. The two agree
-  on the name, which is the name of the directory, and on the licence. The root description is the
-  other one or its beginning: it stops before what a client of the standard does not get.
+  on the name, which is the name of the directory, and on the licence. The root description is not
+  empty, and is the other one or its beginning. It is meant to stop before what a client of the
+  standard does not get: where it stops is not checked.
 - The version of a root manifest is the content of the file `.version`. For Claude Code the commit
   is the version of a plugin: no `.claude-plugin/plugin.json` carries a version, and neither does
   the marketplace entry of a plugin that has a root manifest.
@@ -80,6 +81,7 @@ class Manifests(unittest.TestCase):
                 claude_code = read_json(plugin / ".claude-plugin" / "plugin.json")
                 self.assertEqual((root["name"], claude_code["name"]), (plugin.name, plugin.name))
                 self.assertEqual(root["license"], claude_code["license"])
+                self.assertNotEqual(root["description"], "", "the root description is empty")
                 self.assertTrue(
                     claude_code["description"].startswith(root["description"]),
                     f"{root['description']!r} is not the beginning of {claude_code['description']!r}",
