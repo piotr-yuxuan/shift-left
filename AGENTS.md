@@ -124,6 +124,7 @@ were written.
 - Nothing private in a tracked file or a commit message: no home directory path, no
   user name, no email address other than a commit identity, nothing from another
   repository. Write a real path as `<clone>` or `<scratch>`.
+- A commit message carries no `Co-Authored-By` trailer.
 
 ## When a hook or a guard wrongly blocks
 
