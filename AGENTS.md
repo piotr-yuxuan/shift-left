@@ -174,7 +174,8 @@ were written.
   repository. Write a real path as `<clone>` or `<scratch>`.
 - A commit message carries no `Co-Authored-By` trailer.
 - Nobody edits `.version` but the pipeline, and the owner for a new minor or major
-  version.
+  version; the `version` of each root `plugin.json` under `plugins/` is edited in the
+  same commit, since a test keeps them equal.
 - The title of the version commit of the pipeline, `Version X.Y.Z`, is the one
   exception to the rule on titles.
 - No other commit message holds a skip marker such as `[skip ci]`, which keeps the
