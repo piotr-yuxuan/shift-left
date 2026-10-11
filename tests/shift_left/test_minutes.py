@@ -486,6 +486,15 @@ class Coordinator(unittest.TestCase):
         transcripts = {
             "sidechain records": [user(0, isSidechain=True), assistant(1, isSidechain=True)],
             "records with no timestamp": [{"type": "user"}, {"type": "assistant"}],
+            # The key starts a turn on an event only: elsewhere it is no sign that turns are marked.
+            "the key on a sidechain record alone": [
+                user(0, isSidechain=True, turnOrigin="human"),
+                assistant(1, isSidechain=True),
+            ],
+            "the key on a record with no timestamp alone": [
+                {"type": "user", "turnOrigin": "human"},
+                assistant(1),
+            ],
         }
         for label, records in transcripts.items():
             with self.subTest(label):
