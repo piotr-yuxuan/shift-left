@@ -116,7 +116,15 @@ change.
   before. The directory `<config>/plugins/cache/<old>/` stays behind, and each version
   directory in it has gained a file `.orphaned_at`. `plugin uninstall` of a plugin
   that is not installed exits 1. `plugin marketplace remove` alone also uninstalls the
-  plugins of the marketplace, and says so: seen with a throwaway marketplace.
+  plugins of the marketplace, and says so: seen with a throwaway marketplace. It then
+  deletes the folder `<config>/plugins/data/<plugin>-<marketplace>/` of each of them,
+  and says that it deletes their data where it can; after
+  `plugin uninstall --keep-data` the removal leaves that folder: seen with the same
+  marketplace and a folder made by hand, with one file in it. A start removes the
+  file `.orphaned_at` from a cached copy that `installed_plugins.json` names again:
+  seen with the same marketplace, by one debug start made once `settings.json`,
+  `installed_plugins.json` and `known_marketplaces.json` were put back from copies
+  made before the uninstall; until that start the file was still there.
 - **A plugin may have the name of its marketplace.** Seen on 2026-10-11, Claude Code
   2.1.288, with scratch commands: a throwaway marketplace in a directory, whose one
   plugin has the name of the marketplace, passes `plugin validate`, and the plugin
