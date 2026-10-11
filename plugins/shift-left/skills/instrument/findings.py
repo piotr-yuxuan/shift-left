@@ -42,6 +42,9 @@ KEPT_FOR_GIT = ("GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM")
 # How long a writer waits for the lock on the directory of the findings file before it gives up.
 LOCK_DEADLINE_SECONDS = 60
 
+# The role whose answer `add` takes: the only one that may hold "adds" under "x-roles".
+ADDING_ROLE = "reviewer"
+
 TYPES = {
     "string": lambda value: isinstance(value, str),
     # In Python a bool is an int; in JSON true is not a number.
@@ -77,8 +80,8 @@ SCHEMA_FORM = {
         },
         "x-roles": {
             "type": "object",
-            "required": ["reviewer"],
-            "properties": {"reviewer": {"type": "object", "required": ["adds"]}},
+            "required": [ADDING_ROLE],
+            "properties": {ADDING_ROLE: {"type": "object", "required": ["adds"]}},
         },
     },
 }
@@ -243,6 +246,8 @@ def usable(schema) -> dict:
 
     A rule that the code would ignore is a failure: a keyword outside the subset, or a right under
     "x-roles" that is not in the form {"adds": [fields]} or {"sets": {field: {"from", "to"}}}.
+    Only ADDING_ROLE may hold "adds", since `add` takes its answer alone, and a role that adds sets
+    nothing, since `set` reads "sets" of a role that has no "adds".
     """
     faults = [{"path": path, "rule": "outside the subset"} for path in outside_subset(schema, "schema")]
     faults = faults or validate(schema, SCHEMA_FORM, "schema")
@@ -264,8 +269,12 @@ def usable(schema) -> dict:
             },
             "additionalProperties": False,
         }
-        for role in schema["x-roles"]:
-            faults += validate(schema["x-roles"][role], rights, f"schema.x-roles.{role}")
+        for role, given in schema["x-roles"].items():
+            role_faults = validate(given, rights, f"schema.x-roles.{role}")
+            if not role_faults and "adds" in given and ("sets" in given or role != ADDING_ROLE):
+                rule = f"adds is the right of {ADDING_ROLE} alone, and a role that adds sets nothing"
+                role_faults = [{"path": f"schema.x-roles.{role}", "rule": rule}]
+            faults += role_faults
     if faults:
         raise Failure(f"{SCHEMA_FILE}: {faults[0]['path']}: {faults[0]['rule']}")
     return schema
@@ -358,7 +367,7 @@ def add(schema: dict, document, answer, round_found: int, lens: str) -> tuple[di
     reviewer does not add.
     """
     entries = entries_of(schema, {"findings": []} if document is None else document)
-    reject_if(validate(answer, role_schema(schema, "reviewer"), "answer"))
+    reject_if(validate(answer, role_schema(schema, ADDING_ROLE), "answer"))
     expected_id = re.compile(rf"r{round_found}-{re.escape(lens)}-[1-9][0-9]*")
     errors, added = [], []
     for index, given in enumerate(answer["findings"]):

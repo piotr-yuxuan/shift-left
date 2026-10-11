@@ -1487,6 +1487,10 @@ class Authority(CommandLine):
             "a limit that the script does not know": with_role(
                 "fixer", {"sets": {"origin": {"only": []}}}
             ),
+            "a role that both adds and sets": with_role(
+                "reviewer", {"adds": REVIEWER_FIELDS, "sets": {"carry_over_of": {}}}
+            ),
+            "adds on a role other than the reviewer": with_role("auditor", {"adds": ["id", "lens"]}),
             "no reviewer": lambda schema: schema["x-roles"].pop("reviewer"),
             "no roles": lambda schema: schema.pop("x-roles"),
             "no severity": lambda schema: schema["properties"].pop("severity"),
