@@ -1,6 +1,6 @@
 # Working in this repository
 
-This repository holds one Claude Code marketplace, `piotr-yuxuan`, and a few small
+This repository holds one Claude Code marketplace, `shift-left`, and a few small
 plugins. `docs/harness-facts.md` records what was observed about Claude Code and how.
 
 ## A registered clone is live configuration
@@ -13,7 +13,7 @@ checkout. What it holds reaches sessions in two ways:
   disk, uncommitted edits and the checked-out branch included.
 - The plugins were seen to be read from the clone in place by a start of the CLI, and
   from a copy in the plugin cache by a session of the desktop app. That copy stays at
-  the commit that was installed until `claude plugin update <plugin>@piotr-yuxuan`
+  the commit that was installed until `claude plugin update <plugin>@shift-left`
   takes the commit that the clone is at.
 
 So a merge into `main` changes the instructions at once, and the plugins of a desktop
@@ -87,7 +87,7 @@ Manifests; each command must exit 0:
 "$C" plugin validate .
 "$C" plugin validate plugins/principles
 "$C" plugin validate plugins/quality-ratchet
-"$C" plugin validate plugins/shift-left
+"$C" plugin validate plugins/coordinator
 ```
 
 Self-containment of the plugins. The first command prints nothing; the second prints
@@ -129,5 +129,5 @@ were written.
 
 Do not change the configuration to get past it. Say what was blocked and stop. The
 owner disables the plugin, for example
-`claude plugin disable quality-ratchet@piotr-yuxuan`, and enables it again once the
+`claude plugin disable quality-ratchet@shift-left`, and enables it again once the
 cause is fixed.
