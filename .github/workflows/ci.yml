@@ -1,0 +1,53 @@
+# The pipeline: the gate at every push, then a release for a push to main that passes.
+# It holds no rule: the checks are in ci/gate.sh, and the release is in ci/release.py.
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    # A branch of the repository is checked at its push. A pull request is checked only
+    # when it comes from a fork, so that no branch is checked twice.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The whole history and the tags: the check of the messages reads both.
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - run: python3 -m pip install ruff==0.16.10
+      # A runner has no Claude Code CLI: the check of the manifests is skipped, and says so.
+      - run: ci/gate.sh --no-cli
+
+  release:
+    needs: gate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !github.event.repository.fork
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      deployments: write
+    # One at a time. The one that runs is never cancelled; a newer one takes the place of
+    # the one that waits, which would have found that main has moved.
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The whole history and the tags: the notes are the titles since the tag before.
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - run: python3 ci/release.py
+        env:
+          GH_TOKEN: ${{ github.token }}
