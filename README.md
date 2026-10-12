@@ -9,6 +9,8 @@ in any client of that standard:
 [What works in which client](#what-works-in-which-client) says what is known of each
 component, and on what evidence.
 
+![social media preview, a shift key running leftward and chasing a bug](./docs/social-media-preview.png)
+
 ## Plugins
 
 A skill or an agent is named below as Claude Code names it, `<plugin>:<name>`. How
