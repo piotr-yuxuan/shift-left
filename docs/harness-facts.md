@@ -172,6 +172,15 @@ directory, `<home>`. `install.sh` runs these commands; the probe ran them one by
   `<home>/.agents/skills` are one folder, either a link to the other, which holds a
   link to the directory of a skill; a debug start logs one skill of the user. The
   installer so refuses to link skills into `~/.agents/skills` when it is that folder.
+- **A user-level `CLAUDE.md` that is a link is read through it, but in a Cowork
+  session.** Seen the same day with the same version, L1 to L3: a start with `-p` and a
+  scratch configuration, whose requests went by `ANTHROPIC_BASE_URL` to a server on
+  `127.0.0.1` that recorded them and answered 400, with a dummy API key, so that no
+  model was called. The system prompt of each request holds the content of the user's
+  `CLAUDE.md` when it is a file (L1) and when it is a link to a file (L2), and not when
+  `CLAUDE_CODE_ENTRYPOINT` is `local-agent` (L3), the entrypoint that the bundle names
+  Cowork. Static: in the bundle, the reader of the user's `CLAUDE.md` skips, in a Cowork
+  session only, a file that is a link or that has more than one hard link.
 
 ### Skills that an agent names
 
