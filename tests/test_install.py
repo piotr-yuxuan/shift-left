@@ -426,6 +426,29 @@ class Refusals(InstallCase):
                 before = self.snapshot()
                 self.assertRefusedAndUnchanged(self.install(), before, "~/.agents/skills/alpha")
 
+    def test_a_file_or_a_link_to_nothing_on_the_way_to_a_link_is_refused(self):
+        # As a folder on a volume that is not mounted would be.
+        unmounted = self.scratch / "unmounted"
+        cases = {
+            "~/.agents": lambda place: place.write_text("kept\n"),
+            "~/.agents/skills": lambda place: place.symlink_to(unmounted),
+            "~/.codex": lambda place: place.symlink_to(unmounted),
+            "~/.config/Code": lambda place: place.symlink_to(unmounted),
+        }
+        for shown, make in cases.items():
+            with self.subTest(place=shown):
+                for parent in (".agents", ".codex", ".config"):
+                    path = self.home / parent
+                    if path.is_symlink() or path.is_file():
+                        path.unlink()
+                    else:
+                        shutil.rmtree(path, ignore_errors=True)
+                place = self.home / shown.removeprefix("~/")
+                place.parent.mkdir(parents=True, exist_ok=True)
+                make(place)
+                before = self.snapshot()
+                self.assertRefusedAndUnchanged(self.install(), before, shown)
+
     def test_a_skill_that_the_skills_of_codex_hold_is_refused(self):
         (self.home / ".codex" / "skills" / "beta").mkdir(parents=True)
         before = self.snapshot()

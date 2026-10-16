@@ -32,7 +32,10 @@
 #     link elsewhere or a link to nothing, such as a link that an earlier run made to a skill
 #     since moved, or instructions of the user's own;
 #   - a skill whose name ${CODEX_HOME:-~/.codex}/skills holds, unless that directory and
-#     ~/.agents/skills are one: Codex would list both.
+#     ~/.agents/skills are one: Codex would list both;
+#   - the place of a directory that is to hold a link, or else the nearest place above it that
+#     holds something, when what is there is not a directory, such as a file or a link to
+#     nothing: no link can be made under it.
 #
 # Then it prints `== <client>` before the part of each client, and `  <place>: linked` or
 # `  <place>: already linked` for each link that it makes or finds. A link is found when what
@@ -202,6 +205,18 @@ fi
 for place in "$codex/AGENTS.md" "$prompts"; do
   if taken "$place" "$rules"; then
     refuse "$place" "something is there that does not lead to $(shown "$rules")"
+  fi
+done
+# The directory that is to hold each link, or the nearest place above it that holds something.
+parents=()
+[ "${#skills[@]}" -eq 0 ] || parents+=("$agents")
+parents+=("$codex" "${prompts%/*}")
+for parent in "${parents[@]}"; do
+  while ! [ -e "$parent" ] && ! [ -L "$parent" ]; do
+    parent="$(dirname "$parent")"
+  done
+  if ! [ -d "$parent" ]; then
+    refuse "$parent" "it is not a directory, so no link can be made under it"
   fi
 done
 [ "$refused" -eq 0 ] || exit 1
