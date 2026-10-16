@@ -19,6 +19,12 @@ say that it is invalid: a quoted, a nested or a multi-line value is outside, and
 starts with a digit. The sixth key, `metadata`, is outside in every form: the specification makes
 it a map from text to text, which no line of this form holds, and a line `metadata: <value>` would
 give a string where a map is asked.
+
+One line outside the specification is read: `disable-model-invocation: true`. Claude Code and
+VS Code then leave the skill out of the model's context, so that only the user invokes it
+(code.claude.com/docs/en/skills, "Restrict Claude's skill access"; VS Code's page on agent
+skills). Codex reads the same intent from `allow_implicit_invocation: false` under `policy` in
+the skill's `agents/openai.yaml`, which a test checks beside the line.
 """
 
 import re
@@ -32,6 +38,7 @@ KEYS = {"name", "description", "license", "compatibility", "allowed-tools"}
 PLAIN_VALUE = re.compile(r"[A-Za-z](?:(?!: | #).)*(?<![ :])")
 YAML_WORDS = {"true", "false", "yes", "no", "on", "off", "y", "n", "null"}
 SUBSET = "outside the subset this test reads"
+USER_INVOKED = "disable-model-invocation: true"
 
 
 class Skills(unittest.TestCase):
@@ -43,6 +50,8 @@ class Skills(unittest.TestCase):
             self.fail(f"{SUBSET}: no first line `---` that a later line `---` closes")
         fields: dict[str, str] = {}
         for line in lines[1 : lines.index("---", 1)]:
+            if line == USER_INVOKED:
+                continue
             key, _, value = line.partition(": ")
             plain = PLAIN_VALUE.fullmatch(value) and value.isprintable()
             if key not in KEYS or key in fields or not plain or value.lower() in YAML_WORDS:
@@ -69,6 +78,14 @@ class Skills(unittest.TestCase):
         for skill in SKILLS:
             with self.subTest(skill=skill.name):
                 self.assertLessEqual(len(self.front_matter(skill).get("compatibility", "")), 500)
+
+    def test_a_skill_that_only_the_user_invokes_says_so_to_codex_too(self):
+        for skill in SKILLS:
+            lines = (skill / "SKILL.md").read_text(encoding="utf-8").split("\n")
+            if USER_INVOKED in lines[1 : lines.index("---", 1)]:
+                with self.subTest(skill=skill.name):
+                    policy = (skill / "agents" / "openai.yaml").read_text(encoding="utf-8")
+                    self.assertIn("allow_implicit_invocation: false", policy)
 
 
 if __name__ == "__main__":
