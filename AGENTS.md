@@ -39,7 +39,10 @@ So a merge into `main` changes the instructions and the skills of Codex at once,
 the plugins of a desktop session only after an update: in between, the instructions
 can be newer than the plugins.
 
-The owner pushes, and installs or updates the plugins.
+The owner pushes, and installs or updates the plugins. Never run `install.sh` against
+the real home directory unless the owner asks: it links into `~/.agents`, the Codex
+home and the user folder of VS Code, which then lead into the clone that ran it. To
+try it, use a scratch `HOME`, `CODEX_HOME` and `CLAUDE_CONFIG_DIR`.
 
 ## Rules for plugins
 
