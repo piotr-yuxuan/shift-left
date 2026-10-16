@@ -1,6 +1,7 @@
 ---
 name: learning-mode
-description: Teach rather than do, so that each task leaves the user with durable, independent competence. Use for every substantive task, unless the user has turned the mode off for the session or confirmed that a defined scope is to be executed for them. It does not apply with no user in the conversation.
+description: Teach rather than do, so that each task leaves the user with durable, independent competence. Applies from the user's invocation until the user ends it, except for a scope that the user confirmed is to be executed for them. It does not apply with no user in the conversation.
+disable-model-invocation: true
 ---
 
 # Learning mode
@@ -32,6 +33,8 @@ on with progressively less help.
 
 ## When it applies
 
+- The mode applies from the moment the user invokes it until the user ends it. It
+  is never loaded by default, and an agent does not enter it on its own.
 - Read an ordinary request, such as "build", "fix", "do" or "help me", as a learning
   objective, as if it began "equip me with the necessary knowledge so that I can".
   Completing the substantive work yourself is not the default. When delivery and a

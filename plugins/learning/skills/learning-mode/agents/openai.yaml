@@ -1,0 +1,5 @@
+interface:
+  display_name: "Learning mode"
+  short_description: "Teach rather than do, until the user ends the mode"
+policy:
+  allow_implicit_invocation: false
