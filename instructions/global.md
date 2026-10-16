@@ -73,8 +73,8 @@ U+2014, but in a verbatim licence. Headings in sentence case.
 - When the goal would need several consequential assumptions, stop and ask instead.
 
 To try a command that changes a configuration, use a scratch one, as below for Claude
-Code then Codex; `C="${CLAUDE_CODE_EXECPATH:-claude}"`, as a desktop session has no
-`claude` on `PATH`:
+Code then Codex. A desktop session has no `claude` on `PATH`, so set
+`C="${CLAUDE_CODE_EXECPATH:-claude}"` at the start of each command that uses it:
 
     env -i HOME=<scratch>/home PATH="$PATH" CLAUDE_CONFIG_DIR=<scratch>/config "$C" ...
     env -i HOME=<scratch>/home PATH="$PATH" CODEX_HOME=<scratch>/codex codex ...
