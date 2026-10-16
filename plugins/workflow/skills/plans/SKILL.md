@@ -100,9 +100,9 @@ worktree, then the checks again.
 
 Append implementation notes to the plan: what each step did, with its commits;
 decisions and rejected alternatives; deviations; test results; what was surprising or
-undocumented; limitations; follow-ups. Right before the merge, move the plan to
-`docs/work/changelog/`: by `git mv` and a commit in the worktree when git tracks it,
-else by `mv` in the primary checkout.
+undocumented; limitations; follow-ups. Once the user confirms the merge at step 8,
+and right before it, move the plan to `docs/work/changelog/`: by `git mv` and a
+commit in the worktree when git tracks it, else by `mv` in the primary checkout.
 
 ## 8. Pre-merge summary
 
