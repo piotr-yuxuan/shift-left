@@ -373,6 +373,16 @@ class ImportCheck(InstallCase):
                 self.assertIn(self.IMPORTS, result.stdout.splitlines())
                 self.assertNotIn(self.ADD, result.stdout.splitlines())
 
+    def test_a_claude_md_that_is_a_link_to_the_shared_rules_is_reported_and_no_line_is_asked(self):
+        # A line added to it would go into the shared rules.
+        (self.home / ".claude").mkdir()
+        (self.home / ".claude" / "CLAUDE.md").symlink_to(self.rules)
+        result = self.install()
+        self.assertPasses(result)
+        lines = result.stdout.splitlines()
+        self.assertIn("  ~/.claude/CLAUDE.md: is the shared rules", lines)
+        self.assertNotIn(self.ADD, lines)
+
     def test_a_line_that_imports_another_file_is_not_reported(self):
         (self.home / "other.md").write_text("Other rules.\n")
         self.write_claude_md("@~/other.md\n")

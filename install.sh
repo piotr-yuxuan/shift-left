@@ -61,11 +61,12 @@
 # $C, else $CLAUDE_CODE_EXECPATH, else `claude` on PATH; without one, these steps are skipped
 # and it prints `  skipped: no Claude Code CLI; set C to its path`.
 # With a CLI or without, it then reads ${CLAUDE_CONFIG_DIR:-~/.claude}/CLAUDE.md, the
-# instructions of the user for Claude Code, for a line of its own that imports the shared rules:
-# `@` and a path that leads to them, absolute, from `~/` or from the directory of that file,
-# with `\ ` for a space. It prints `  <file>: imports the shared rules`; or, when no line does,
-# `  <file>: add this line to import the shared rules:` and the line, `    @<path>`, on the next
-# one. It writes no such file.
+# instructions of the user for Claude Code. When that file is the shared rules, as a link to
+# them, it prints `  <file>: is the shared rules`. Else it looks for a line of its own that
+# imports them: `@` and a path that leads to them, absolute, from `~/` or from the directory of
+# that file, with `\ ` for a space. It prints `  <file>: imports the shared rules`; or, when no
+# line does, `  <file>: add this line to import the shared rules:` and the line, `    @<path>`,
+# on the next one. It writes no such file.
 #
 # == VS Code: ~/.config/Code/User/prompts/shift-left.instructions.md, in the folder of the
 # user's instruction files of VS Code on Linux, is linked to the shared rules. Then it prints
@@ -273,7 +274,9 @@ if [ -f "$config/CLAUDE.md" ]; then
     [ "$path" -ef "$rules" ] && imports=yes
   done <"$config/CLAUDE.md"
 fi
-if [ -n "$imports" ]; then
+if [ "$config/CLAUDE.md" -ef "$rules" ]; then
+  echo "  $(shown "$config/CLAUDE.md"): is the shared rules"
+elif [ -n "$imports" ]; then
   echo "  $(shown "$config/CLAUDE.md"): imports the shared rules"
 else
   echo "  $(shown "$config/CLAUDE.md"): add this line to import the shared rules:"
