@@ -164,12 +164,19 @@ What it does for each client, with the words of
   documents (the row "Install from a path"), is printed per plugin, for you to add;
   the script writes no setting. `instructions/global.md` is linked as
   `~/.config/Code/User/prompts/shift-left.instructions.md`, in the user folder of VS
-  Code on Linux, where nobody saw VS Code read it.
+  Code on Linux, where nobody saw VS Code read it. Wherever VS Code can see
+  `~/.agents/skills`, it reads the skill links too, *by its documentation*: the page
+  "Agent Skills", `code.visualstudio.com/docs/agent-customization/agent-skills`, dated
+  2026-10-14 and read on 2026-10-16, names that folder among those of the user's own
+  skills. By its code, read in VS Code 1.140.0 and not seen at work
+  (`docs/harness-facts.md`), a skill found there comes before the copy that a plugin
+  brings, which is skipped, and keeps its bare name: `karpathy-guidelines`, where the
+  plugin's copy is `principles:karpathy-guidelines`.
 
 It refuses, says why and changes nothing when the place of a link is taken, as by a
 skill of the same name in `~/.agents/skills` or in the skills of Codex, which Codex
-would list twice, or by instructions of your own at either instruction link: move
-them aside, then run it again. Its header lists every refusal.
+would list twice (*seen*, probe X8), or by instructions of your own at either
+instruction link: move them aside, then run it again. Its header lists every refusal.
 
 A plugin that you disable in Claude Code stays disabled at the next run: the script
 does not install it again. In Codex, a skill whose link you remove comes back at the
@@ -182,6 +189,14 @@ never touches, by the absolute path of its link, `<home>` being your home direct
 path = "<home>/.agents/skills/<name>/SKILL.md"
 enabled = false
 ```
+
+In VS Code, an entry of `chat.pluginLocations` set to `false` turns a plugin off, but
+not its skills that the script links, which VS Code reads as your own. How to turn off
+one of them there is not known: the page "Agent Skills" turns a skill off in the
+skill's own front matter, a file of the clone. By its code,
+`"~/.agents/skills": false` in the setting `chat.agentSkillsLocations`, which that
+page calls deprecated and not read by the Copilot harness, turns off every skill
+linked there.
 
 ### Claude Code
 
