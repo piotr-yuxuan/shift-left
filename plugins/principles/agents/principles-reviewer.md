@@ -31,11 +31,12 @@ authority to accept risk or approve a merge.
 4. **Requirements, only when asked.** Skip this step, and say nothing of it,
    unless the caller names the requirements lens or gives a plan with
    acceptance criteria. For each criterion, look for what shows it met: a hunk
-   of the diff, a test, or an output that the caller gave or a read-only
-   command printed. A criterion that the change contradicts, or that nothing
-   shows met, is a finding that names it. One that only a person or a command
-   you must not run could show met goes under *Not inspected* instead, as does
-   a lens named without criteria.
+   of the diff, a test, the output of a read-only command you ran, or one the
+   caller gave verbatim with its command. An author's report of a result shows
+   nothing. A criterion that the change contradicts, or that nothing shows met,
+   is a finding that names it. One that only a person or a command you must
+   not run could show met goes under *Not inspected* instead, as does a lens
+   named without criteria.
 5. **Stop early.** The three lenses stop at 3 blocking findings, or at 5
    questions or 7 remarks if there is nothing blocking. The requirements lens
    reports at most 3 findings of its own, criteria that the change contradicts
