@@ -13,10 +13,13 @@ Those decisions also put rules in the file, and a cut made to keep it within 80 
 none unseen. Each of these is found by a phrase of it, in the text read with every run of blanks
 as one space, since a phrase may wrap: the precedence of a repository's instructions; the skills
 and the agent of `principles` and the hook of Claude Code; the rules on tests, on commits and on
-writing; the invariants; `C` and the scratch configurations; that only the user invokes
-`learning:learning-mode`. The rule on the primary checkout binds only a repository whose
-instructions name `workflow:plans`: the list item that holds `primary checkout` begins with those
-words.
+writing; the invariants; `C` and the scratch configurations. The rule on the primary checkout
+binds only a repository whose instructions name `workflow:plans`: the list item that holds
+`primary checkout` begins with those words.
+
+Only the user invokes `learning:learning-mode`: a list item says that it "is for the user alone to
+invoke" and "Never load it otherwise", and where the file says to load or loads that skill by
+name, the word before is "never".
 """
 
 import re
@@ -79,7 +82,6 @@ class SharedRules(unittest.TestCase):
             "CLAUDE_CODE_EXECPATH",
             "at the start of each command that uses it",
             "CODEX_HOME",
-            "`learning:learning-mode` is for the user alone to invoke",
         )
         for phrase in phrases:
             with self.subTest(phrase=phrase):
@@ -93,6 +95,17 @@ class SharedRules(unittest.TestCase):
         for item in holders:
             with self.subTest(item=item):
                 self.assertTrue(item.startswith(scope))
+
+    def test_only_the_user_invokes_learning_mode_and_no_rule_loads_it(self):
+        rule = "`learning:learning-mode` is for the user alone to invoke"
+        items = [" ".join(item.split()) for item in ITEM.findall(TEXT)]
+        holders = [item for item in items if rule in item]
+        self.assertEqual(len(holders), 1, "no single list item keeps the mode for the user")
+        self.assertIn("Never load it otherwise", holders[0])
+        text = " ".join(TEXT.split())
+        for before in re.findall(r"(\S*) loads? `learning:learning-mode`", text, re.IGNORECASE):
+            with self.subTest(before=before):
+                self.assertEqual(before.lower(), "never")
 
 
 if __name__ == "__main__":
