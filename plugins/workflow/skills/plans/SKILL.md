@@ -83,13 +83,13 @@ plan:
   a plan with acceptance criteria turns on;
 - elsewhere, a fresh context that loads `principles:programming-principles` and
   `principles:karpathy-guidelines`;
-- without those skills, a fresh context that checks the change against the intent and
-  against each acceptance criterion.
+- without those skills, a fresh context that checks the change against the intent.
 
-Fix the blocking and major findings; each fix is reviewed again. At most three
-rounds, unless `AGENTS.md` says otherwise. A serious finding, one that blocks, or
-shows a defect or an unmet criterion, still open after the last round goes to the
-user at step 8: never accept one silently.
+Whoever reviews also checks the change against each acceptance criterion of the plan,
+with at most three findings of its own. Fix the blocking and major findings; each fix
+is reviewed again. At most three rounds, unless `AGENTS.md` says otherwise. A serious
+finding, one that blocks, or shows a defect or an unmet criterion, still open after
+the last round goes to the user at step 8: never accept one silently.
 
 ## 6. Catch up
 
