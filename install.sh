@@ -65,9 +65,12 @@
 # them, it prints `  <file>: is the shared rules`. Else it looks for a line of its own that
 # imports them: `@` and a path that leads to them, absolute, from `~/` or from the directory of
 # that file, with `\ ` for a space, and which ends before its first `#`, as Claude Code reads
-# it. It prints `  <file>: imports the shared rules`; or, when no line does, `  <file>: add this
-# line to import the shared rules:` and the line, `    @<path>`, on the next one. It writes no
-# such file.
+# it. It prints `  <file>: imports the shared rules`; or, when no line does,
+# `  <file>: add this line to import the shared rules:` and the line, `    @<path>`, on the
+# next one. When the path of the shared rules holds `#` or `\`, at which Claude Code ends the
+# path of an import, it prints in place of these two lines
+# `  <file>: import the shared rules through a link, as their path holds # or \`: a link to
+# them, or to a directory above them, from a path that holds neither. It writes no such file.
 #
 # == VS Code: ~/.config/Code/User/prompts/shift-left.instructions.md, in the folder of the
 # user's instruction files of VS Code on Linux, is linked to the shared rules. Then it prints
@@ -276,13 +279,16 @@ if [ -f "$config/CLAUDE.md" ]; then
     [ "$path" -ef "$rules" ] && imports=yes
   done <"$config/CLAUDE.md"
 fi
+line="@$(shown "$rules")"
 if [ "$config/CLAUDE.md" -ef "$rules" ]; then
   echo "  $(shown "$config/CLAUDE.md"): is the shared rules"
 elif [ -n "$imports" ]; then
   echo "  $(shown "$config/CLAUDE.md"): imports the shared rules"
+elif [[ "$line" == *[\#\\]* ]]; then
+  echo "  $(shown "$config/CLAUDE.md"): import the shared rules through a link," \
+    "as their path holds # or \\"
 else
   echo "  $(shown "$config/CLAUDE.md"): add this line to import the shared rules:"
-  line="@$(shown "$rules")"
   echo "    ${line// /\\ }"
 fi
 

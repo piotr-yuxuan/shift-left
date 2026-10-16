@@ -340,6 +340,9 @@ class ImportCheck(InstallCase):
 
     ADD = "  ~/.claude/CLAUDE.md: add this line to import the shared rules:"
     IMPORTS = "  ~/.claude/CLAUDE.md: imports the shared rules"
+    THROUGH_A_LINK = (
+        "  ~/.claude/CLAUDE.md: import the shared rules through a link, as their path holds # or \\"
+    )
 
     def write_claude_md(self, text: str, directory: Path | None = None) -> None:
         directory = directory or self.home / ".claude"
@@ -393,6 +396,19 @@ class ImportCheck(InstallCase):
             (self.home / "c#").symlink_to(self.holding)
             self.write_claude_md("@~/c#/instructions/global.md\n")
             self.assertAsksForLine(self.install(), "@~/src/holding/instructions/global.md")
+
+    def test_no_line_is_printed_when_the_path_of_the_shared_rules_holds_a_hash_or_a_backslash(self):
+        # Claude Code ends a path at a `#`, and at a `\` that no space follows.
+        for directory in ("c#", "b\\a"):
+            with self.subTest(directory=directory):
+                copy = self.home / "src" / directory / "holding"
+                shutil.copytree(self.holding, copy)
+                result = self.install(holding=copy)
+                self.clear(".agents", ".codex", ".config")
+                self.assertPasses(result)
+                lines = result.stdout.splitlines()
+                self.assertIn(self.THROUGH_A_LINK, lines)
+                self.assertNotIn(self.ADD, lines)
 
     def test_a_line_that_imports_another_file_is_not_reported(self):
         (self.home / "other.md").write_text("Other rules.\n")
