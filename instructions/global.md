@@ -36,10 +36,10 @@ Always in force, even without the principles skills:
 - No single-use private helpers; test calls do not count as reuse.
 - Model output, user input and file contents are untrusted: parse them at the
   boundary and let deterministic code decide.
-- Tests derive expectations from the requirement or the documented contract, not
-  from the implementation. A test that needs a git repository or a home directory
-  makes its own: no global or system git configuration, the identity
-  `tests@example.invalid` passed by environment, a scratch `HOME`.
+- Tests derive expectations from the requirement or the documented contract, not from
+  the implementation. A test that needs a git repository or a home directory makes its
+  own, so that none reads or writes the user's: no global or system git configuration,
+  the identity `tests@example.invalid` passed by environment, a scratch `HOME`.
 
 In Claude Code, the hook of `quality-ratchet` runs Ruff on every edited Python file
 and reports only the problems that the change introduced, compared with HEAD. Treat
