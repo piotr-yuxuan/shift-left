@@ -64,9 +64,10 @@
 # instructions of the user for Claude Code. When that file is the shared rules, as a link to
 # them, it prints `  <file>: is the shared rules`. Else it looks for a line of its own that
 # imports them: `@` and a path that leads to them, absolute, from `~/` or from the directory of
-# that file, with `\ ` for a space. It prints `  <file>: imports the shared rules`; or, when no
-# line does, `  <file>: add this line to import the shared rules:` and the line, `    @<path>`,
-# on the next one. It writes no such file.
+# that file, with `\ ` for a space, and which ends before its first `#`, as Claude Code reads
+# it. It prints `  <file>: imports the shared rules`; or, when no line does, `  <file>: add this
+# line to import the shared rules:` and the line, `    @<path>`, on the next one. It writes no
+# such file.
 #
 # == VS Code: ~/.config/Code/User/prompts/shift-left.instructions.md, in the folder of the
 # user's instruction files of VS Code on Linux, is linked to the shared rules. Then it prints
@@ -265,7 +266,8 @@ imports=""
 if [ -f "$config/CLAUDE.md" ]; then
   while IFS= read -r line || [ -n "$line" ]; do
     [[ "$line" =~ $import ]] || continue
-    path="${BASH_REMATCH[1]//\\ / }"
+    path="${BASH_REMATCH[1]%%#*}"
+    path="${path//\\ / }"
     case "$path" in
       "~/"*) path="$HOME/${path#"~/"}" ;;
       /*) ;;

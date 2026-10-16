@@ -383,6 +383,17 @@ class ImportCheck(InstallCase):
         self.assertIn("  ~/.claude/CLAUDE.md: is the shared rules", lines)
         self.assertNotIn(self.ADD, lines)
 
+    def test_a_path_ends_before_its_first_hash_as_claude_code_reads_it(self):
+        with self.subTest(line="the shared rules, then a fragment"):
+            self.write_claude_md("@~/src/holding/instructions/global.md#rules\n")
+            result = self.install()
+            self.assertPasses(result)
+            self.assertIn(self.IMPORTS, result.stdout.splitlines())
+        with self.subTest(line="through a directory whose name holds a hash"):
+            (self.home / "c#").symlink_to(self.holding)
+            self.write_claude_md("@~/c#/instructions/global.md\n")
+            self.assertAsksForLine(self.install(), "@~/src/holding/instructions/global.md")
+
     def test_a_line_that_imports_another_file_is_not_reported(self):
         (self.home / "other.md").write_text("Other rules.\n")
         self.write_claude_md("@~/other.md\n")
