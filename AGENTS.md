@@ -20,7 +20,7 @@ user-level instructions import.
 
 The clone that a user registers as a local-directory marketplace, and whose
 `instructions/global.md` the user-level instructions import, is called the primary
-checkout. What it holds reaches sessions in two ways:
+checkout. What it holds reaches sessions in three ways:
 
 - `instructions/global.md` is read from the clone at each session start, as it is on
   disk, uncommitted edits and the checked-out branch included.
@@ -28,10 +28,15 @@ checkout. What it holds reaches sessions in two ways:
   from a copy in the plugin cache by a session of the desktop app. That copy stays at
   the commit that was installed until `claude plugin update <plugin>@shift-left`
   takes the commit that the clone is at.
+- Once `install.sh` has run from it, Codex reads its skills through links in
+  `~/.agents/skills`, and `instructions/global.md` through a link at `AGENTS.md` of
+  the Codex home, from the clone as it is on disk. VS Code is given a link to the same
+  file in its user folder, not seen read. A skill that is added, moved or removed
+  needs another run to get, change or lose its link.
 
-So a merge into `main` changes the instructions at once, and the plugins of a desktop
-session only after an update: in between, the instructions can be newer than the
-plugins.
+So a merge into `main` changes the instructions and the skills of Codex at once, and
+the plugins of a desktop session only after an update: in between, the instructions
+can be newer than the plugins.
 
 The owner pushes, and installs or updates the plugins.
 
@@ -77,6 +82,7 @@ The owner pushes, and installs or updates the plugins.
 plugins/<name>/                   one self-contained plugin each
 plugins/<name>/plugin.json        the manifest of the standard, where there is a skill
 instructions/global.md            user-level rules, imported from a user-level CLAUDE.md
+install.sh                        the installer, for Claude Code, Codex and VS Code
 tests/                            tests of the plugins' scripts, outside the plugins
 tests/packaging/                  tests of the manifests and of the skills
 docs/harness-facts.md             what was observed about each client and the standards
