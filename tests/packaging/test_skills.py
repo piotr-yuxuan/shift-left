@@ -24,7 +24,9 @@ One line outside the specification is read: `disable-model-invocation: true`. Cl
 VS Code then leave the skill out of the model's context, so that only the user invokes it
 (code.claude.com/docs/en/skills, "Restrict Claude's skill access"; VS Code's page on agent
 skills). Codex reads the same intent from `allow_implicit_invocation: false` under `policy` in
-the skill's `agents/openai.yaml`, which a test checks beside the line.
+the skill's `agents/openai.yaml`, which a test checks beside the line: an indented line of that
+key under the line `policy:`, so that a comment or the key elsewhere does not count. The decision
+of 2026-10-16 makes `learning-mode` of the plugin `learning` one such skill.
 """
 
 import re
@@ -39,6 +41,8 @@ PLAIN_VALUE = re.compile(r"[A-Za-z](?:(?!: | #).)*(?<![ :])")
 YAML_WORDS = {"true", "false", "yes", "no", "on", "off", "y", "n", "null"}
 SUBSET = "outside the subset this test reads"
 USER_INVOKED = "disable-model-invocation: true"
+# The line `policy:`, then indented lines, the last of which sets the key.
+NOT_IMPLICIT = re.compile(r"^policy:\n(?: .*\n)*? +allow_implicit_invocation: false *$", re.MULTILINE)
 
 
 class Skills(unittest.TestCase):
@@ -80,12 +84,15 @@ class Skills(unittest.TestCase):
                 self.assertLessEqual(len(self.front_matter(skill).get("compatibility", "")), 500)
 
     def test_a_skill_that_only_the_user_invokes_says_so_to_codex_too(self):
+        user_invoked = []
         for skill in SKILLS:
             lines = (skill / "SKILL.md").read_text(encoding="utf-8").split("\n")
             if USER_INVOKED in lines[1 : lines.index("---", 1)]:
+                user_invoked.append(f"{skill.parent.parent.name}/{skill.name}")
                 with self.subTest(skill=skill.name):
                     policy = (skill / "agents" / "openai.yaml").read_text(encoding="utf-8")
-                    self.assertIn("allow_implicit_invocation: false", policy)
+                    self.assertRegex(policy, NOT_IMPLICIT)
+        self.assertIn("learning/learning-mode", user_invoked)
 
 
 if __name__ == "__main__":
