@@ -513,6 +513,14 @@ class Refusals(InstallCase):
                 result = self.install(str(self.holding), argument, cwd=self.scratch)
                 self.assertRefusedAndUnchanged(result, before, shown)
 
+    def test_a_clone_whose_marketplace_has_the_name_of_another_clones_is_refused(self):
+        # Without skills, so that no refusal of a skill name stops the run first.
+        first = write_clone(self.home / "src" / "a", "bare", {"hooks": []})
+        second = write_clone(self.home / "src" / "b", "bare", {"hooks": []})
+        before = self.snapshot()
+        result = self.install(str(first), str(second))
+        self.assertRefusedAndUnchanged(result, before, "~/src/b")
+
     def test_a_holding_clone_without_a_file_of_shared_rules_is_refused(self):
         self.rules.unlink()
         for name, make in (("no file", lambda: None), ("a directory", self.rules.mkdir)):

@@ -20,6 +20,8 @@
 #
 #   - a clone in which no marketplace file can be read that names one plugin or more, each by
 #     a name of printable characters;
+#   - a clone whose marketplace has the name of that of a clone named before it: Claude Code
+#     would keep one of the two;
 #   - a CODEX_HOME or a CLAUDE_CONFIG_DIR that is not an absolute path: the directory that it
 #     names depends on the working directory;
 #   - shared rules that are not a file that can be read, as when this script is run through a
@@ -154,8 +156,14 @@ for argument in "$@"; do
     refuse "$argument" "no marketplace file that names one plugin or more can be read in it"
     continue
   fi
+  marketplace="${names%%$'\n'*}"
+  for index in "${!marketplaces[@]}"; do
+    [ "${marketplaces[index]}" = "$marketplace" ] || continue
+    refuse "$clone" "its marketplace, $marketplace, is also that of $(shown "${clones[index]}")"
+    continue 2
+  done
   clones+=("$clone")
-  marketplaces+=("${names%%$'\n'*}")
+  marketplaces+=("$marketplace")
   plugins+=("${names#*$'\n'}")
 done
 for variable in CODEX_HOME CLAUDE_CONFIG_DIR; do
