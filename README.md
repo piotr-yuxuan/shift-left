@@ -26,7 +26,9 @@ another client names it to its agent is not known.
   first, surgical changes, goal-driven execution. It is copied unchanged from another
   repository, under another licence: see the notice beside it.
 - The agent `principles:principles-reviewer`: a fast, read-only review of one change
-  against both skills, in one bounded pass.
+  against both skills, in one bounded pass. Its requirements lens is off unless the
+  caller names it or gives a plan with acceptance criteria; it then checks the change
+  against those criteria, with at most three findings of its own.
 
 It needs nothing else.
 
