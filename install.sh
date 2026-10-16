@@ -65,7 +65,8 @@
 set -u
 shopt -s nullglob
 
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" || exit 1
+# CDPATH would make `cd` look for a relative path elsewhere first.
+here="$(CDPATH='' cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)" || exit 1
 rules="$here/instructions/global.md"
 agents="$HOME/.agents/skills"
 codex="${CODEX_HOME:-$HOME/.codex}"

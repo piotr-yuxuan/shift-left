@@ -150,6 +150,18 @@ class Installs(InstallCase):
         self.assertPasses(result)
         self.assertIn(f"plugin marketplace add {self.other}", self.calls())
 
+    def test_the_script_run_by_a_relative_path_uses_the_holding_clone_whatever_cdpath_says(self):
+        # A clone of another marketplace, with shared rules of its own, at the path of the holding
+        # clone from the directory that CDPATH names, where `cd` would look first.
+        decoy = self.scratch / "decoy"
+        clone = write_clone(decoy / "home" / "src" / "holding", "decoy", {"fourth": []})
+        (clone / "instructions").mkdir()
+        (clone / "instructions" / "global.md").write_text("The shared rules of the decoy.\n")
+        result = self.install(holding=Path("home/src/holding"), cwd=self.scratch, CDPATH=str(decoy))
+        self.assertPasses(result)
+        self.assertIn(f"plugin marketplace add {self.holding}", self.calls())
+        self.assertLinked(self.home / ".codex" / "AGENTS.md", self.rules)
+
     def test_a_clone_without_skills_gets_no_link_and_its_plugins_are_installed(self):
         bare = write_clone(self.home / "src" / "bare", "bare", {"hooks": []})
         result = self.install(str(bare))
