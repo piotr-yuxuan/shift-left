@@ -9,7 +9,7 @@
 # argument, the clone is the one that holds this script. Of its own, it makes links and the
 # directories that hold them, and nothing else: it moves, removes, copies and edits nothing.
 # The commands of the Claude Code CLI that it runs change the configuration of Claude Code, as
-# each of them says.
+# each of them says. It needs bash, and python3 on PATH to read the JSON files.
 #
 # Before it changes anything, it reads the marketplace file, .claude-plugin/marketplace.json, of
 # each clone, and looks for every refusal. For each it prints `refused <place>: <reason>` on

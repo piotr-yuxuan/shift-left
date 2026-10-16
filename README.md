@@ -138,7 +138,8 @@ for the clients of the machine, and links `instructions/global.md` for them. Wit
 argument it takes the clone that holds it; other clones, of other marketplaces laid
 out the same way, can be named. Of its own it makes links into the clones and nothing
 else, so a commit reaches Codex through them at once. Run it again after each commit,
-so that Claude Code takes the commit too. Its header says what it prints.
+so that Claude Code takes the commit too. Its header says what it prints. It needs
+`bash` and `python3` on `PATH`.
 
 ```
 <clone>/install.sh
