@@ -162,6 +162,14 @@ class Installs(InstallCase):
         self.assertIn(f"plugin marketplace add {self.holding}", self.calls())
         self.assertLinked(self.home / ".codex" / "AGENTS.md", self.rules)
 
+    def test_a_module_in_the_working_directory_is_not_run_and_nothing_is_written_there(self):
+        # Python looks for a module in its working directory first, unless told not to.
+        work = self.scratch / "work"
+        work.mkdir()
+        (work / "json.py").write_text('open("ran", "w").close()\n')
+        self.assertPasses(self.install(cwd=work))
+        self.assertEqual(os.listdir(work), ["json.py"])
+
     def test_a_clone_without_skills_gets_no_link_and_its_plugins_are_installed(self):
         bare = write_clone(self.home / "src" / "bare", "bare", {"hooks": []})
         result = self.install(str(bare))

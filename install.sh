@@ -141,7 +141,7 @@ plugins=()
 for argument in "$@"; do
   # CDPATH would make `cd` look for a relative path elsewhere first.
   if ! clone="$(CDPATH='' cd -- "$argument" 2>/dev/null && pwd)" ||
-    ! names="$(python3 -c "$read_marketplace" "$clone/.claude-plugin/marketplace.json" \
+    ! names="$(python3 -I -c "$read_marketplace" "$clone/.claude-plugin/marketplace.json" \
       2>/dev/null)"; then
     refuse "$argument" "no marketplace file that names one plugin or more can be read in it"
     continue
@@ -193,7 +193,7 @@ link "$codex/AGENTS.md" "$rules" || exit 1
 echo "== Claude Code"
 if command -v "$cli" >/dev/null; then
   listed="$("$cli" plugin list --json </dev/null)" || exit 1
-  installed="$(python3 -c "$read_installed" <<<"$listed")" || exit 1
+  installed="$(python3 -I -c "$read_installed" <<<"$listed")" || exit 1
   for index in "${!clones[@]}"; do
     "$cli" plugin marketplace add "${clones[index]}" </dev/null || exit 1
     while IFS= read -r plugin; do
