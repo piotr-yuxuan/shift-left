@@ -15,12 +15,12 @@ Reply in the language that the user writes in; in French, address the user as
 
 - In a repository whose instructions name `workflow:plans`, follow that skill.
 - `learning:learning-mode` is for the user alone to invoke: `/learning:learning-mode`
-  in Claude Code and VS Code, `$learning:learning-mode` in Codex. Never load it
-  otherwise.
+  in Claude Code, `$learning:learning-mode` in Codex. Never load it otherwise.
 - Before writing, refactoring, debugging, reviewing or testing code, load
   `principles:programming-principles` and `principles:karpathy-guidelines`, and apply
   both. Open a principle's guide whenever a design decision depends on it.
-- Skip a skill named here that is not installed; say so for `workflow:plans`.
+- Skip a skill named here that is not installed; say so for `workflow:plans`. VS Code
+  gives a skill linked in `~/.agents/skills` its bare name: `plans`, `/learning-mode`.
 
 # Code quality
 

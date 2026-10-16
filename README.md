@@ -115,10 +115,11 @@ task leaves the user able to do it alone. It reserves the meaningful decision fo
 user, teaches with worked examples, asks one question at a time and waits, gives the
 least help that moves the user forward, and checks independent performance before it
 counts a skill as learnt. Only the user invokes it, as `/learning:learning-mode` in
-Claude Code and VS Code and as `$learning:learning-mode` in Codex; it is never loaded
-by default, nor by the model on its own. It applies from that invocation until the
-user ends it, except for a scope that the user confirms is to be executed for them,
-and never where no user is in the conversation.
+Claude Code and as `$learning:learning-mode` in Codex; VS Code gives a skill linked in
+`~/.agents/skills` its bare name, `/learning-mode`. It is never loaded by default, nor
+by the model on its own. It applies from that invocation until the user ends it,
+except for a scope that the user confirms is to be executed for them, and never where
+no user is in the conversation.
 
 It needs nothing else.
 
