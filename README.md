@@ -310,7 +310,8 @@ Each cell of the table holds one of five words.
 - *no*: a probe saw that the client does not load or run it. No cell says so today.
 - *not known*: none of these.
 
-*Its page* is, for each client, the one page that was read, as page text:
+A cell that cites another page names it. *Its page* is, for each client, the page
+below, read as page text:
 
 - VS Code: "Agent plugins in VS Code",
   `code.visualstudio.com/docs/agent-customization/agent-plugins`, dated 2026-10-07.
@@ -340,6 +341,7 @@ Both are recorded in `docs/harness-facts.md`.
 | Install from GitHub | *not known*, until this repository is first pushed: see "Install" | *by its documentation* (its page, "Configure plugin marketplaces" and "Install a plugin from source", 2026-10-11): `owner/repo` in the setting `chat.plugins.marketplaces`, or a command that takes the address of a git repository. Not run | *by its documentation* (its page, "Plugin specification for install command", 2026-10-11): a plugin of a registered marketplace, or a subdirectory of a repository on GitHub. Not run | *by its documentation* (its page, "Add a marketplace from the CLI", 2026-10-11): a marketplace is added from `owner/repo`, and the page sends the install and the test of a plugin to the desktop app. Not run |
 | Install from a local clone | *seen*: Claude Code 2.1.288, 2026-10-10 ("Where a plugin is loaded from") and 2026-10-11 (probe Q1) | *by its documentation* (its page, "Configure plugin marketplaces", 2026-10-11): a `file:///` address of the clone in the setting `chat.plugins.marketplaces`. Not run | *not known* | *by its documentation* (its page, "Add a marketplace from the CLI", 2026-10-11): the root directory of a local marketplace. Not run |
 | Install from a path, one plugin directory | *seen*: Claude Code 2.1.288, 2026-10-11 (probe Q1): for one session, with `--plugin-dir` | *by its documentation* (its page, "Use local plugins", 2026-10-11): the setting `chat.pluginLocations`. Not run | *by its documentation* (its page, "Plugin specification for install command", 2026-10-11): a local path. Not run | *not known* |
+| Install with `install.sh`, from a clone | *seen*: Claude Code 2.1.295, 2026-10-16 (probe C): the commands that it runs, run one by one; each plugin is installed and read from the clone | *by its documentation* for the plugins (its page, "Use local plugins", 2026-10-11): it prints an entry of the setting `chat.pluginLocations` per plugin, for you to add. Not run. *not known* for `instructions/global.md`, which it links into the user folder of VS Code. The skill links are read too, ahead of the plugins' copies, by the page "Agent Skills" (2026-10-16) and by the code of VS Code 1.140.0: see "Install" | *not known*: the script does nothing for this client | *seen*: Codex CLI 0.163.0-alpha.10.2, 2026-10-16 (probes X1 and X3): the skills and `instructions/global.md`, through links like those that it makes |
 
 The other clients on the list as it was read on 2026-10-11, OpenHands, NanoClaw, Grok
 Bot, Cursor, OpenClaw, Hermes Agent and Kiro, with ChatGPT, which the list names in one
