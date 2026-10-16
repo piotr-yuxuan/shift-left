@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "learning",
+  "version": "0.0.3",
+  "description": "A learning mode in which the agent teaches rather than does, so that each task builds the user's independent competence, as one skill",
+  "license": "EUPL-1.2",
+  "repository": "https://github.com/piotr-yuxuan/shift-left"
+}

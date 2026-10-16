@@ -41,6 +41,10 @@
     {
       "name": "workflow",
       "source": "./plugins/workflow"
+    },
+    {
+      "name": "learning",
+      "source": "./plugins/learning"
     }
   ]
 }

@@ -1,0 +1,5 @@
+{
+  "name": "learning",
+  "description": "A learning mode in which the agent teaches rather than does, so that each task builds the user's independent competence, as one skill",
+  "license": "EUPL-1.2"
+}
