@@ -434,6 +434,29 @@ class ImportCheck(InstallCase):
             self.assertPasses(result)
             self.assertIn(self.IMPORTS, result.stdout.splitlines())
 
+    def test_a_line_inside_a_fenced_code_block_imports_nothing(self):
+        # Claude Code skips code blocks, a comment inside one included.
+        line = "@~/src/holding/instructions/global.md"
+        asked = {
+            "the line inside a fence of backticks": f"# Mine\n\n```\n{line}\n```\n",
+            "the line after a shorter fence inside a longer one": f"````\n```\n{line}\n````\n",
+            "the line inside a fence that is never closed": f"~~~ text\n{line}\n",
+        }
+        for name, text in asked.items():
+            with self.subTest(text=name):
+                self.write_claude_md(text)
+                self.assertAsksForLine(self.install(), line)
+        imported = {
+            "the line after a comment opened inside a fence": f"```\n<!-- example\n```\n{line}\n",
+            "the line after a fence opened inside a comment": f"<!--\n~~~\n-->\n{line}\n",
+        }
+        for name, text in imported.items():
+            with self.subTest(text=name):
+                self.write_claude_md(text)
+                result = self.install()
+                self.assertPasses(result)
+                self.assertIn(self.IMPORTS, result.stdout.splitlines())
+
     def test_a_line_that_imports_another_file_is_not_reported(self):
         (self.home / "other.md").write_text("Other rules.\n")
         self.write_claude_md("@~/other.md\n")

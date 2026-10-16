@@ -64,9 +64,12 @@
 # instructions of the user for Claude Code. When that file is the shared rules, as a link to
 # them, it prints `  <file>: is the shared rules`. Else it looks for a line of its own that
 # imports them, outside an HTML comment, which runs from a line that begins with `<!--` to the
-# first that holds `-->`: `@` and a path that leads to them, absolute, from `~/` or from the
-# directory of that file, with `\ ` for a space, and which ends before its first `#`, as Claude
-# Code reads it. It prints `  <file>: imports the shared rules`; or, when no line does,
+# first that holds `-->`, and outside a fenced code block, which runs from a line that begins
+# with three backticks or more, or three tildes or more, to the first line of as many of the
+# same character or more and nothing else, or to the end: `@` and a path that leads to them,
+# absolute, from `~/` or from the directory of that file, with `\ ` for a space, and which
+# ends before its first `#`, as Claude Code reads it. It prints
+# `  <file>: imports the shared rules`; or, when no line does,
 # `  <file>: add this line to import the shared rules:` and the line, `    @<path>`, on the
 # next one. When the path of the shared rules holds `#` or `\`, at which Claude Code ends the
 # path of an import, it prints in place of these two lines
@@ -132,6 +135,8 @@ for plugin in json.load(sys.stdin):
 import='^@(([^[:space:]\]|\\ )+)[[:space:]]*$'
 # A line that opens an HTML comment, which ends with the first line that holds `-->`.
 opens='^ {0,3}<!--'
+# A line that opens a fenced code block, which ends with a line of the same character.
+fences='^ {0,3}(`{3,}|~{3,})'
 
 # A path as the output writes it: from `~/` when it lies under the home directory.
 shown() {
@@ -277,10 +282,20 @@ fi
 imports=""
 if [ -f "$config/CLAUDE.md" ]; then
   comment=""
+  # The line that closes the fenced code block that the reading is in, as a pattern.
+  fence=""
   while IFS= read -r line || [ -n "$line" ]; do
+    if [ -n "$fence" ]; then
+      [[ "$line" =~ $fence ]] && fence=""
+      continue
+    fi
     [[ "$line" =~ $opens ]] && comment=yes
     if [ -n "$comment" ]; then
       [[ "$line" == *"-->"* ]] && comment=""
+      continue
+    fi
+    if [[ "$line" =~ $fences ]]; then
+      fence="^ {0,3}${BASH_REMATCH[1]}${BASH_REMATCH[1]:0:1}*[[:space:]]*\$"
       continue
     fi
     [[ "$line" =~ $import ]] || continue
