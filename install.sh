@@ -11,8 +11,8 @@
 # directories that hold them, and nothing else: it moves, removes, copies and edits nothing.
 # The commands of the Claude Code CLI that it runs change the configuration of Claude Code, as
 # each of them says. It needs bash 4.4 or later, and python3 on PATH to read the JSON files;
-# without python3 it prints `install.sh needs python3 on PATH` on standard error, and exits 1
-# before it reads anything.
+# without either it prints `install.sh needs bash 4.4 or later` or `install.sh needs python3 on
+# PATH` on standard error, and exits 1 before it reads anything. macOS has bash 3.2 at /bin/bash.
 #
 # Before it changes anything, it reads the marketplace file, .claude-plugin/marketplace.json, of
 # each clone, and looks for every refusal. For each it prints `refused <place>: <reason>` on
@@ -87,6 +87,10 @@
 # changed; or a step failed, such as a command of the CLI or the reading of its list, and the
 # steps after it did not run.
 
+# Before 4.4, `set -u` takes an empty array for an unbound variable. BASH_VERSINFO cannot be set,
+# so the tests, which run one bash, never reach the exit.
+((BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404)) ||
+  { echo "install.sh needs bash 4.4 or later" >&2; exit 1; }
 set -u
 shopt -s nullglob
 
