@@ -62,9 +62,9 @@ U+2014, but in a verbatim licence. Headings in sentence case.
 # Invariants
 
 - Never push.
-- In a repository whose instructions name `workflow:plans`, never write in the
-  primary checkout except under `docs/work/`, to add a worktree, and for the merge
-  that the user confirms.
+- In a repository whose instructions name `workflow:plans`, never write, switch
+  branch, stash or merge in the primary checkout except under `docs/work/`, to add a
+  worktree, and for the merge that the user confirms.
 - Never change the user's configuration (`~/.claude`, `~/.codex`, `~/.agents`,
   `~/.config/Code`) unless the user asks for it in the session.
 - A destructive or irreversible command needs the user's explicit confirmation first.

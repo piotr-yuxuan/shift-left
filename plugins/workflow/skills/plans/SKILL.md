@@ -21,8 +21,8 @@ the user.
 ## Invariants
 
 - Never push.
-- Never write in the primary checkout except under `docs/work/`, to add a worktree,
-  and for step 9 once the user confirms.
+- Never write, switch branch, stash or merge in the primary checkout except under
+  `docs/work/`, to add a worktree, and for step 9 once the user confirms.
 - Never change the user's configuration (`~/.claude`, `~/.codex`, `~/.agents`,
   `~/.config/Code`) unless the user asks for it in the session.
 - A destructive or irreversible command needs the user's explicit confirmation first.
