@@ -13,8 +13,9 @@ component, and on what evidence.
 
 ## Plugins
 
-A skill or an agent is named below as Claude Code names it, `<plugin>:<name>`. How
-another client names it to its agent is not known.
+A skill or an agent is named below as Claude Code names it, `<plugin>:<name>`. Codex
+lists a skill that the installer links under the same name (probe X3); how another
+client names it to its agent is not known.
 
 ### `principles`
 
@@ -130,6 +131,57 @@ A command is printed here only where it was seen to work, with one exception, sa
 below. [What works in which client](#what-works-in-which-client) has a row for each
 way to install.
 
+### Every client, from a clone
+
+`install.sh`, at the root of a clone, installs the plugins of clones of marketplaces
+for the clients of the machine, and links `instructions/global.md` for them. With no
+argument it takes the clone that holds it; other clones, of other marketplaces laid
+out the same way, can be named. Of its own it makes links into the clones and nothing
+else, so a commit reaches Codex through them at once. Run it again after each commit,
+so that Claude Code takes the commit too. Its header says what it prints.
+
+```
+<clone>/install.sh
+<clone>/install.sh <clone> <other clone>
+```
+
+What it does for each client, with the words of
+[What works in which client](#what-works-in-which-client):
+
+- Codex, *seen*: Codex CLI 0.163.0-alpha.10.2, 2026-10-16 (probe X of
+  `docs/harness-facts.md`). Each skill is linked as `~/.agents/skills/<name>`, which
+  Codex lists under the name of its plugin, as `principles:karpathy-guidelines`, and
+  `instructions/global.md` as `AGENTS.md` of the Codex home, `~/.codex` or
+  `CODEX_HOME`, which Codex reads as the user's instructions. An
+  `AGENTS.override.md` beside that link is read in its place.
+- Claude Code, *seen*: Claude Code 2.1.295, 2026-10-16 (probe C). Each clone is added
+  as a marketplace, and each plugin installed, unless it is installed for the user
+  already, then updated. The user-level `CLAUDE.md` is not edited: the script says
+  whether it imports `instructions/global.md`, and prints the line to add if not.
+- VS Code, *by its documentation* for the plugins and *not known* for the
+  instructions. One entry of the setting `chat.pluginLocations`, which its page
+  documents (the row "Install from a path"), is printed per plugin, for you to add;
+  the script writes no setting. `instructions/global.md` is linked as
+  `~/.config/Code/User/prompts/shift-left.instructions.md`, in the user folder of VS
+  Code on Linux, where nobody saw VS Code read it.
+
+It refuses, says why and changes nothing when the place of a link is taken, as by a
+skill of the same name in `~/.agents/skills` or in the skills of Codex, which Codex
+would list twice, or by instructions of your own at either instruction link: move
+them aside, then run it again. Its header lists every refusal.
+
+A plugin that you disable in Claude Code stays disabled at the next run: the script
+does not install it again. In Codex, a skill whose link you remove comes back at the
+next run. Turn it off instead in `config.toml` of the Codex home, which the script
+never touches, by the absolute path of its link, `<home>` being your home directory
+(*seen*, probe X5):
+
+```
+[[skills.config]]
+path = "<home>/.agents/skills/<name>/SKILL.md"
+enabled = false
+```
+
 ### Claude Code
 
 From GitHub, *not known*, and the one exception:
@@ -173,8 +225,9 @@ claude --plugin-dir <clone>/plugins/principles
 
 ### Other clients
 
-No command is printed for VS Code, GitHub Copilot CLI or Codex: none was run. Each
-documents how a plugin is added, on the page that
+No command of VS Code, GitHub Copilot CLI or Codex is printed: none was run. For
+Codex and VS Code, the installer above makes links instead. Each documents how a
+plugin is added, on the page that
 [What works in which client](#what-works-in-which-client) names for it.
 
 ### If a hook wrongly blocks
@@ -211,9 +264,10 @@ skip such an import when the file lies outside their working directory.
 
 ### Other clients
 
-Where another client loads user-level instructions, and whether this file serves
-there as it is, is not known. It begins with a front matter, `applyTo: "**"`, meant
-for VS Code; nobody saw VS Code read it.
+The installer links this file where Codex reads the user's instructions, and Codex
+was seen to read it there (probe X1); and into the user folder of VS Code, where
+nobody saw it read. It begins with a front matter, `applyTo: "**"`, meant for VS
+Code. Whether it serves another client as it is, is not known.
 
 ## What works in which client
 
@@ -222,7 +276,8 @@ their root, as Agent Plugins 1.0.0 asks (`agent-plugins.org/specification`, 4.1 
 5.2, read on 2026-10-11), beside the `.claude-plugin/plugin.json` that Claude Code
 reads. Their skills follow Agent Skills (`agentskills.io/specification`, "SKILL.md
 format", read on 2026-10-11). The tests in `tests/packaging/` check both. That is
-packaging: of the clients below, only Claude Code was seen to load anything.
+packaging: of the clients below, only Claude Code was seen to load a plugin, and Codex
+only what the installer links.
 
 Each cell of the table holds one of five words.
 
@@ -264,7 +319,7 @@ Both are recorded in `docs/harness-facts.md`.
 | The reviewer agent of `principles`, `agents/principles-reviewer.md`, in Claude Code's format | *seen*: Claude Code 2.1.288, 2026-10-10, in a session of the desktop app ("Skills that an agent names"); 2026-10-11, counted at a start (probe Q1) | *by its documentation* (its page, "Plugin formats", "Plugin manifest (plugin.json)" and "Reference plugin paths in hook commands", 2026-10-11; probe Q2a): read from `agents/`, in Claude format, while the plugin had only Claude Code's manifest; no longer read now that the root manifest is there, since agents then come from `com.github.copilot/agents/` alone. Read is not shown to work: nobody saw the agent run there | *by its documentation* (its page, "File locations" and "Components", 2026-10-11): read from `agents/`, as a legacy plugin, while the plugin had only Claude Code's manifest; no longer read now that the root manifest is there, since it takes precedence and agents then come from `com.github.copilot/agents/`. Nobody saw the agent run there | *not known* |
 | The hook of `quality-ratchet`, `hooks/hooks.json`, written for Claude Code's event | *seen*: Claude Code 2.1.288, 2026-10-10, in sessions of the desktop app ("Hooks"); 2026-10-11, read at a start (probe Q1) | *by its documentation* (its page, "Plugin formats", "Hook file location" and "Hook configuration format", 2026-10-11; probe Q2a): the plugin has no root manifest, so it is read in Claude format, with `hooks/hooks.json`; the Local harness ignores the value of a matcher, so the command runs after every tool call and not only after an edit. Not tried | *by its documentation* (its page, "File locations", 2026-10-11): read as a legacy plugin, with `hooks/hooks.json`. Not tried | *by its documentation* (its page, "Bundled MCP servers and lifecycle hooks", 2026-10-11): `hooks/hooks.json` is discovered by default, for a plugin installed by hand in the desktop app, and skipped until the user trusts it. Not tried |
 | The language server of `basedpyright-lsp`, an entry of the marketplace file | *seen*: Claude Code 2.1.288, 2026-10-10 ("Where a plugin is loaded from"); 2026-10-11, loaded at a start (probe Q1) | *not known*. The bundle of VS Code 1.140.0 that reads a marketplace file nowhere names the field `lspServers`, which declares it; a bundle of its built-in extension `copilot` does (probe Q2a) | *not known*. Its page ("LSP server configuration", 2026-10-11) requires `fileExtensions` of a language server, where the entry has `extensionToLanguage` | *not known* |
-| `instructions/global.md` | *seen*: Claude Code 2.1.288, 2026-10-10 ("Instructions"): imported by the user-level `CLAUDE.md` | *not known*: see "Always-on instructions" | *not known* | *not known* |
+| `instructions/global.md` | *seen*: Claude Code 2.1.288, 2026-10-10 ("Instructions"): imported by the user-level `CLAUDE.md` | *not known*: see "Always-on instructions" | *not known* | *seen*: Codex CLI 0.163.0-alpha.10.2, 2026-10-16 (probe X1): read as the user's instructions through a link at `AGENTS.md` of the Codex home, which the installer makes |
 | The marketplace file, `.claude-plugin/marketplace.json` | *seen*: Claude Code 2.1.288, 2026-10-11 (probe Q1) | *by its documentation* (its page, "Configure plugin marketplaces", 2026-10-11; probe Q2a): a marketplace is a git repository named in the setting `chat.plugins.marketplaces`, and the page sends to Claude Code's documentation for the schema of its entries; the files of VS Code try this path last of four. Not tried | *by its documentation* (its page, "File locations" and "Plugin source types", 2026-10-11): this path is the last of four that it checks, and a source may be a relative path. Not tried | *by its documentation* (its page, "How local marketplaces work" and "Marketplace metadata", 2026-10-11): read as a legacy-compatible marketplace; a source may be a plain path; the page asks each entry for a policy and a category, which these entries lack. Not tried |
 | Install from GitHub | *not known*, until this repository is first pushed: see "Install" | *by its documentation* (its page, "Configure plugin marketplaces" and "Install a plugin from source", 2026-10-11): `owner/repo` in the setting `chat.plugins.marketplaces`, or a command that takes the address of a git repository. Not run | *by its documentation* (its page, "Plugin specification for install command", 2026-10-11): a plugin of a registered marketplace, or a subdirectory of a repository on GitHub. Not run | *by its documentation* (its page, "Add a marketplace from the CLI", 2026-10-11): a marketplace is added from `owner/repo`, and the page sends the install and the test of a plugin to the desktop app. Not run |
 | Install from a local clone | *seen*: Claude Code 2.1.288, 2026-10-10 ("Where a plugin is loaded from") and 2026-10-11 (probe Q1) | *by its documentation* (its page, "Configure plugin marketplaces", 2026-10-11): a `file:///` address of the clone in the setting `chat.plugins.marketplaces`. Not run | *not known* | *by its documentation* (its page, "Add a marketplace from the CLI", 2026-10-11): the root directory of a local marketplace. Not run |
