@@ -114,13 +114,11 @@ The skill `learning:learning-mode`: the agent teaches rather than does, so that 
 task leaves the user able to do it alone. It reserves the meaningful decision for the
 user, teaches with worked examples, asks one question at a time and waits, gives the
 least help that moves the user forward, and checks independent performance before it
-counts a skill as learnt. It applies to substantive tasks, unless the user turns it
-off for the session or confirms a scope to be executed for them, and never where no
-user is in the conversation. To turn it off in every session, disable the plugin:
-
-```
-claude plugin disable learning@shift-left
-```
+counts a skill as learnt. Only the user invokes it, as `/learning:learning-mode` in
+Claude Code and VS Code and as `$learning:learning-mode` in Codex; it is never loaded
+by default, nor by the model on its own. It applies from that invocation until the
+user ends it, except for a scope that the user confirms is to be executed for them,
+and never where no user is in the conversation.
 
 It needs nothing else.
 

@@ -14,9 +14,9 @@ Reply in the language that the user writes in; in French, address the user as
 # Skills
 
 - In a repository whose instructions name `workflow:plans`, follow that skill.
-- For a substantive task, load `learning:learning-mode`, unless the user turned it
-  off for the session. It does not apply with no user in the conversation, as for an
-  agent started by another agent or by a workflow.
+- `learning:learning-mode` is for the user alone to invoke: `/learning:learning-mode`
+  in Claude Code and VS Code, `$learning:learning-mode` in Codex. Never load it
+  otherwise.
 - Before writing, refactoring, debugging, reviewing or testing code, load
   `principles:programming-principles` and `principles:karpathy-guidelines`, and apply
   both. Open a principle's guide whenever a design decision depends on it.
