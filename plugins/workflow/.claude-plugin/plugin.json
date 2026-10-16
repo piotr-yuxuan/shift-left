@@ -1,0 +1,5 @@
+{
+  "name": "workflow",
+  "description": "The life of a change, from its plan to its merge: one plan, one branch and one worktree, an independent review and notes, as one skill",
+  "license": "EUPL-1.2"
+}

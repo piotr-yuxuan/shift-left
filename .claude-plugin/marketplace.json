@@ -37,6 +37,10 @@
     {
       "name": "coordinator",
       "source": "./plugins/coordinator"
+    },
+    {
+      "name": "workflow",
+      "source": "./plugins/workflow"
     }
   ]
 }
