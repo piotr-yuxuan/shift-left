@@ -20,6 +20,8 @@
 #
 #   - a clone in which no marketplace file can be read that names one plugin or more, each by
 #     a name of printable characters;
+#   - a CODEX_HOME or a CLAUDE_CONFIG_DIR that is not an absolute path: the directory that it
+#     names depends on the working directory;
 #   - shared rules that are not a file that can be read, as when this script is run through a
 #     link from another directory, which it then takes for the clone that holds it;
 #   - a skill whose name another plugin, of the same clone or of another, also holds: one link
@@ -155,6 +157,12 @@ for argument in "$@"; do
   clones+=("$clone")
   marketplaces+=("${names%%$'\n'*}")
   plugins+=("${names#*$'\n'}")
+done
+for variable in CODEX_HOME CLAUDE_CONFIG_DIR; do
+  case "${!variable:-/}" in
+    /*) ;;
+    *) refuse "${!variable}" "$variable is not an absolute path" ;;
+  esac
 done
 
 skills=()

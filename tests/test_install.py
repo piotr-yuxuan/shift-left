@@ -443,6 +443,14 @@ class Refusals(InstallCase):
         self.assertRefusedAndUnchanged(result, before, str(codex_home / "skills" / "alpha"))
         self.assertNotIn("beta", result.stderr)
 
+    def test_a_codex_home_or_a_claude_config_dir_that_is_not_absolute_is_refused(self):
+        for variable in ("CODEX_HOME", "CLAUDE_CONFIG_DIR"):
+            with self.subTest(variable=variable):
+                before = self.snapshot()
+                result = self.install(cwd=self.scratch, **{variable: "relative"})
+                self.assertRefusedAndUnchanged(result, before, "relative")
+                self.assertFalse((self.scratch / "relative").exists())
+
     def test_a_skill_name_that_two_plugins_hold_is_refused(self):
         cases = {
             "in one clone": (self.holding / "plugins" / "second", ()),
