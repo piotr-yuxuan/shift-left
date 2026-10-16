@@ -410,6 +410,17 @@ class ImportCheck(InstallCase):
                 self.assertIn(self.THROUGH_A_LINK, lines)
                 self.assertNotIn(self.ADD, lines)
 
+    def test_a_line_inside_an_html_comment_imports_nothing(self):
+        line = "@~/src/holding/instructions/global.md"
+        with self.subTest(text="the line inside a comment"):
+            self.write_claude_md(f"# Mine\n\n<!--\n{line}\n-->\n")
+            self.assertAsksForLine(self.install(), line)
+        with self.subTest(text="the line after two comments"):
+            self.write_claude_md(f"<!-- A note. -->\n  <!--\n@~/other.md\n-->\n{line}\n")
+            result = self.install()
+            self.assertPasses(result)
+            self.assertIn(self.IMPORTS, result.stdout.splitlines())
+
     def test_a_line_that_imports_another_file_is_not_reported(self):
         (self.home / "other.md").write_text("Other rules.\n")
         self.write_claude_md("@~/other.md\n")

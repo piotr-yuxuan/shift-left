@@ -63,9 +63,10 @@
 # With a CLI or without, it then reads ${CLAUDE_CONFIG_DIR:-~/.claude}/CLAUDE.md, the
 # instructions of the user for Claude Code. When that file is the shared rules, as a link to
 # them, it prints `  <file>: is the shared rules`. Else it looks for a line of its own that
-# imports them: `@` and a path that leads to them, absolute, from `~/` or from the directory of
-# that file, with `\ ` for a space, and which ends before its first `#`, as Claude Code reads
-# it. It prints `  <file>: imports the shared rules`; or, when no line does,
+# imports them, outside an HTML comment, which runs from a line that begins with `<!--` to the
+# first that holds `-->`: `@` and a path that leads to them, absolute, from `~/` or from the
+# directory of that file, with `\ ` for a space, and which ends before its first `#`, as Claude
+# Code reads it. It prints `  <file>: imports the shared rules`; or, when no line does,
 # `  <file>: add this line to import the shared rules:` and the line, `    @<path>`, on the
 # next one. When the path of the shared rules holds `#` or `\`, at which Claude Code ends the
 # path of an import, it prints in place of these two lines
@@ -123,6 +124,8 @@ for plugin in json.load(sys.stdin):
 
 # A line of its own that imports a file: `@`, then a path in which a space is `\ `.
 import='^@(([^[:space:]\]|\\ )+)[[:space:]]*$'
+# A line that opens an HTML comment, which ends with the first line that holds `-->`.
+opens='^ {0,3}<!--'
 
 # A path as the output writes it: from `~/` when it lies under the home directory.
 shown() {
@@ -267,7 +270,13 @@ else
 fi
 imports=""
 if [ -f "$config/CLAUDE.md" ]; then
+  comment=""
   while IFS= read -r line || [ -n "$line" ]; do
+    [[ "$line" =~ $opens ]] && comment=yes
+    if [ -n "$comment" ]; then
+      [[ "$line" == *"-->"* ]] && comment=""
+      continue
+    fi
     [[ "$line" =~ $import ]] || continue
     path="${BASH_REMATCH[1]%%#*}"
     path="${path//\\ / }"
