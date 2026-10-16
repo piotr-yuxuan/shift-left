@@ -31,8 +31,9 @@ checkout. What it holds reaches sessions in three ways:
 - Once `install.sh` has run from it, Codex reads its skills through links in
   `~/.agents/skills`, and `instructions/global.md` through a link at `AGENTS.md` of
   the Codex home, from the clone as it is on disk. VS Code is given a link to the same
-  file in its user folder, not seen read. A skill that is added, moved or removed
-  needs another run to get, change or lose its link.
+  file in its user folder, not seen read, and reads the skill links too, by its
+  documentation, where it can see them. A skill that is added, moved or removed needs
+  another run to get, change or lose its link.
 
 So a merge into `main` changes the instructions and the skills of Codex at once, and
 the plugins of a desktop session only after an update: in between, the instructions
