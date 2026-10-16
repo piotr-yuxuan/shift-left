@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Installs the plugins of clones of marketplaces for the clients of this machine, and links the
-# shared rules, instructions/global.md of the clone that holds this script, for each client.
-# Run it again after each commit of a clone: each of its steps can be repeated.
+# Installs the plugins of clones of marketplaces for the clients of this machine. It links the
+# shared rules, instructions/global.md of the clone that holds this script, for Codex and VS
+# Code, and checks that the instructions of the user for Claude Code import them. Run it again
+# after each commit of a clone: each of its steps can be repeated.
 #
 #     install.sh [clone ...]
 #
