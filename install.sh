@@ -33,6 +33,9 @@
 #     since moved, or instructions of the user's own;
 #   - a skill whose name ${CODEX_HOME:-~/.codex}/skills holds, unless that directory and
 #     ~/.agents/skills are one: Codex would list both;
+#   - ~/.agents/skills, when a skill is to be linked there and it is the directory
+#     ${CLAUDE_CONFIG_DIR:-~/.claude}/skills, which Claude Code reads as the user's skills: it
+#     would list each skill beside its plugin's, and keep it when the plugin is disabled;
 #   - the place of a directory that is to hold a link, or else the nearest place above it that
 #     holds something, when what is there is not a directory, such as a file or a link to
 #     nothing: no link can be made under it; or when it leads into a clone of the run, which a
@@ -200,6 +203,9 @@ for clone in "${clones[@]}"; do
     skills+=("$directory")
   done
 done
+if [ "${#skills[@]}" -gt 0 ] && [ "$agents" -ef "$config/skills" ]; then
+  refuse "$agents" "Claude Code reads it as the user's skills: each would be listed twice"
+fi
 if ! [ -f "$rules" ] || ! [ -r "$rules" ]; then
   refuse "$rules" "the shared rules are not a file that can be read"
 fi

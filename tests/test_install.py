@@ -188,6 +188,13 @@ class Installs(InstallCase):
         self.assertIn("plugin update hooks@bare", self.calls())
         self.assertIn('    "~/src/bare/plugins/hooks": true,', result.stdout.splitlines())
 
+    def test_a_run_that_links_no_skill_passes_when_the_skills_of_the_user_are_claude_codes(self):
+        (self.home / ".claude" / "skills").mkdir(parents=True)
+        (self.home / ".agents").mkdir()
+        (self.home / ".agents" / "skills").symlink_to(self.home / ".claude" / "skills")
+        bare = write_clone(self.home / "src" / "bare", "bare", {"hooks": []})
+        self.assertPasses(self.install(str(bare)))
+
     def test_the_cli_lists_once_then_registers_each_clone_and_installs_then_updates_its_plugins(self):
         self.assertPasses(self.run_with_both_clones())
         self.assertEqual(
@@ -469,6 +476,26 @@ class Refusals(InstallCase):
                 before = self.snapshot()
                 result = self.install(str(self.holding), str(self.other))
                 self.assertRefusedAndUnchanged(result, before, shown)
+
+    def test_skills_of_the_user_that_are_the_skills_of_claude_code_are_refused(self):
+        agents = self.home / ".agents" / "skills"
+        claude = self.home / ".claude" / "skills"
+        config = self.scratch / "config"
+        cases = {
+            "~/.agents/skills a link": (claude, agents, {}),
+            "~/.claude/skills a link": (agents, claude, {}),
+            "CLAUDE_CONFIG_DIR set": (config / "skills", agents, {"CLAUDE_CONFIG_DIR": str(config)}),
+        }
+        for name, (real, link, environment) in cases.items():
+            with self.subTest(case=name):
+                self.clear(".agents", ".claude")
+                shutil.rmtree(config, ignore_errors=True)
+                real.mkdir(parents=True)
+                link.parent.mkdir(parents=True, exist_ok=True)
+                link.symlink_to(real)
+                before = self.snapshot()
+                result = self.install(**environment)
+                self.assertRefusedAndUnchanged(result, before, "~/.agents/skills")
 
     def test_a_skill_that_the_skills_of_codex_hold_is_refused(self):
         (self.home / ".codex" / "skills" / "beta").mkdir(parents=True)
