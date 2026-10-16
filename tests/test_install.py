@@ -471,6 +471,35 @@ class Refusals(InstallCase):
                 result = self.install(str(self.holding), argument, cwd=self.scratch)
                 self.assertRefusedAndUnchanged(result, before, shown)
 
+    def test_a_holding_clone_without_a_file_of_shared_rules_is_refused(self):
+        self.rules.unlink()
+        for name, make in (("no file", lambda: None), ("a directory", self.rules.mkdir)):
+            with self.subTest(case=name):
+                make()
+                before = self.snapshot()
+                result = self.install()
+                self.assertRefusedAndUnchanged(result, before, "~/src/holding/instructions/global.md")
+
+    @unittest.skipIf(os.geteuid() == 0, "root reads a file whatever its mode")
+    def test_shared_rules_that_cannot_be_read_are_refused(self):
+        before = self.snapshot()
+        self.rules.chmod(0)
+        try:
+            result = self.install()
+        finally:
+            self.rules.chmod(0o644)
+        self.assertRefusedAndUnchanged(result, before, "~/src/holding/instructions/global.md")
+
+    def test_the_script_run_through_a_link_from_another_directory_is_refused(self):
+        # The script takes the directory of the link for the clone that holds it, and finds no
+        # shared rules there.
+        commands = self.home / "bin"
+        commands.mkdir()
+        (commands / "install.sh").symlink_to(self.holding / "install.sh")
+        before = self.snapshot()
+        result = self.install(str(self.holding), holding=commands)
+        self.assertRefusedAndUnchanged(result, before, "~/bin/instructions/global.md")
+
 
 class Cli(InstallCase):
     def test_the_cli_is_c_else_claude_code_execpath_else_claude_on_path(self):

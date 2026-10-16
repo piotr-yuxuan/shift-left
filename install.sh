@@ -18,6 +18,8 @@
 #
 #   - a clone in which no marketplace file can be read that names one plugin or more, each by
 #     a name of printable characters;
+#   - shared rules that are not a file that can be read, as when this script is run through a
+#     link from another directory, which it then takes for the clone that holds it;
 #   - a skill whose name another plugin, of the same clone or of another, also holds: one link
 #     cannot lead to both;
 #   - something at the place of a link that does not lead to its target: a directory, a file, a
@@ -168,6 +170,9 @@ for clone in "${clones[@]}"; do
     skills+=("$directory")
   done
 done
+if ! [ -f "$rules" ] || ! [ -r "$rules" ]; then
+  refuse "$rules" "the shared rules are not a file that can be read"
+fi
 for place in "$codex/AGENTS.md" "$prompts"; do
   if taken "$place" "$rules"; then
     refuse "$place" "something is there that does not lead to $(shown "$rules")"
