@@ -502,6 +502,20 @@ class Refusals(InstallCase):
             self.rules.chmod(0o644)
         self.assertRefusedAndUnchanged(result, before, "~/src/holding/instructions/global.md")
 
+    def test_without_python3_on_path_the_run_says_so_and_changes_nothing(self):
+        # The commands that the script runs, but python3.
+        commands = self.scratch / "commands"
+        commands.mkdir()
+        for command in ("bash", "dirname", "mkdir", "ln"):
+            (commands / command).symlink_to(shutil.which(command))
+        before = self.snapshot()
+        result = self.install(PATH=str(commands))
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(result.stderr, "install.sh needs python3 on PATH\n")
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(self.calls(), [])
+        self.assertEqual(self.snapshot(), before)
+
     def test_the_script_run_through_a_link_from_another_directory_is_refused(self):
         # The script takes the directory of the link for the clone that holds it, and finds no
         # shared rules there.

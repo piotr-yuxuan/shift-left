@@ -10,7 +10,9 @@
 # argument, the clone is the one that holds this script. Of its own, it makes links and the
 # directories that hold them, and nothing else: it moves, removes, copies and edits nothing.
 # The commands of the Claude Code CLI that it runs change the configuration of Claude Code, as
-# each of them says. It needs bash 4.4 or later, and python3 on PATH to read the JSON files.
+# each of them says. It needs bash 4.4 or later, and python3 on PATH to read the JSON files;
+# without python3 it prints `install.sh needs python3 on PATH` on standard error, and exits 1
+# before it reads anything.
 #
 # Before it changes anything, it reads the marketplace file, .claude-plugin/marketplace.json, of
 # each clone, and looks for every refusal. For each it prints `refused <place>: <reason>` on
@@ -131,6 +133,7 @@ link() {
   fi
 }
 
+command -v python3 >/dev/null || { echo "install.sh needs python3 on PATH" >&2; exit 1; }
 [ "$#" -gt 0 ] || set -- "$here"
 clones=()
 marketplaces=()
