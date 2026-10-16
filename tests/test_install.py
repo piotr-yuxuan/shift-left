@@ -526,11 +526,12 @@ class Refusals(InstallCase):
         # of the skills comes last, since a link that it made would change the clone.
         cases = {
             "~/.codex": self.holding / "instructions",
+            "~/.config/Code/User/prompts": self.holding / "instructions",
             "~/.agents/skills": self.holding / "plugins" / "first" / "skills",
         }
         for shown, target in cases.items():
             with self.subTest(place=shown):
-                self.clear(".agents", ".codex")
+                self.clear(".agents", ".codex", ".config")
                 place = self.home / shown.removeprefix("~/")
                 place.parent.mkdir(parents=True, exist_ok=True)
                 place.symlink_to(target)
