@@ -137,6 +137,37 @@ change.
   plugin has the name of the marketplace, passes `plugin validate`, and the plugin
   installs as `<name>@<name>`. `plugin list --json` shows it enabled with no error.
 
+### Probe C: what the installer relies on
+
+Seen on 2026-10-16, Claude Code 2.1.295 on Linux, with scratch commands and no
+credentials, on clones of this repository at one commit, made in a scratch home
+directory, `<home>`. `install.sh` runs these commands; the probe ran them one by one.
+
+- **`plugin list --json` gives each installed plugin with its scope.** C5, C6: on a
+  configuration with no plugin, before and after `plugin marketplace add`, it prints
+  `[]`. With one plugin installed it prints one object, whose keys include `id`, which
+  is `<plugin>@<marketplace>`, `scope`, here `user`, `enabled` and `readFromFolder`.
+  C7: `plugin update` of a plugin that is not installed exits 1 and says that it is
+  not installed.
+- **An install enables again a plugin that the user disabled; an update does not.**
+  C2: after `plugin disable`, `plugin install` of the same plugin exits 0 and the list
+  shows it enabled. C6: after `plugin disable`, `plugin update` alone exits 0 and the
+  list shows it still disabled.
+- **Each plugin of this marketplace installs and updates from a clone.** C1: after
+  `plugin marketplace add <home>/a`, `plugin install` then `plugin update` of
+  each of the four plugins, `basedpyright-lsp` included, exit 0. Each is then enabled
+  and read from its folder in the clone, and `plugin update` says that it is read from
+  its folder and already at the latest version.
+- **Adding a marketplace again under its name points the name at the new directory.**
+  C3: `plugin marketplace add` of the same clone through a linked directory, then of
+  another clone of the same marketplace, each exits 0 and says from which directory
+  the name had been added and where it now points. The installed plugins are then
+  read from the new directory.
+- **The user-level `CLAUDE.md` is that of the configuration directory.** Static: in
+  the CLI's bundle, the user's `CLAUDE.md` is read from `CLAUDE_CONFIG_DIR` when it is
+  set, else from `~/.claude`. Seen, C4: a debug start with `CLAUDE_CONFIG_DIR` set
+  logs the user's skills as `<scratch>/config/skills`, in the same directory.
+
 ### Skills that an agent names
 
 - **A missing skill is not reported.** Seen: an agent whose `skills:` list names one
@@ -549,8 +580,13 @@ read as page text on 2026-10-11.
 
 ## Codex
 
-Nothing was seen: no probe ran. The page is "Package your plugin",
-`developers.openai.com/plugins/build/plugins`, read as page text on 2026-10-11.
+Probe X ran the Codex CLI 0.163.0-alpha.10.2 on Linux on 2026-10-16, with
+`codex debug prompt-input`, which prints the input that the model would receive and
+calls no model. It ran under scratch home directories, in a working directory that
+holds no `AGENTS.md`, and found which of the files below the input holds by a marker
+in each. Its facts are marked seen. The page is "Package your plugin",
+`developers.openai.com/plugins/build/plugins`, read as page text on 2026-10-11; its
+facts are marked doc.
 
 - **The root `plugin.json` is the portable entry point, and other manifests are
   accepted.** Doc: "Plugin structure": the page calls the root `plugin.json` the
@@ -576,6 +612,22 @@ Nothing was seen: no probe ran. The page is "Package your plugin",
   `codex plugin marketplace add` takes `owner/repo`, a git address or the root
   directory of a local marketplace, and the page sends the install and the test of
   a local plugin to the desktop app.
+- **The user's instructions are the `AGENTS.md` of the Codex home, read through a
+  link.** Seen, X1: with `CODEX_HOME` set, its `AGENTS.md`, a link to a file
+  elsewhere, is read, and `~/.codex/AGENTS.md` is not. X2: with `CODEX_HOME` unset,
+  `~/.codex/AGENTS.md`, a link, is read.
+- **An `AGENTS.override.md` is read in place of that `AGENTS.md`.** Seen, X4: with
+  both in the Codex home, the input holds the override and not the file that the link
+  leads to.
+- **A skill linked into `~/.agents/skills` is listed, under the name of its plugin.**
+  Seen, X3: a link there to the directory of the skill `karpathy-guidelines` in a
+  clone of this repository; the input lists it as `principles:karpathy-guidelines`,
+  with its description.
+- **A linked skill is turned off in `config.toml`, and its link stays.** Seen, X5 to
+  X7, with two skills of `principles` linked: in `config.toml` of the Codex home, an
+  entry `[[skills.config]]` whose `path` is the `SKILL.md` of one of them, by the path
+  of its link or by its path in the clone, and `enabled = false`, removes that skill
+  from the input; the other stays listed, and with no entry both are listed.
 
 ## The standards
 
