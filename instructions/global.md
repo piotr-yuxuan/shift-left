@@ -20,7 +20,7 @@ Reply in the language that the user writes in; in French, address the user as
   `principles:programming-principles` and `principles:karpathy-guidelines`, and apply
   both. Open a principle's guide whenever a design decision depends on it.
 - Skip a skill named here that is not installed; say so for `workflow:plans`. VS Code
-  gives a skill linked in `~/.agents/skills` its bare name: `plans`, `/learning-mode`.
+  names a plugin's skill as Claude Code does, bare when linked in `~/.agents/skills`.
 
 # Code quality
 
