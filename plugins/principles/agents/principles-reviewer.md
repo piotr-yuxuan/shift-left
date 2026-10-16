@@ -37,9 +37,11 @@ authority to accept risk or approve a merge.
    you must not run could show met goes under *Not inspected* instead, as does
    a lens named without criteria.
 5. **Stop early.** The three lenses stop at 3 blocking findings, or at 5
-   questions or 7 remarks if there is nothing blocking; the requirements lens
-   stops at 3 findings of its own. These are limits, not targets: a small
-   change may have no findings.
+   questions or 7 remarks if there is nothing blocking. The requirements lens
+   reports at most 3 findings of its own, criteria that the change contradicts
+   before those that nothing shows met, and lists those it leaves out under
+   *Not inspected*. These are limits, not targets: a small change may have no
+   findings.
 
 Return, briefly:
 
