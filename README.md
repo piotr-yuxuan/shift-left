@@ -2,10 +2,10 @@
 
 A marketplace, `shift-left`, with a few small plugins for coding agents, which bring
 review quality forward to the moment code is written. Each plugin can be adopted
-alone. The plugins are written for Claude Code and tested with it. The two that hold
-skills, `principles` and `coordinator`, are also packaged as the Agent Plugins
-standard asks, version 1.0.0, and tests check that packaging. They were not observed
-in any client of that standard:
+alone. The plugins are written for Claude Code and tested with it. The four that hold
+skills, `principles`, `coordinator`, `workflow` and `learning`, are also packaged as
+the Agent Plugins standard asks, version 1.0.0, and tests check that packaging. They
+were not observed in any client of that standard:
 [What works in which client](#what-works-in-which-client) says what is known of each
 component, and on what evidence.
 
@@ -89,6 +89,41 @@ value that it does not know: an entry of an unknown type is ignored, and an agen
 a state other than `done` counts as not finished. A later version of Claude Code that
 renames such a value gives wrong figures, so see the facts again after an upgrade.
 
+### `workflow`
+
+The skill `workflow:plans`: how a change goes from a plan to a merge. One plan, one
+branch and one linked worktree per change; small commits whose messages follow fixed
+rules; an independent review, by the agent `principles:principles-reviewer` in Claude
+Code where `principles` is installed, and otherwise in a fresh context; notes appended
+to the plan; a merge only once the user confirms. A repository adopts it with a section
+of its `AGENTS.md` that names the skill and gives the repository's own parameters:
+
+```
+## Workflow
+
+Every change follows the skill `workflow:plans`; load it before the first edit. In
+this repository: plans are `docs/work/plans/NNN-slug.<ext>`, tracked or not; the
+checks are <commands>; the extra steps are <only what is specific here>.
+```
+
+It needs `git` and nothing else.
+
+### `learning`
+
+The skill `learning:learning-mode`: the agent teaches rather than does, so that each
+task leaves the user able to do it alone. It reserves the meaningful decision for the
+user, teaches with worked examples, asks one question at a time and waits, gives the
+least help that moves the user forward, and checks independent performance before it
+counts a skill as learnt. It applies to substantive tasks, unless the user turns it
+off for the session or confirms a scope to be executed for them, and never where no
+user is in the conversation. To turn it off in every session, disable the plugin:
+
+```
+claude plugin disable learning@shift-left
+```
+
+It needs nothing else.
+
 ## Install
 
 A command is printed here only where it was seen to work, with one exception, said
@@ -108,6 +143,8 @@ claude plugin install principles@shift-left
 claude plugin install quality-ratchet@shift-left
 claude plugin install basedpyright-lsp@shift-left
 claude plugin install coordinator@shift-left
+claude plugin install workflow@shift-left
+claude plugin install learning@shift-left
 ```
 
 The same commands recreate a user configuration on a new machine: they record the
@@ -123,6 +160,8 @@ session:
 claude plugin update principles@shift-left
 claude plugin update quality-ratchet@shift-left
 claude plugin update coordinator@shift-left
+claude plugin update workflow@shift-left
+claude plugin update learning@shift-left
 ```
 
 From a path, *seen*: one plugin directory, for one session, with no marketplace and
@@ -149,8 +188,11 @@ claude plugin enable quality-ratchet@shift-left
 
 ## Always-on instructions
 
-`instructions/global.md` holds the user-level rules that go with these plugins. The
-file belongs to no plugin, so installing a plugin does not bring it.
+`instructions/global.md` holds the owner's own user-level rules, written for every
+client: the skills to load, code quality, commits and writing, and invariants such as
+never pushing. Some parts are personal: the language register, the learning mode, and
+the configuration folders that the invariants name. The file belongs to no plugin, so
+installing a plugin does not bring it; adopt what fits.
 
 ### Claude Code
 
@@ -170,17 +212,17 @@ skip such an import when the file lies outside their working directory.
 ### Other clients
 
 Where another client loads user-level instructions, and whether this file serves
-there as it is, is not known. The file was written for Claude Code: it names skills
-with the prefix of their plugin, a hook after an edit and a subagent.
+there as it is, is not known. It begins with a front matter, `applyTo: "**"`, meant
+for VS Code; nobody saw VS Code read it.
 
 ## What works in which client
 
-`principles` and `coordinator` each have a `plugin.json` at their root, as Agent
-Plugins 1.0.0 asks (`agent-plugins.org/specification`, 4.1 and 5.2, read on
-2026-10-11), beside the `.claude-plugin/plugin.json` that Claude Code reads. Their
-skills follow Agent Skills (`agentskills.io/specification`, "SKILL.md format", read
-on 2026-10-11). The tests in `tests/packaging/` check both. That is packaging: of the
-clients below, only Claude Code was seen to load anything.
+`principles`, `coordinator`, `workflow` and `learning` each have a `plugin.json` at
+their root, as Agent Plugins 1.0.0 asks (`agent-plugins.org/specification`, 4.1 and
+5.2, read on 2026-10-11), beside the `.claude-plugin/plugin.json` that Claude Code
+reads. Their skills follow Agent Skills (`agentskills.io/specification`, "SKILL.md
+format", read on 2026-10-11). The tests in `tests/packaging/` check both. That is
+packaging: of the clients below, only Claude Code was seen to load anything.
 
 Each cell of the table holds one of five words.
 
@@ -215,6 +257,8 @@ Both are recorded in `docs/harness-facts.md`.
 | Skill `programming-principles` of `principles` | *seen*: Claude Code 2.1.288, 2026-10-10, in a session ("Skills that an agent names"); 2026-10-11, counted at a start (probe Q1) | *by the standard* (the list, 2026-10-11) | *by its documentation* (its page, "Components", 2026-10-11): skills are read from the immediate subdirectories of `skills/` of a plugin whose root manifest declares the standard | *by the standard* (the list, 2026-10-11) |
 | Skill `karpathy-guidelines` of `principles` | *seen*: Claude Code 2.1.288, 2026-10-10, in a session ("Skills that an agent names"); 2026-10-11, counted at a start (probe Q1) | *by the standard* (the list, 2026-10-11) | *by its documentation* (its page, "Components", 2026-10-11): as above | *by the standard* (the list, 2026-10-11) |
 | Skill `instrument` of `coordinator` | *seen*: Claude Code 2.1.288, 2026-10-11, counted at a start (probe Q1). No session has loaded it yet: the plugin was installed in scratch configurations only | *by the standard* (the list, 2026-10-11) | *by its documentation* (its page, "Components", 2026-10-11): as above | *by the standard* (the list, 2026-10-11) |
+| Skill `plans` of `workflow` | *seen*: Claude Code 2.1.295, 2026-10-16, counted by `plugin details` ("Two plugins of one skill each"). No session has loaded it yet: the plugin was installed in a scratch configuration only | *by the standard* (the list, 2026-10-11) | *by its documentation* (its page, "Components", 2026-10-11): as above | *by the standard* (the list, 2026-10-11) |
+| Skill `learning-mode` of `learning` | *seen*: Claude Code 2.1.295, 2026-10-16, counted by `plugin details` ("Two plugins of one skill each"). No session has loaded it yet: the plugin was installed in a scratch configuration only | *by the standard* (the list, 2026-10-11) | *by its documentation* (its page, "Components", 2026-10-11): as above | *by the standard* (the list, 2026-10-11) |
 | `findings.py`, which an agent runs from the directory of the skill `instrument` | *not known*: no session has run it from an installed copy of the skill. That an agent is told the directory of a skill and can run the files beside it was seen with a skill of another plugin ("Scripts that a skill brings") | *not known*: how the client tells its agent the directory of a skill is not established | *not known*, for the same reason | *not known*, for the same reason |
 | `minutes.py`, run in the same way | *not known*, as for `findings.py`. The records that it reads were seen ("Workflow runs and transcripts") | *not known*. It reads records that only Claude Code writes, so there is nothing for it to read | *not known*, for the same reason | *not known*, for the same reason |
 | The reviewer agent of `principles`, `agents/principles-reviewer.md`, in Claude Code's format | *seen*: Claude Code 2.1.288, 2026-10-10, in a session of the desktop app ("Skills that an agent names"); 2026-10-11, counted at a start (probe Q1) | *by its documentation* (its page, "Plugin formats", "Plugin manifest (plugin.json)" and "Reference plugin paths in hook commands", 2026-10-11; probe Q2a): read from `agents/`, in Claude format, while the plugin had only Claude Code's manifest; no longer read now that the root manifest is there, since agents then come from `com.github.copilot/agents/` alone. Read is not shown to work: nobody saw the agent run there | *by its documentation* (its page, "File locations" and "Components", 2026-10-11): read from `agents/`, as a legacy plugin, while the plugin had only Claude Code's manifest; no longer read now that the root manifest is there, since it takes precedence and agents then come from `com.github.copilot/agents/`. Nobody saw the agent run there | *not known* |
@@ -228,7 +272,7 @@ Both are recorded in `docs/harness-facts.md`.
 
 The other clients on the list as it was read on 2026-10-11, OpenHands, NanoClaw, Grok
 Bot, Cursor, OpenClaw, Hermes Agent and Kiro, with ChatGPT, which the list names in one
-entry with Codex, and GitHub Copilot outside its CLI, have the three skills *by the
+entry with Codex, and GitHub Copilot outside its CLI, have the five skills *by the
 standard* and every other row *not known*.
 
 ## Versions and releases
@@ -244,7 +288,7 @@ in the environment `release`, says which commit a client now fetches.
 
 No `.claude-plugin/plugin.json` carries a version: for Claude Code the commit is the
 version of a plugin, and each release is a new commit. So one command takes a release
-of `principles`, of `quality-ratchet` or of `coordinator`:
+of `principles`, `quality-ratchet`, `coordinator`, `workflow` or `learning`:
 
 ```
 claude plugin update <plugin>@shift-left

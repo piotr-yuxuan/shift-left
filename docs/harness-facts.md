@@ -371,6 +371,25 @@ commands of `AGENTS.md`; `plugin marketplace add <clone>`, `plugin install`,
 show there first: in the description that `plugin details` prints, in the version
 that `plugin list` prints, in the counts of the log.
 
+### Two plugins of one skill each
+
+Seen on 2026-10-16, Claude Code 2.1.295, with scratch commands, on the linked worktree
+of the branch that adds the plugins `workflow` and `learning`. No session was started.
+
+- **Each plugin validates and counts its one skill.** `plugin validate` of the
+  marketplace, of `plugins/workflow` and of `plugins/learning` exits 0, with the two
+  warnings of a manifest with no `version` and no `author`. After
+  `plugin marketplace add <worktree>` and `plugin install <plugin>@shift-left`,
+  `plugin details` counts one skill and no other component for each: `plans` for
+  `workflow`, `learning-mode` for `learning`. It estimates about 80 tokens always on
+  for each, and about 1,200 and 2,100 tokens when the skill is invoked.
+- **The worktree is read in place.** `plugin list --json` shows both enabled, read from
+  `plugins/<plugin>` of the worktree, at a version that is the first twelve characters
+  of the commit of the worktree.
+- **A disabled plugin stays installed.** `plugin disable learning@shift-left` exits 0,
+  and `plugin list --json` then shows `learning` with `enabled` false, and `workflow`
+  still enabled. Whether a session then lacks the skill was not observed.
+
 ## VS Code
 
 Nothing below was seen in a running VS Code: no window was opened and no account was
