@@ -73,8 +73,10 @@
 # `  <file>: import the shared rules through a link, as their path holds # or \`: a link to
 # them, or to a directory above them, from a path that holds neither. It writes no such file.
 #
-# == VS Code: ~/.config/Code/User/prompts/shift-left.instructions.md, in the folder of the
-# user's instruction files of VS Code on Linux, is linked to the shared rules. Then it prints
+# == VS Code: <user>/prompts/shift-left.instructions.md, in the folder of the user's instruction
+# files of VS Code, is linked to the shared rules; <user> is the user folder of VS Code,
+# ~/Library/Application Support/Code/User on macOS, where OSTYPE begins with darwin, and
+# ~/.config/Code/User elsewhere, as on Linux. Then it prints
 # `  add these entries to "chat.pluginLocations" in the user settings:` and one entry per plugin
 # of each clone, `    "<clone>/plugins/<plugin>": true,`. It writes no setting.
 #
@@ -96,7 +98,11 @@ codex="${CODEX_HOME:-$HOME/.codex}"
 codex="${codex%/}"
 config="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 config="${config%/}"
-prompts="$HOME/.config/Code/User/prompts/shift-left.instructions.md"
+case "$OSTYPE" in
+  darwin*) prompts="$HOME/Library/Application Support/Code/User" ;;
+  *) prompts="$HOME/.config/Code/User" ;;
+esac
+prompts="$prompts/prompts/shift-left.instructions.md"
 cli="${C:-${CLAUDE_CODE_EXECPATH:-claude}}"
 
 # The name of a marketplace, then the name of each of its plugins, one per line. A file that

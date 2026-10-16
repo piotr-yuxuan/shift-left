@@ -166,8 +166,9 @@ What it does for each client, with the words of
   instructions. One entry of the setting `chat.pluginLocations`, which its page
   documents (the row "Install from a path"), is printed per plugin, for you to add;
   the script writes no setting. `instructions/global.md` is linked as
-  `~/.config/Code/User/prompts/shift-left.instructions.md`, in the user folder of VS
-  Code on Linux, where nobody saw VS Code read it. Wherever VS Code can see
+  `prompts/shift-left.instructions.md` in the user folder of VS Code,
+  `~/.config/Code/User` on Linux and `~/Library/Application Support/Code/User` on
+  macOS, where nobody saw VS Code read it. Wherever VS Code can see
   `~/.agents/skills`, it reads the skill links too, *by its documentation*: the page
   "Agent Skills", `code.visualstudio.com/docs/agent-customization/agent-skills`, dated
   2026-10-14 and read on 2026-10-16, names that folder among those of the user's own

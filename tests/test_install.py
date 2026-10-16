@@ -70,11 +70,12 @@ class InstallCase(unittest.TestCase):
         self.log = self.scratch / "calls.log"
         self.stand_in = self.stand_in_at(self.scratch / "bin" / "claude", self.log)
         # Built from nothing, so that no variable and no configuration of the caller reaches
-        # the script.
+        # the script. OSTYPE as bash sets it on Linux, whatever the system of the caller.
         self.environment = {
             "PATH": os.environ["PATH"],
             "HOME": str(self.home),
             "C": str(self.stand_in),
+            "OSTYPE": "linux-gnu",
         }
 
     def stand_in_at(self, path: Path, log: Path) -> Path:
@@ -245,6 +246,18 @@ class Installs(InstallCase):
                 self.assertLinked(self.home / ".codex" / "AGENTS.md", self.rules)
                 prompts = self.home / ".config" / "Code" / "User" / "prompts"
                 self.assertLinked(prompts / "shift-left.instructions.md", self.rules)
+
+    def test_on_macos_the_instructions_of_vs_code_are_linked_in_its_user_folder_there(self):
+        # OSTYPE as bash sets it on macOS.
+        result = self.install(OSTYPE="darwin23")
+        self.assertPasses(result)
+        user = self.home / "Library" / "Application Support" / "Code" / "User"
+        self.assertLinked(user / "prompts" / "shift-left.instructions.md", self.rules)
+        self.assertFalse((self.home / ".config").exists())
+        self.assertIn(
+            "  ~/Library/Application Support/Code/User/prompts/shift-left.instructions.md: linked",
+            result.stdout.splitlines(),
+        )
 
     def test_with_codex_home_set_the_instructions_of_codex_are_linked_there_and_not_in_dot_codex(self):
         codex_home = self.scratch / "codex"
