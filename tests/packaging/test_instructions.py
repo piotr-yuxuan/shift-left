@@ -6,7 +6,8 @@ applies: the file starts with the three lines `---`, `applyTo: "**"` and `---`. 
 skill or an agent of a plugin as `<plugin>:<name>` between backticks, and each name is one of this
 repository: a skill, `plugins/<plugin>/skills/<name>/SKILL.md`, or an agent,
 `plugins/<plugin>/agents/<name>.md`, so that a rename leaves no name that leads nowhere. Among them
-are `workflow:plans` and `learning:learning-mode`, which the file is to name.
+are `workflow:plans` and `learning:learning-mode`, which the file is to name. The file has at most
+80 lines; of those two skills, the first has at most 120 lines and the second at most 170.
 """
 
 import re
@@ -33,6 +34,15 @@ class SharedRules(unittest.TestCase):
                     or (directory / "agents" / f"{name}.md").is_file(),
                     "no skill and no agent of that name",
                 )
+
+    def test_the_file_has_at_most_80_lines(self):
+        self.assertLessEqual(len(TEXT.splitlines()), 80)
+
+    def test_each_of_the_two_skills_that_the_file_is_to_name_keeps_within_its_length(self):
+        for plugin, name, limit in (("workflow", "plans", 120), ("learning", "learning-mode", 170)):
+            with self.subTest(name=f"{plugin}:{name}"):
+                skill = ROOT / "plugins" / plugin / "skills" / name / "SKILL.md"
+                self.assertLessEqual(len(skill.read_text(encoding="utf-8").splitlines()), limit)
 
 
 if __name__ == "__main__":
