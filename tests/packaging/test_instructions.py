@@ -13,9 +13,10 @@ Those decisions also put rules in the file, and a cut made to keep it within 80 
 none unseen. Each of these is found by a phrase of it, in the text read with every run of blanks
 as one space, since a phrase may wrap: the precedence of a repository's instructions; the skills
 and the agent of `principles` and the hook of Claude Code; the rules on tests, on commits and on
-writing; the invariants; `C` and the scratch configurations. The rule on the primary checkout
-binds only a repository whose instructions name `workflow:plans`: the list item that holds
-`primary checkout` begins with those words.
+writing; the invariants; `C` and the scratch configurations; that only the user invokes
+`learning:learning-mode`. The rule on the primary checkout binds only a repository whose
+instructions name `workflow:plans`: the list item that holds `primary checkout` begins with those
+words.
 """
 
 import re
@@ -78,6 +79,7 @@ class SharedRules(unittest.TestCase):
             "CLAUDE_CODE_EXECPATH",
             "at the start of each command that uses it",
             "CODEX_HOME",
+            "`learning:learning-mode` is for the user alone to invoke",
         )
         for phrase in phrases:
             with self.subTest(phrase=phrase):
