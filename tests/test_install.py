@@ -116,6 +116,15 @@ class InstallCase(unittest.TestCase):
                 state[str(path)] = ("file", path.read_bytes())
         return state
 
+    def clear(self, *names: str) -> None:
+        """Removes each of these entries of the home directory: a link, a file or a directory."""
+        for name in names:
+            path = self.home / name
+            if path.is_symlink() or path.is_file():
+                path.unlink()
+            else:
+                shutil.rmtree(path, ignore_errors=True)
+
     def assertPasses(self, result: subprocess.CompletedProcess[str]) -> None:
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -437,17 +446,29 @@ class Refusals(InstallCase):
         }
         for shown, make in cases.items():
             with self.subTest(place=shown):
-                for parent in (".agents", ".codex", ".config"):
-                    path = self.home / parent
-                    if path.is_symlink() or path.is_file():
-                        path.unlink()
-                    else:
-                        shutil.rmtree(path, ignore_errors=True)
+                self.clear(".agents", ".codex", ".config")
                 place = self.home / shown.removeprefix("~/")
                 place.parent.mkdir(parents=True, exist_ok=True)
                 make(place)
                 before = self.snapshot()
                 self.assertRefusedAndUnchanged(self.install(), before, shown)
+
+    def test_a_directory_of_links_that_leads_into_a_clone_is_refused(self):
+        # As the skills of one plugin, shown to Codex by a link to their folder, would be. The case
+        # of the skills comes last, since a link that it made would change the clone.
+        cases = {
+            "~/.codex": self.holding / "instructions",
+            "~/.agents/skills": self.holding / "plugins" / "first" / "skills",
+        }
+        for shown, target in cases.items():
+            with self.subTest(place=shown):
+                self.clear(".agents", ".codex")
+                place = self.home / shown.removeprefix("~/")
+                place.parent.mkdir(parents=True, exist_ok=True)
+                place.symlink_to(target)
+                before = self.snapshot()
+                result = self.install(str(self.holding), str(self.other))
+                self.assertRefusedAndUnchanged(result, before, shown)
 
     def test_a_skill_that_the_skills_of_codex_hold_is_refused(self):
         (self.home / ".codex" / "skills" / "beta").mkdir(parents=True)

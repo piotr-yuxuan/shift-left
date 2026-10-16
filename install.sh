@@ -35,7 +35,8 @@
 #     ~/.agents/skills are one: Codex would list both;
 #   - the place of a directory that is to hold a link, or else the nearest place above it that
 #     holds something, when what is there is not a directory, such as a file or a link to
-#     nothing: no link can be made under it.
+#     nothing: no link can be made under it; or when it leads into a clone of the run, which a
+#     link made under it would change.
 #
 # Then it prints `== <client>` before the part of each client, and `  <place>: linked` or
 # `  <place>: already linked` for each link that it makes or finds. A link is found when what
@@ -217,7 +218,15 @@ for parent in "${parents[@]}"; do
   done
   if ! [ -d "$parent" ]; then
     refuse "$parent" "it is not a directory, so no link can be made under it"
+    continue
   fi
+  real="$(CDPATH='' cd -- "$parent" && pwd -P)"
+  for clone in "${clones[@]}"; do
+    case "$real/" in "$(CDPATH='' cd -- "$clone" && pwd -P)/"*)
+      refuse "$parent" "it leads into $(shown "$clone"), which a link made there would change"
+      ;;
+    esac
+  done
 done
 [ "$refused" -eq 0 ] || exit 1
 
