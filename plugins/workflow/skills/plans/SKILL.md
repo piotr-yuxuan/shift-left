@@ -112,7 +112,8 @@ checks the user should make. Then wait for the user's word.
 
 ## 9. Merge
 
-Only once the user confirms, from the primary checkout:
+Only once the user confirms, from the primary checkout, never by a fast-forward, so
+that the merge commit groups the plan's commits and gives them one revertable handle:
 
     git merge --no-ff NNN-slug -m "Merge plan NNN, <short sentence>"
     git worktree remove .worktree/NNN-slug
