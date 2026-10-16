@@ -167,6 +167,11 @@ directory, `<home>`. `install.sh` runs these commands; the probe ran them one by
   the CLI's bundle, the user's `CLAUDE.md` is read from `CLAUDE_CONFIG_DIR` when it is
   set, else from `~/.claude`. Seen, C4: a debug start with `CLAUDE_CONFIG_DIR` set
   logs the user's skills as `<scratch>/config/skills`, in the same directory.
+- **A skill linked into that folder of skills is one of the user's.** Seen the same
+  day with the same version, S1 and S2: `<scratch>/config/skills` and
+  `<home>/.agents/skills` are one folder, either a link to the other, which holds a
+  link to the directory of a skill; a debug start logs one skill of the user. The
+  installer so refuses to link skills into `~/.agents/skills` when it is that folder.
 
 ### Skills that an agent names
 
