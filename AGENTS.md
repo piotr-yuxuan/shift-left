@@ -5,6 +5,17 @@ coding agents. They are written for Claude Code, and those that hold a skill are
 packaged as the Agent Plugins standard asks. `docs/harness-facts.md` records what was
 observed about each client and about the standards, and how.
 
+## Workflow
+
+Every change follows the skill `workflow:plans`; load it before the first edit. In this
+repository: plans are `docs/work/plans/NNN-slug.md`, not tracked; the checks are
+`ci/gate.sh`; the extra steps are the plan's row in `docs/work/README.md`, whose rules
+hold under `docs/work/`, added at step 1 and its link changed at step 7, and after step
+6 the `version` of each root `plugin.json` that the branch adds set to `.version`.
+
+The rules that every repository shares are in `instructions/global.md`, which the
+user-level instructions import.
+
 ## A registered clone is live configuration
 
 The clone that a user registers as a local-directory marketplace, and whose
@@ -22,14 +33,7 @@ So a merge into `main` changes the instructions at once, and the plugins of a de
 session only after an update: in between, the instructions can be newer than the
 plugins.
 
-- Never write, switch branch, stash or merge in the primary checkout, except under
-  `docs/work/` and to add a worktree.
-- One plan, one branch, one linked worktree, named after the plan:
-  `git worktree add .worktree/NNN-slug -b NNN-slug`.
-- Never push, and never change the user's Claude Code configuration directory. The
-  owner merges into `main`, pushes, and installs or updates the plugins.
-- To try a command that changes a configuration, use a scratch one:
-  `env -i HOME=<scratch>/home PATH="$PATH" CLAUDE_CONFIG_DIR=<scratch>/config "$C" ...`
+The owner pushes, and installs or updates the plugins.
 
 ## Rules for plugins
 
@@ -65,8 +69,6 @@ plugins.
   the discovery of `hooks/hooks.json`, as `docs/harness-facts.md` records of the page
   of Codex. Every adapter is tested through the documented contract of its client, as
   a hook is.
-- A move changes nothing but what its plan lists. Any other content change to a moved
-  file is a separate commit, made only after a test of the existing behaviour exists.
 
 ## Layout
 
@@ -91,9 +93,9 @@ working here does not load it a second time as project instructions.
 
 ## Commands
 
-Before a handoff, an agent runs the gate, which runs every check of this section and
-four more. The pipeline runs the same script at each push. Its header describes each
-check, and says how to run one alone and how it finds the CLI:
+The gate runs every check of this section and four more, and the pipeline runs the
+same script at each push. Its header describes each check, and says how to run one
+alone and how it finds the CLI:
 
 ```
 ci/gate.sh
@@ -103,12 +105,7 @@ The commands below are what four of its eight checks run: `tests`, `lint`, `mani
 and `contained`. The four others have no command here: `dashes`, `private` and `version`
 read the tracked files, and `messages` reads the commit messages that no tag reaches.
 
-`C` is the Claude Code CLI. In a desktop session `claude` is not on `PATH` and the CLI
-is at `$CLAUDE_CODE_EXECPATH`, so set it at the start of each command:
-
-```
-C="${CLAUDE_CODE_EXECPATH:-claude}"
-```
+`$C` is the Claude Code CLI, as the shared rules set it.
 
 Tests, which need `git` 2.42 or later, `ruff`, `bash` and `python3` on `PATH`:
 
@@ -129,6 +126,8 @@ Manifests; each command must exit 0:
 "$C" plugin validate plugins/principles
 "$C" plugin validate plugins/quality-ratchet
 "$C" plugin validate plugins/coordinator
+"$C" plugin validate plugins/workflow
+"$C" plugin validate plugins/learning
 ```
 
 Self-containment of the plugins. The first command prints nothing; the second prints
@@ -150,12 +149,9 @@ git diff --stat main...HEAD
 
 - Python `unittest` from the standard library, in `tests/` at the root.
 - A script that is a hook is tested through its real contract: an event on standard
-  input, an exit status, text on standard error. Expectations come from the documented
-  contract, not from the code.
-- A test that needs a git repository creates it isolated: every `GIT_*` variable
-  removed, no global or system configuration, no signing, the identity
-  `tests@example.invalid` passed by environment, and its own Ruff configuration, so
-  that no test reads the user's home.
+  input, an exit status, text on standard error.
+- A test that needs a git repository, isolated as the shared rules ask, also removes
+  every `GIT_*` variable, turns signing off and has its own Ruff configuration.
 
 ## Lint
 
@@ -167,17 +163,14 @@ were written.
 
 ## Writing
 
-- Small commits with sentence-case imperative titles.
-- No Unicode dash in anything written for the repository, the licence text excepted.
 - Nothing private in a tracked file or a commit message: no home directory path, no
   user name, no email address other than a commit identity, nothing from another
   repository. Write a real path as `<clone>` or `<scratch>`.
-- A commit message carries no `Co-Authored-By` trailer.
 - Nobody edits `.version` but the pipeline, and the owner for a new minor or major
   version; the `version` of each root `plugin.json` under `plugins/` is edited in the
   same commit, since a test keeps them equal.
 - The title of the version commit of the pipeline, `Version X.Y.Z`, is the one
-  exception to the rule on titles.
+  exception to the shared rule on titles.
 - No other commit message holds a skip marker such as `[skip ci]`, which keeps the
   pipeline from running.
 
