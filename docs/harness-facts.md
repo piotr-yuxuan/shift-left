@@ -426,7 +426,7 @@ of the branch that adds the plugins `workflow` and `learning`. No session was st
 Nothing below was seen in a running VS Code: no window was opened and no account was
 used. The page is "Agent plugins in VS Code",
 `code.visualstudio.com/docs/agent-customization/agent-plugins`, dated 2026-10-07 and
-read as page text on 2026-10-11.
+read as page text on 2026-10-11, unless a fact names another.
 
 - **A root `plugin.json` that declares the schema of the standard sets the format of
   the plugin.** Doc: "Plugin formats". VS Code detects the format of a plugin from
@@ -536,6 +536,34 @@ read as page text on 2026-10-11.
   not load": the `name` of a skill has no namespace prefix and equals the name of
   its directory, and a skill with an invalid name is skipped in silence. The page
   does not say how VS Code names a skill of a plugin to its agent.
+- **A skill in `~/.agents/skills` is the user's, and a plugin's skill of its name
+  does not replace it.** Doc: "Agent Skills",
+  `code.visualstudio.com/docs/agent-customization/agent-skills`, dated 2026-10-14 and
+  read as page text on 2026-10-16. "Create a skill": personal skills are read from
+  `~/.copilot/skills/`, `~/.claude/skills/` and `~/.agents/skills/`. "SKILL.md file
+  format": the command of a skill that a plugin brings takes the name of the plugin as
+  a prefix, as `/my-plugin:test-runner`. Static, VS Code 1.140.0, in
+  `resources/app/out/vs/workbench/workbench.desktop.main.js` of the package, read on
+  2026-10-16. The list of the folders of skills holds `~/.agents/skills`, as storage
+  of the user. The skills found are sorted by storage, the workspace's first, then the
+  user's, then the plugins', then those of extensions; of the skills of one name, which
+  is the name of the directory, the first is kept and each other is skipped as a
+  duplicate. Only the command of a plugin's skill takes the prefix. A plugin whose
+  entry of `chat.pluginLocations` is `false` is not loaded, and its skills are not
+  listed. So a skill linked into `~/.agents/skills` is kept under its bare name, a
+  plugin's skill of that name is skipped, and turning that plugin off in its entry
+  leaves the linked skill on.
+- **How one skill of the user is turned off is not documented, other than in the
+  skill.** Doc, the same page. "Use skills as slash commands": a skill whose front
+  matter sets `user-invocable: false` and `disable-model-invocation: true` is
+  disabled, which is an edit of the skill itself. "Create a skill": for Local harness
+  sessions the setting `chat.agentSkillsLocations` adds folders of skills; it is
+  deprecated, and Copilot harness sessions do not read it. Static, the same file: the
+  default of that setting maps each of the six folders of skills to `true`, and a
+  folder that it maps to `false` is not searched, so `"~/.agents/skills": false` turns
+  off every skill linked there, where the setting is read. The same file keeps a list
+  of the skill files that the user disabled in its views, and leaves them out of the
+  commands of `/`; whether they are also kept from the agent was not read.
 
 ## GitHub Copilot CLI
 
@@ -584,9 +612,11 @@ Probe X ran the Codex CLI 0.163.0-alpha.10.2 on Linux on 2026-10-16, with
 `codex debug prompt-input`, which prints the input that the model would receive and
 calls no model. It ran under scratch home directories, in a working directory that
 holds no `AGENTS.md`, and found which of the files below the input holds by a marker
-in each. Its facts are marked seen. The page is "Package your plugin",
-`developers.openai.com/plugins/build/plugins`, read as page text on 2026-10-11; its
-facts are marked doc.
+in each. Its facts are marked seen. The pages are "Package your plugin",
+`developers.openai.com/plugins/build/plugins`, read as page text on 2026-10-11, and
+"Build skills", `developers.openai.com/codex/skills`, which leads to
+`learn.chatgpt.com/docs/build-skills`, read as page text on 2026-10-16; their facts
+are marked doc.
 
 - **The root `plugin.json` is the portable entry point, and other manifests are
   accepted.** Doc: "Plugin structure": the page calls the root `plugin.json` the
@@ -627,7 +657,21 @@ facts are marked doc.
   X7, with two skills of `principles` linked: in `config.toml` of the Codex home, an
   entry `[[skills.config]]` whose `path` is the `SKILL.md` of one of them, by the path
   of its link or by its path in the clone, and `enabled = false`, removes that skill
-  from the input; the other stays listed, and with no entry both are listed.
+  from the input; the other stays listed, and with no entry both are listed. Doc:
+  "Build skills", "Enable or disable local Codex skills": such an entry in
+  `~/.codex/config.toml`, by the path of a `SKILL.md`, disables a skill without
+  deleting it, once Codex is restarted.
+- **The skills of the user are read from two folders, and a skill in both is listed
+  twice.** Seen, X8 to X14, with a skill of one `name` whose description no other skill
+  holds: the input lists it once when it is in `~/.agents/skills` alone (X10) or in
+  `~/.codex/skills` alone (X11). With a directory of it in each of the two, it is
+  listed twice, once from each (X8). When `~/.agents/skills` is a link to
+  `~/.codex/skills` (X9), or the reverse (X12), it is listed once. With `CODEX_HOME`
+  set, a skill in its `skills` and in `~/.agents/skills` is listed twice (X13), and one
+  in `~/.codex/skills` alone is not listed (X14). Doc: "Build skills", "Where Codex
+  loads local skills": the page names `$HOME/.agents/skills` for the skills of the
+  user, and not the skills of the Codex home; two skills that share a `name` are not
+  merged, and both can appear; Codex follows a linked skill folder to its target.
 
 ## The standards
 
