@@ -238,6 +238,20 @@ class Installs(InstallCase):
         self.assertFalse((self.home / ".codex").exists())
         self.assertIn(f"  {codex_home / 'AGENTS.md'}: linked", result.stdout.splitlines())
 
+    def test_a_slash_at_the_end_of_home_codex_home_or_claude_config_dir_changes_no_place(self):
+        codex_home = self.scratch / "codex"
+        config = self.scratch / "config"
+        result = self.install(
+            HOME=f"{self.home}/", CODEX_HOME=f"{codex_home}/", CLAUDE_CONFIG_DIR=f"{config}/"
+        )
+        self.assertPasses(result)
+        lines = result.stdout.splitlines()
+        self.assertIn(f"  {codex_home}/AGENTS.md: linked", lines)
+        self.assertIn(f"  {config}/CLAUDE.md: add this line to import the shared rules:", lines)
+        self.assertIn("    @~/src/holding/instructions/global.md", lines)
+        self.assertIn('    "~/src/holding/plugins/first": true,', lines)
+        self.assertNotIn(str(self.home), result.stdout)
+
     def test_a_second_run_changes_nothing_and_says_each_link_is_already_linked(self):
         first = self.install()
         self.assertPasses(first)

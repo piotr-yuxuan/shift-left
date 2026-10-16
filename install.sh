@@ -33,7 +33,8 @@
 # Then it prints `== <client>` before the part of each client, and `  <place>: linked` or
 # `  <place>: already linked` for each link that it makes or finds. A link is found when what
 # is at its place leads to its target, by any path. A place, in these lines and in the others
-# below, is written from `~/` when it lies under the home directory.
+# below, is written from `~/` when it lies under the home directory, and without the slash that
+# may end HOME, CODEX_HOME or CLAUDE_CONFIG_DIR.
 #
 # == Codex: each skill of each clone, a directory plugins/<plugin>/skills/<name>/ that holds a
 # SKILL.md, is linked as ~/.agents/skills/<name>, where Codex reads the skills of the user; and
@@ -70,9 +71,14 @@ shopt -s nullglob
 # CDPATH would make `cd` look for a relative path elsewhere first.
 here="$(CDPATH='' cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)" || exit 1
 rules="$here/instructions/global.md"
+# HOME, CODEX_HOME and CLAUDE_CONFIG_DIR without the slash that may end them, so that a place
+# is written from `~/` and holds no `//`.
+[ "$HOME" = / ] || HOME="${HOME%/}"
 agents="$HOME/.agents/skills"
 codex="${CODEX_HOME:-$HOME/.codex}"
+codex="${codex%/}"
 config="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+config="${config%/}"
 prompts="$HOME/.config/Code/User/prompts/shift-left.instructions.md"
 cli="${C:-${CLAUDE_CODE_EXECPATH:-claude}}"
 
