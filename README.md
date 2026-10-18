@@ -135,18 +135,22 @@ What it does for each client, with the words of [What works in which client](#wh
 - Claude Code, *seen*: Claude Code 2.1.295, 2026-10-16 (probe C). Each clone is added as a marketplace, and each plugin
   installed, unless it is installed for the user already, then updated. The user-level `CLAUDE.md` is not edited: the
   script says whether it imports `instructions/global.md`, or is a link to it, and prints the line to add if neither,
-  unless the path of the file holds `#` or `\`, which no such line can carry. A linked `CLAUDE.md` was seen read through
-  its link, but not in a Cowork session (probe L).
+  unless the path of the file holds `#` or `\`, which no such line can carry. It takes for an import only a line of its
+  own, outside an HTML comment and a fenced code block, as Claude Code was seen to (probe I); Claude Code also takes one
+  inside a sentence, which the script reports missing. A linked `CLAUDE.md` was seen read through its link, but not in a
+  Cowork session (probe L).
 - VS Code, *by its documentation* for the plugins and *not known* for the instructions. One entry of the setting
   `chat.pluginLocations`, which its page documents (the row "Install from a path"), is printed per plugin, for you to
   add; the script writes no setting. `instructions/global.md` is linked as `prompts/shift-left.instructions.md` in the
   user folder of VS Code, `~/.config/Code/User` on Linux and `~/Library/Application Support/Code/User` on macOS, where
-  nobody saw VS Code read it. Wherever VS Code can see `~/.agents/skills`, it reads the skill links too, *by its
-  documentation*: the page "Agent Skills", `code.visualstudio.com/docs/agent-customization/agent-skills`, dated
-  2026-10-14 and read on 2026-10-16, names that folder among those of the user's own skills. By its code, read in VS
-  Code 1.140.0 and not seen at work (`docs/harness-facts.md`), a skill found there comes before the copy that a plugin
-  brings, which is skipped, and keeps its bare name: `karpathy-guidelines`, where the plugin's copy is
-  `principles:karpathy-guidelines`.
+  nobody saw VS Code read it. These are the default folders of stable VS Code: the script does not follow
+  `XDG_CONFIG_HOME`, another edition such as Insiders or VSCodium, or `--user-data-dir`, any of which may lead VS Code
+  to another folder, and links there all the same. Wherever VS Code can see `~/.agents/skills`, it reads the skill
+  links too, *by its documentation*: the page "Agent Skills",
+  `code.visualstudio.com/docs/agent-customization/agent-skills`, dated 2026-10-14 and read on 2026-10-16, names that
+  folder among those of the user's own skills. By its code, read in VS Code 1.140.0 and not seen at work
+  (`docs/harness-facts.md`), a skill found there comes before the copy that a plugin brings, which is skipped, and
+  keeps its bare name: `karpathy-guidelines`, where the plugin's copy is `principles:karpathy-guidelines`.
 
 It refuses, says why and changes nothing when the place of a link is taken, as by a skill of the same name in
 `~/.agents/skills` or in the skills of Codex, which Codex would list twice (*seen*, probe X8), or by instructions of

@@ -22,8 +22,9 @@
 #     a name of printable characters;
 #   - a clone whose marketplace has the name of that of a clone named before it: Claude Code
 #     would keep one of the two;
-#   - a CODEX_HOME or a CLAUDE_CONFIG_DIR that is not an absolute path: the directory that it
-#     names depends on the working directory;
+#   - a HOME that is empty or not an absolute path, or a CODEX_HOME or a CLAUDE_CONFIG_DIR that
+#     is set, not empty and not an absolute path: the places under it would be at the root, or
+#     would depend on the working directory;
 #   - shared rules that are not a file that can be read, as when this script is run through a
 #     link from another directory, which it then takes for the clone that holds it;
 #   - a skill whose name another plugin, of the same clone or of another, also holds: one link
@@ -77,9 +78,11 @@
 # them, or to a directory above them, from a path that holds neither. It writes no such file.
 #
 # == VS Code: <user>/prompts/shift-left.instructions.md, in the folder of the user's instruction
-# files of VS Code, is linked to the shared rules; <user> is the user folder of VS Code,
-# ~/Library/Application Support/Code/User on macOS, where OSTYPE begins with darwin, and
-# ~/.config/Code/User elsewhere, as on Linux. Then it prints
+# files of VS Code, is linked to the shared rules; <user> is the default user folder of stable
+# VS Code, ~/Library/Application Support/Code/User on macOS, where OSTYPE begins with darwin,
+# and ~/.config/Code/User elsewhere, as on Linux. It does not follow XDG_CONFIG_HOME, another
+# edition such as Insiders or VSCodium, or --user-data-dir, any of which may lead VS Code to
+# another folder: the link is made there all the same. Then it prints
 # `  add these entries to "chat.pluginLocations" in the user settings:` and one entry per plugin
 # of each clone, `    "<clone>/plugins/<plugin>": true,`. It writes no setting.
 #
@@ -87,8 +90,8 @@
 # changed; or a step failed, such as a command of the CLI or the reading of its list, and the
 # steps after it did not run.
 
-# Before 4.4, `set -u` takes an empty array for an unbound variable. BASH_VERSINFO cannot be set,
-# so the tests, which run one bash, never reach the exit.
+# Before 4.4, `set -u` takes an empty array for an unbound variable. BASH_VERSINFO cannot be set:
+# the tests run a copy in which another array takes its place.
 ((BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404)) ||
   { echo "install.sh needs bash 4.4 or later" >&2; exit 1; }
 set -u
@@ -196,10 +199,13 @@ for argument in "$@"; do
   marketplaces+=("$marketplace")
   plugins+=("${names#*$'\n'}")
 done
-for variable in CODEX_HOME CLAUDE_CONFIG_DIR; do
-  case "${!variable:-/}" in
+for variable in HOME CODEX_HOME CLAUDE_CONFIG_DIR; do
+  value="${!variable-}"
+  # An empty CODEX_HOME or CLAUDE_CONFIG_DIR is taken for an unset one, which has a default.
+  [ "$variable" = HOME ] || value="${value:-/}"
+  case "$value" in
     /*) ;;
-    *) refuse "${!variable}" "$variable is not an absolute path" ;;
+    *) refuse "$value" "$variable is not an absolute path" ;;
   esac
 done
 

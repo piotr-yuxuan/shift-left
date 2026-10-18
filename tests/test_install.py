@@ -607,6 +607,15 @@ class Refusals(InstallCase):
                 self.assertRefusedAndUnchanged(result, before, "relative")
                 self.assertFalse((self.scratch / "relative").exists())
 
+    def test_a_home_that_is_empty_or_not_absolute_is_refused(self):
+        for value in ("", "relative"):
+            with self.subTest(value=value):
+                before = self.snapshot()
+                result = self.install(cwd=self.scratch, HOME=value)
+                self.assertRefusedAndUnchanged(result, before, value)
+                self.assertIn("HOME is not an absolute path", result.stderr)
+                self.assertFalse((self.scratch / "relative").exists())
+
     def test_a_skill_name_that_two_plugins_hold_is_refused(self):
         cases = {
             "in one clone": (self.holding / "plugins" / "second", ()),
@@ -709,6 +718,30 @@ class Refusals(InstallCase):
         self.assertEqual(result.stdout, "")
         self.assertEqual(self.calls(), [])
         self.assertEqual(self.snapshot(), before)
+
+    def test_a_bash_older_than_4_4_is_refused_before_anything_is_read(self):
+        # BASH_VERSINFO cannot be set, and one bash runs the tests: the copy that runs reads the
+        # version from an array of the same form that it is given first.
+        script = (ROOT / "install.sh").read_text()
+        self.assertIn("BASH_VERSINFO", script)
+        script = script.replace("BASH_VERSINFO", "VERSIONS")
+        for version in ("3.2", "4.0", "4.3", "4.4", "5.0", "5.3"):
+            with self.subTest(version=version):
+                major, minor = version.split(".")
+                pretended = script.replace("\n", f"\nVERSIONS=({major} {minor} 0)\n", 1)
+                (self.holding / "install.sh").write_text(pretended)
+                self.clear(".agents", ".codex", ".config", ".claude")
+                self.log.write_text("")
+                before = self.snapshot()
+                result = self.install()
+                if version in ("3.2", "4.0", "4.3"):
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertEqual(result.stderr, "install.sh needs bash 4.4 or later\n")
+                    self.assertEqual(result.stdout, "")
+                    self.assertEqual(self.calls(), [])
+                    self.assertEqual(self.snapshot(), before)
+                else:
+                    self.assertPasses(result)
 
     def test_the_script_run_through_a_link_from_another_directory_is_refused(self):
         # The script takes the directory of the link for the clone that holds it, and finds no
