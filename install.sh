@@ -77,9 +77,11 @@
 # them, or to a directory above them, from a path that holds neither. It writes no such file.
 #
 # == VS Code: <user>/prompts/shift-left.instructions.md, in the folder of the user's instruction
-# files of VS Code, is linked to the shared rules; <user> is the user folder of VS Code,
-# ~/Library/Application Support/Code/User on macOS, where OSTYPE begins with darwin, and
-# ~/.config/Code/User elsewhere, as on Linux. Then it prints
+# files of VS Code, is linked to the shared rules; <user> is the default user folder of stable
+# VS Code, ~/Library/Application Support/Code/User on macOS, where OSTYPE begins with darwin,
+# and ~/.config/Code/User elsewhere, as on Linux. It does not follow XDG_CONFIG_HOME, another
+# edition such as Insiders or VSCodium, or --user-data-dir, any of which may lead VS Code to
+# another folder: the link is made there all the same. Then it prints
 # `  add these entries to "chat.pluginLocations" in the user settings:` and one entry per plugin
 # of each clone, `    "<clone>/plugins/<plugin>": true,`. It writes no setting.
 #
