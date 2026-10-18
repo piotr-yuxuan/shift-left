@@ -225,8 +225,8 @@ claude plugin enable quality-ratchet@shift-left
 
 `instructions/global.md` holds the owner's own user-level rules, written for every client: the skills to load, code
 quality, commits and writing, and invariants such as never pushing. Some parts are personal: the language register, the
-learning mode, and the configuration folders that the invariants name. The file belongs to no plugin, so installing a
-plugin does not bring it; adopt what fits.
+rule that only the user invokes the learning mode, and the configuration folders that the invariants name. The file
+belongs to no plugin, so installing a plugin does not bring it; adopt what fits.
 
 ### Claude Code
 
