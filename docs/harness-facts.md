@@ -434,6 +434,11 @@ of the branch that adds the plugins `workflow` and `learning`. No session was st
 - **A disabled plugin stays installed.** `plugin disable learning@shift-left` exits 0,
   and `plugin list --json` then shows `learning` with `enabled` false, and `workflow`
   still enabled. Whether a session then lacks the skill was not observed.
+- **The estimate ignores `disable-model-invocation`.** Seen on 2026-10-18, Claude Code
+  2.1.299, with the same scratch commands at commit `ec61b0c`, once `learning-mode`
+  set `disable-model-invocation: true`: `plugin details` still estimates about 80
+  tokens always on for each skill, and about 1,300 and 2,200 when it is invoked.
+  Whether a session leaves out the description of `learning-mode` was not observed.
 
 ## VS Code
 
