@@ -90,8 +90,8 @@
 # changed; or a step failed, such as a command of the CLI or the reading of its list, and the
 # steps after it did not run.
 
-# Before 4.4, `set -u` takes an empty array for an unbound variable. BASH_VERSINFO cannot be set,
-# so the tests, which run one bash, never reach the exit.
+# Before 4.4, `set -u` takes an empty array for an unbound variable. BASH_VERSINFO cannot be set:
+# the tests run a copy in which another array takes its place.
 ((BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404)) ||
   { echo "install.sh needs bash 4.4 or later" >&2; exit 1; }
 set -u
