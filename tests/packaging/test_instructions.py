@@ -20,6 +20,15 @@ binds only a repository whose instructions name `workflow:plans`: the list item 
 Only the user invokes `learning:learning-mode`: a list item says that it "is for the user alone to
 invoke" and "Never load it otherwise", and where the file says to load or loads that skill by
 name, the word before is "never".
+
+The same decisions fix what the two skills hold, so that a cut made to keep either within its
+length drops nothing unseen; both are read as the file is, with every run of blanks as one space.
+`plans` has its nine steps as the headings `## 1.` to `## 9.`, in that order, and holds the
+commands of steps 3 and 9, `reports back`, `without those skills` and the sentence by which whoever
+reviews checks each acceptance criterion. `learning-mode`, read ignoring case, holds a phrase of
+each of its rules, `no user` and `clarifying` among them, and none of what named the owner's own
+files and tools where it came from: `~/pvt`, `todo.org`, `Codex`, `I use`, nor a character outside
+ASCII.
 """
 
 import re
@@ -28,6 +37,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TEXT = (ROOT / "instructions" / "global.md").read_text(encoding="utf-8")
+PLANS = (ROOT / "plugins/workflow/skills/plans/SKILL.md").read_text(encoding="utf-8")
+LEARNING = (ROOT / "plugins/learning/skills/learning-mode/SKILL.md").read_text(encoding="utf-8")
 NAMED = re.compile(r"`([a-z0-9-]+):([a-z0-9-]+)`")
 # A list item: a line that begins with `- `, and the lines indented by two spaces that follow it.
 ITEM = re.compile(r"^- .*(?:\n  .*)*", re.MULTILINE)
@@ -106,6 +117,54 @@ class SharedRules(unittest.TestCase):
         for before in re.findall(r"(\S*) loads? `learning:learning-mode`", text, re.IGNORECASE):
             with self.subTest(before=before):
                 self.assertEqual(before.lower(), "never")
+
+
+class SkillContents(unittest.TestCase):
+    def test_plans_has_its_nine_steps_in_order(self):
+        self.assertEqual(re.findall(r"^## ([0-9]+)\. ", PLANS, re.MULTILINE), list("123456789"))
+
+    def test_plans_holds_a_phrase_of_each_rule_that_it_is_to_hold(self):
+        text = " ".join(PLANS.split())
+        phrases = (
+            "git worktree add .worktree/NNN-slug -b NNN-slug main",
+            "git rev-parse --show-toplevel",
+            "git branch --show-current",
+            "git check-ignore -q docs/work/plans",
+            'git merge --no-ff NNN-slug -m "Merge plan NNN, ',
+            "git worktree remove .worktree/NNN-slug",
+            "git branch -d NNN-slug",
+            "reports back",
+            "without those skills",
+            "Whoever reviews also checks the change against each acceptance criterion",
+        )
+        for phrase in phrases:
+            with self.subTest(phrase=phrase):
+                self.assertTrue(phrase in text, "not found")
+
+    def test_learning_mode_holds_a_phrase_of_each_rule_that_it_is_to_hold(self):
+        text = " ".join(LEARNING.split()).lower()
+        phrases = (
+            "execution-only",
+            "cognitive debt",
+            "worked example",
+            "one substantive question",
+            "least help",
+            "untested",
+            "journal file",
+            "employment",
+            "no user",
+            "clarifying",
+        )
+        for phrase in phrases:
+            with self.subTest(phrase=phrase):
+                self.assertTrue(phrase in text, "not found")
+
+    def test_learning_mode_names_none_of_the_owners_own_files_or_tools(self):
+        text = LEARNING.lower()
+        for phrase in ("~/pvt", "todo.org", "codex", "i use"):
+            with self.subTest(phrase=phrase):
+                self.assertFalse(phrase in text, "found")
+        self.assertTrue(LEARNING.isascii(), "a character outside ASCII")
 
 
 if __name__ == "__main__":
