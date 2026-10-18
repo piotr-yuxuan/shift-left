@@ -607,6 +607,15 @@ class Refusals(InstallCase):
                 self.assertRefusedAndUnchanged(result, before, "relative")
                 self.assertFalse((self.scratch / "relative").exists())
 
+    def test_a_home_that_is_empty_or_not_absolute_is_refused(self):
+        for value in ("", "relative"):
+            with self.subTest(value=value):
+                before = self.snapshot()
+                result = self.install(cwd=self.scratch, HOME=value)
+                self.assertRefusedAndUnchanged(result, before, value)
+                self.assertIn("HOME is not an absolute path", result.stderr)
+                self.assertFalse((self.scratch / "relative").exists())
+
     def test_a_skill_name_that_two_plugins_hold_is_refused(self):
         cases = {
             "in one clone": (self.holding / "plugins" / "second", ()),
