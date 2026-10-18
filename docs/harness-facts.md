@@ -182,6 +182,35 @@ directory, `<home>`. `install.sh` runs these commands; the probe ran them one by
   Cowork. Static: in the bundle, the reader of the user's `CLAUDE.md` skips, in a Cowork
   session only, a file that is a link or that has more than one hard link.
 
+### Probe I: what Claude Code reads as an import
+
+Seen on 2026-10-18, Claude Code 2.1.299 and 2.1.295 on Linux, by the method of probe L:
+a user-level `CLAUDE.md` names, by an absolute path, a file that holds a marker, and the
+file counts as imported when a request holds the marker. Each case is named by its probe
+number. Static, read in the bundle of 2.1.299: the file, without its front matter, is
+lexed as Markdown, and `(?:^|\s)@((?:[^\s\\]|\\ )+)` is applied to its text; a relative
+path is read from the directory of that file. `install.sh` reads only a line of its own,
+so it reports missing an import that Claude Code takes (I3, I10) and prints a line to
+add; it reads the other cases as Claude Code does.
+
+- **An import inside an HTML comment is not read.** Not imported: a line `@<path>`
+  between a line `<!--` and a line `-->` (I2). Imported: `<!-- a comment --> @<path>`
+  (I3). Static: an HTML token that begins with `<!--` is read without its comments, and
+  every other HTML token is skipped. Not observed: a comment indented, or inside a
+  paragraph.
+- **An import inside a fenced code block or a code span is not read.** Not imported:
+  `@<path>` between two lines of three backticks (I4), or of four tildes (I5), or
+  between backticks on its line (I11). Static: code and code span tokens are skipped.
+  Not observed: an indented fence, a closing fence longer than the opening one, an
+  indented code block.
+- **The path of an import ends at its first `#`, and at a `\` that no space follows.**
+  Imported: `@<path>#a-fragment` (I6), and a path through a directory `a b` written
+  `a\ b` (I9). Not imported: a path through a directory `a#b` (I7) or `a\b` (I8).
+  Static: the path is cut at its first `#`, then `\ ` becomes a space. Neither `#` nor a
+  lone `\` can be escaped.
+- **An import need not be a line of its own.** Imported: `@<path>` inside a sentence,
+  between spaces (I10). Static: an `@` at the start of the text or after a blank.
+
 ### Skills that an agent names
 
 - **A missing skill is not reported.** Seen: an agent whose `skills:` list names one

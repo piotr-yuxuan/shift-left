@@ -135,8 +135,10 @@ What it does for each client, with the words of [What works in which client](#wh
 - Claude Code, *seen*: Claude Code 2.1.295, 2026-10-16 (probe C). Each clone is added as a marketplace, and each plugin
   installed, unless it is installed for the user already, then updated. The user-level `CLAUDE.md` is not edited: the
   script says whether it imports `instructions/global.md`, or is a link to it, and prints the line to add if neither,
-  unless the path of the file holds `#` or `\`, which no such line can carry. A linked `CLAUDE.md` was seen read through
-  its link, but not in a Cowork session (probe L).
+  unless the path of the file holds `#` or `\`, which no such line can carry. It takes for an import only a line of its
+  own, outside an HTML comment and a fenced code block, as Claude Code was seen to (probe I); Claude Code also takes one
+  inside a sentence, which the script reports missing. A linked `CLAUDE.md` was seen read through its link, but not in a
+  Cowork session (probe L).
 - VS Code, *by its documentation* for the plugins and *not known* for the instructions. One entry of the setting
   `chat.pluginLocations`, which its page documents (the row "Install from a path"), is printed per plugin, for you to
   add; the script writes no setting. `instructions/global.md` is linked as `prompts/shift-left.instructions.md` in the
