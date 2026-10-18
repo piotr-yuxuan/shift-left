@@ -53,10 +53,10 @@ From the primary checkout:
 Before any edit, in the worktree, `git rev-parse --show-toplevel` prints the worktree
 and `git branch --show-current` prints `NNN-slug`.
 
-If `git check-ignore -q docs/work/plans` fails, git tracks plans: move the plan file
-into the worktree and commit it, as the first commit of the branch, since an
-untracked copy left in the primary checkout would stop the merge of step 9. An
-untracked plan stays in the primary checkout, and its notes are written there.
+If `git check-ignore -q docs/work/plans/NNN-slug.<ext>` fails in the primary checkout,
+git tracks plans: move the plan file into the worktree and commit it, as the first
+commit of the branch, since an untracked copy left there would stop the merge of
+step 9. An untracked plan stays in the primary checkout, with its notes.
 
 ## 4. Implement
 

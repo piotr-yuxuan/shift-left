@@ -129,7 +129,7 @@ class SkillContents(unittest.TestCase):
             "git worktree add .worktree/NNN-slug -b NNN-slug main",
             "git rev-parse --show-toplevel",
             "git branch --show-current",
-            "git check-ignore -q docs/work/plans",
+            "git check-ignore -q docs/work/plans/NNN-slug.<ext>",
             'git merge --no-ff NNN-slug -m "Merge plan NNN, ',
             "git worktree remove .worktree/NNN-slug",
             "git branch -d NNN-slug",
