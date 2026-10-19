@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "principles",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Design rules for clear, maintainable, verifiable code and guidelines against common LLM coding mistakes, as two skills",
   "license": "EUPL-1.2 AND MIT",
   "repository": "https://github.com/piotr-yuxuan/shift-left"
