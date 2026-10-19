@@ -4,6 +4,8 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/piotr-yuxuan/shift-left/ci.yml?branch=main)](https://github.com/piotr-yuxuan/shift-left/actions/workflows/ci.yml)
 [![GitHub licence](https://img.shields.io/github/license/piotr-yuxuan/shift-left)](https://github.com/piotr-yuxuan/shift-left?tab=EUPL-1.2-1-ov-file#readme)
 [![GitHub Issues](https://img.shields.io/github/issues/piotr-yuxuan/shift-left)](https://github.com/piotr-yuxuan/shift-left/issues)
+[![Agent Skills](https://img.shields.io/badge/Agent_Skills-compatible-blue)](https://agentskills.io/specification)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-plugin_marketplace-D97757?logo=claude&logoColor=white)](https://code.claude.com/docs/en/discover-plugins)
 
 <img align="right" width="320" src="./docs/social-media-preview.png" alt="A shift key running leftward and chasing a bug">
 
