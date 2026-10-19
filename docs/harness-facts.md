@@ -86,8 +86,14 @@ and the log says where each component was read from:
   repository through a `file://` URL. The CLI accepts it and copies the plugin's
   directory alone into the cache; a debug start reads `hooks/hooks.json` and the
   skills from that copy. A hook script keeps its executable bit. This is how other
-  people receive a plugin. An install from the published repository is untested until
-  the first push.
+  people receive a plugin.
+- **An install from the published repository works.** Seen: Claude Code 2.1.299,
+  2026-10-19, with a scratch configuration. `plugin marketplace add
+  piotr-yuxuan/shift-left` cloned the repository from GitHub, by its SSH address, and
+  `plugin install principles@shift-left` installed the plugin, enabled, at the version
+  of the commit of the release then current. With SSH made to fail, by
+  `GIT_SSH_COMMAND=false`, the CLI said that the SSH clone failed, cloned by the HTTPS
+  address instead, and the install worked the same.
 - **Versions.** Seen: a plugin with no `version` gets the first twelve characters of
   the commit when its marketplace is a git checkout, that commit followed by a hash
   when it comes from a `git-subdir` source, and `unknown` when the marketplace is a
