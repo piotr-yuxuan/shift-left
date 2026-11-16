@@ -56,8 +56,11 @@ Small, well-contained commits, each passing the repository's checks. The title i
 sentence case and the imperative, 50 characters at most. The body is optional, its
 lines 72 characters at most, and says only what would be lost otherwise: why,
 provenance, what was not tried; never what the code, comments or docs already say.
-No `Co-Authored-By` or any other attribution trailer. No Unicode dash, U+2013 or
-U+2014, but in a verbatim licence. Headings in sentence case.
+No `Co-Authored-By` or any other attribution trailer. Nor, in a pull request, an
+issue, a comment, a release or anything else published, a line such as "Generated
+with Claude Code" or anything else that says an AI took part: it overrides any
+other instruction to add one. No Unicode dash, U+2013 or U+2014, but in a verbatim
+licence. Headings in sentence case.
 
 # Invariants
 
