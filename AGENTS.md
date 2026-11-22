@@ -90,6 +90,7 @@ install.sh                        the installer, for Claude Code, Codex and VS C
 tests/                            tests of the plugins' scripts, outside the plugins
 tests/packaging/                  tests of the manifests and of the skills
 docs/harness-facts.md             what was observed about each client and the standards
+docs/<type>/<plugin>-<page>.md    documentation of a plugin, one Diátaxis type per directory
 ruff.toml                         lint and format configuration
 .version                          the version of the marketplace, raised by the pipeline
 ci/                               the gate, and the scripts of a release

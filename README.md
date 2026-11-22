@@ -51,6 +51,12 @@ this repository: plans are `docs/work/plans/NNN-slug.<ext>`, tracked or not; the
 checks are <commands>; the extra steps are <only what is specific here>.
 ```
 
+Its documentation follows [Diátaxis](https://diataxis.fr/): a tutorial, [Your first plan](docs/tutorials/workflow-first-plan.md);
+two how-to guides, to [adopt it in a repository](docs/how-to/workflow-adopt-in-a-repository.md) and to
+[steer a change from request to merge](docs/how-to/workflow-steer-a-change.md); a
+[reference](docs/reference/workflow-plans.md); and an [explanation](docs/explanation/workflow-plans.md) of why it is
+the way it is.
+
 **`learning`.** The agent reserves the meaningful decision for you, teaches with worked examples, asks one question at
 a time and gives the least help that moves you forward. Start it with `/learning:learning-mode` in Claude Code, or
 `$learning:learning-mode` in Codex; the model never loads it of its own accord.
