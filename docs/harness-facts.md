@@ -163,7 +163,8 @@ directory, `<home>`. `install.sh` runs these commands; the probe ran them one by
   `plugin marketplace add <home>/a`, `plugin install` then `plugin update` of
   each of the four plugins, `basedpyright-lsp` included, exit 0. Each is then enabled
   and read from its folder in the clone, and `plugin update` says that it is read from
-  its folder and already at the latest version.
+  its folder and already at the latest version. Plan 022 removed `basedpyright-lsp` on
+  2026-11-22; the marketplace has five plugins since.
 - **Adding a marketplace again under its name points the name at the new directory.**
   C3: `plugin marketplace add` of the same clone through a linked directory, then of
   another clone of the same marketplace, each exits 0 and says from which directory
