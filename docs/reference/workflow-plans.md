@@ -77,6 +77,15 @@ Context and evidence go in a section of their own.
 A plan names code by its symbol, such as a function, a type or a test. It gives a line
 number only where no symbol names the place, and takes no count at the base.
 
+A plan may make one move on a concept whose code its change edits, when that concept
+does its job worse than what the move gives: retiring it into another concept, existing
+or added, splitting it, or another move that `principles:concept-design` names, where
+that skill is installed. A decision names the concept, what replaces it, what the move
+gains and costs, and the change that edits it; so does the plan's section *Concepts*,
+where the repository's plans have one. Once approved, the move is part of the request
+that each changed line traces to. Any other concept that the plan notices becomes a
+follow-up of step 7.
+
 ## The acceptance script
 
 `NNN-checks.sh` runs by its path from the worktree's root.
@@ -101,7 +110,7 @@ it.
 | Lens | What it checks |
 |---|---|
 | Evidence | Each claim about the code at the base; each list in the plan for completeness; that the steps pass the checks in their order |
-| Design | That the plan does its goal and no more; that each decision holds against the principles and the repository's rules; that each check would fail were the plan not met |
+| Design | That the plan does its goal and no more, save a move on a concept that meets every condition set under "The plan", which it checks; that each decision holds against the principles and the repository's rules; that each check would fail were the plan not met |
 
 ## The worktree
 
@@ -129,6 +138,12 @@ and `git branch --show-current` prints `NNN-slug`.
 - No `Co-Authored-By` or other attribution trailer.
 - A move changes nothing but what its plan lists. Any other change to a moved file is a
   separate commit, made once a test of the existing behaviour exists.
+- A move on a concept that the plan declares comes first, so that the requested change
+  is easy. Its commits change no behaviour: existing tests change only by its renames,
+  and no assertion changes; behaviour that no test covers is pinned first. By its last
+  commit no code, test or current document uses a retired name, or a split name in its
+  old sense. Records keep theirs, and a name read outside the repository goes only where
+  a decision says how.
 
 The checks and `NNN-checks.sh` run in full before step 5 and after each fix. Their
 latest output is kept, with its command.
@@ -150,6 +165,9 @@ latest output is kept, with its command.
   may not run commands that write is given the latest output verbatim, with its command.
 - It checks the change against each acceptance criterion, with at most three findings of
   its own.
+- It reads each commit of a declared move on a concept on its own, with
+  `git log -p main..HEAD`, and checks that it changes no assertion and no behaviour. A
+  breach is a finding over and above its three.
 - Blocking and major findings are fixed, and each fix is reviewed again, for at most
   three rounds unless `AGENTS.md` says otherwise.
 - A serious finding still open after the last round goes to the user at step 8: one that
@@ -173,8 +191,8 @@ by `mv` in the primary checkout otherwise.
 ## Pre-merge summary
 
 Step 8 tells the user what changed and why, the assumptions, the trade-offs and the
-alternatives not taken, the tests run and their results, the limitations, and the manual
-checks to make. Then it waits for the user's word.
+alternatives not taken, the tests run and their results, the limitations, the move on a
+concept, if any, with its commits, and the manual checks to make. Then it waits for the user's word.
 
 ## Merge
 

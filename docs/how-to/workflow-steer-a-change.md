@@ -52,7 +52,8 @@ git log --oneline main..NNN-slug
 
 When the work is reviewed, the agent tells you what changed and why, the assumptions,
 the trade-offs and the alternatives not taken, the tests run and their results, the
-limitations, and the manual checks to make. Then it waits.
+limitations, the move on a concept, if any, with its commits, and the manual checks to
+make. Then it waits.
 
 - Make the manual checks in the worktree, where the change is:
 
