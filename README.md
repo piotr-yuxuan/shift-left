@@ -20,7 +20,7 @@ Cursor and GitHub Copilot read. Each plugin can be installed on its own.
 
 | Plugin | What it gives the agent | Needs |
 |---|---|---|
-| [`principles`](plugins/principles) | Two skills: sixteen design rules for clear, maintainable, verifiable code, and four guidelines against common LLM coding mistakes. A read-only reviewer agent that checks a change against both | nothing |
+| [`principles`](plugins/principles) | Three skills: sixteen design rules for clear, maintainable, verifiable code, four guidelines against common LLM coding mistakes, and six moves on concepts. A read-only reviewer agent that checks a change against the first two | nothing |
 | [`quality-ratchet`](plugins/quality-ratchet) | A hook that runs Ruff after each Python edit and reports only the problems that the edit introduced | Python 3.14+, git, Ruff |
 | [`workflow`](plugins/workflow) | A skill for the life of a change: one plan, one branch and one worktree, an independent review, a merge only on your word | git |
 | [`learning`](plugins/learning) | A learning mode, started only by you, in which the agent teaches rather than does | nothing |
@@ -32,8 +32,11 @@ Cursor and GitHub Copilot read. Each plugin can be installed on its own.
 
 **`principles`.** `programming-principles` holds the sixteen design rules, each with a guide. `karpathy-guidelines`
 holds four: think before coding, simplicity first, surgical changes, goal-driven execution; it is copied unchanged
-from another repository, under MIT. The agent `principles-reviewer` reviews one change against both skills in one
-bounded pass. Give it a plan with acceptance criteria and it checks the change against them too.
+from another repository, under MIT. `concept-design` names Daniel Jackson's six moves on concepts, split and merge,
+unify and specialize, tighten and loosen, each a trade-off, and reads them for code as candidates to weigh;
+`workflow:plans` names it for a plan that makes a move on a concept. The agent `principles-reviewer` reviews one change
+against the first two skills in one bounded pass. Give it a plan with acceptance criteria and it checks the change
+against them too.
 
 **`quality-ratchet`.** After each edit of a Python file, it runs Ruff with the repository's own configuration, plus
 McCabe complexity and the bugbear rules, on the edited file and on its committed version, and reports the difference.
@@ -85,6 +88,7 @@ An agent's context is its working memory, so nothing here is loaded in full up f
   the wrong abstraction, YAGNI, decisions and effects, explicit invariants, resource ownership, readability and
   meaningful verification. The agent opens a principle's guide, with its definition, two worked examples and a review
   question, only when a decision depends on it.
+- `concept-design` loads only when a plan or a change weighs a move on an existing concept.
 - The reviewer works in a context of its own and hands back only its findings.
 - The hooks run outside the model. The one of `quality-ratchet` reports only what an edit made worse; those of
   `code-index` add one line to the context when a worktree is indexed, or when a session starts in a linked worktree
@@ -179,7 +183,7 @@ Plugins, says that the client reads it; not yet tried here. *Not read*: its docu
 
 | | Claude Code | Codex | Cursor | GitHub Copilot in VS Code | GitHub Copilot CLI |
 |---|---|---|---|---|---|
-| The six skills | tested | tested for `principles`, through `install.sh`; documented for the others | documented | documented | documented |
+| The seven skills | tested, but `concept-design` not yet tried | tested for `principles`, through `install.sh`, but `concept-design` not yet tried; documented for the others | documented | documented | documented |
 | The reviewer agent of `principles` | tested | unknown | unknown | not read | not read |
 | The hook of `quality-ratchet` | tested | documented | unknown | documented; runs after every tool call there, not only after an edit | documented |
 | The hooks of `code-index` | documented | documented at a session start; unknown after a command | unknown | not read: with a root manifest, hooks come from `com.github.copilot/` | not read, for the same reason |
