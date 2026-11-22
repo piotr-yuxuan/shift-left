@@ -22,7 +22,6 @@ Cursor and GitHub Copilot read. Each plugin can be installed on its own.
 |---|---|---|
 | [`principles`](plugins/principles) | Two skills: sixteen design rules for clear, maintainable, verifiable code, and four guidelines against common LLM coding mistakes. A read-only reviewer agent that checks a change against both | nothing |
 | [`quality-ratchet`](plugins/quality-ratchet) | A hook that runs Ruff after each Python edit and reports only the problems that the edit introduced | Python 3.14+, git, Ruff |
-| [`basedpyright-lsp`](plugins/basedpyright-lsp) | Type diagnostics and symbol navigation in Python files | `basedpyright-langserver` |
 | [`workflow`](plugins/workflow) | A skill for the life of a change: one plan, one branch and one worktree, an independent review, a merge only on your word | git |
 | [`learning`](plugins/learning) | A learning mode, started only by you, in which the agent teaches rather than does | nothing |
 | [`coordinator`](plugins/coordinator) | Scripts that record what reviews found and what workflow runs cost | Python 3.14+, git |
@@ -39,8 +38,6 @@ bounded pass. Give it a plan with acceptance criteria and it checks the change a
 McCabe complexity and the bugbear rules, on the edited file and on its committed version, and reports the difference.
 A function already over the complexity threshold may not grow. It prefers the `.venv/bin/ruff` of the repository being
 edited to the `ruff` on `PATH`. In a new file, or outside git, every problem counts as introduced.
-
-**`basedpyright-lsp`.** Do not enable `pyright-lsp` at the same time, or diagnostics are reported twice.
 
 **`workflow`.** The skill `plans`: small commits with fixed rules for their messages, a review by
 `principles-reviewer` where it is installed and otherwise in a fresh context, notes appended to the plan. A repository
@@ -86,7 +83,6 @@ Add the marketplace, then install the plugins that you want:
 claude plugin marketplace add piotr-yuxuan/shift-left
 claude plugin install principles@shift-left
 claude plugin install quality-ratchet@shift-left
-claude plugin install basedpyright-lsp@shift-left
 claude plugin install workflow@shift-left
 claude plugin install learning@shift-left
 claude plugin install coordinator@shift-left
@@ -169,7 +165,6 @@ Plugins, says that the client reads it; not yet tried here. *Not read*: its docu
 | The five skills | tested | tested for `principles`, through `install.sh`; documented for the others | documented | documented | documented |
 | The reviewer agent of `principles` | tested | unknown | unknown | not read | not read |
 | The hook of `quality-ratchet` | tested | documented | unknown | documented; runs after every tool call there, not only after an edit | documented |
-| The language server of `basedpyright-lsp` | tested | unknown | unknown | unknown | unknown |
 | The shared instructions | tested | tested, through `install.sh` | unknown | unknown | unknown |
 
 Where the reviewer agent is not available, `workflow` asks for the review in a fresh context instead. `minutes.py` of
@@ -194,8 +189,7 @@ backslash:
 
 Every push to `main` that passes `ci/gate.sh` becomes a release: the pipeline raises the patch number in `.version`,
 then tags and releases that commit. For Claude Code a plugin's version is its commit, so
-`claude plugin update <plugin>@shift-left` takes the latest release. `basedpyright-lsp` keeps a version of its own,
-1.0.0, which a release does not move.
+`claude plugin update <plugin>@shift-left` takes the latest release.
 
 ## Licence
 

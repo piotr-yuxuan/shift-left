@@ -163,7 +163,8 @@ directory, `<home>`. `install.sh` runs these commands; the probe ran them one by
   `plugin marketplace add <home>/a`, `plugin install` then `plugin update` of
   each of the four plugins, `basedpyright-lsp` included, exit 0. Each is then enabled
   and read from its folder in the clone, and `plugin update` says that it is read from
-  its folder and already at the latest version.
+  its folder and already at the latest version. Plan 022 removed `basedpyright-lsp` on
+  2026-11-22; the marketplace has five plugins since.
 - **Adding a marketplace again under its name points the name at the new directory.**
   C3: `plugin marketplace add` of the same clone through a linked directory, then of
   another clone of the same marketplace, each exits 0 and says from which directory
@@ -652,6 +653,7 @@ read as page text on 2026-10-11.
 - **A language server needs `fileExtensions`.** Doc: "LSP server configuration": the
   field `fileExtensions`, from file extensions to language names, is required. The
   entry of `basedpyright-lsp` has `extensionToLanguage` in its place.
+  Since plan 022, on 2026-11-22, the marketplace has no language server entry.
 - **What its install command takes.** Doc: "Plugin specification for install
   command": a plugin of a registered marketplace, as `plugin@marketplace`; a
   repository on GitHub, or a subdirectory of one; a git address; a local path.

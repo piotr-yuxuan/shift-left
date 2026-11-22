@@ -16,25 +16,6 @@
       "source": "./plugins/quality-ratchet"
     },
     {
-      "name": "basedpyright-lsp",
-      "description": "Python diagnostics and code navigation from the installed basedpyright language server",
-      "version": "1.0.0",
-      "source": "./plugins/basedpyright-lsp",
-      "strict": false,
-      "lspServers": {
-        "basedpyright": {
-          "command": "basedpyright-langserver",
-          "args": [
-            "--stdio"
-          ],
-          "extensionToLanguage": {
-            ".py": "python",
-            ".pyi": "python"
-          }
-        }
-      }
-    },
-    {
       "name": "coordinator",
       "source": "./plugins/coordinator"
     },
