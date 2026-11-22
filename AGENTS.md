@@ -139,6 +139,7 @@ Manifests; each command must exit 0:
 "$C" plugin validate plugins/coordinator
 "$C" plugin validate plugins/workflow
 "$C" plugin validate plugins/learning
+"$C" plugin validate plugins/code-index
 ```
 
 Self-containment of the plugins. The first command prints nothing; the second prints

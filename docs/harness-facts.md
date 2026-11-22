@@ -271,6 +271,29 @@ add; it reads the other cases as Claude Code does.
   Each time, the transcript of each gained exactly one record with the report for its
   file: an attachment of type `hook_blocking_error` for the event `PostToolUse`. The
   same probe for an agent started by a workflow is still to run.
+- **What a hook at the start of a session is given, and what it gives.** Doc, read on
+  2026-11-22 through a fetch that summarises the page, not as page text: hooks
+  reference, "SessionStart input" and "Exit code 0". The input holds `cwd` and
+  `source`, one of `startup`, `resume`, `clear`, `compact` and `fork`, which a matcher
+  filters on. Standard output with status 0 is added to the context; no status blocks.
+- **What a hook after a shell command is given, and how it reaches the model.** Doc,
+  read the same way: "PostToolUse input", the `Bash` input under "PreToolUse input",
+  and "PostToolUse decision control". The input holds `cwd`, `tool_input.command` and
+  `tool_response`. `{"hookSpecificOutput": {"hookEventName": "PostToolUse",
+  "additionalContext": "..."}}` adds text to the context; plain output with status 0
+  is not among the outputs that the page says reach the model.
+- **A hook's `if` filters it by one permission rule.** Doc, read the same way: "Common
+  fields": a rule such as `Bash(git *)`, evaluated on tool events only, with no `&&`
+  and no list. The page gives no version from which it is read.
+- **`WorktreeCreate` replaces the creation, and fires for no worktree added through
+  `Bash`.** Doc, read the same way: "WorktreeCreate": it fires for `claude --worktree`,
+  the tool `EnterWorktree` and a subagent with `isolation: "worktree"`, among others,
+  and configuring it replaces Claude Code's own creation; the hook prints the path of
+  the worktree it made. A worktree added through `Bash` fires none.
+- **Hooks block, run in parallel, and have 600 seconds.** Doc, read the same way:
+  "Run hooks in the background": a hook blocks until it completes, unless it is
+  asynchronous; matching hooks run in parallel; the default timeout of a command hook
+  is 600 seconds; hooks of plugins run in subagents and in the desktop app.
 
 ### Scripts that a skill brings
 
@@ -370,7 +393,8 @@ see these facts again after an upgrade.
 
 ### Other tools
 
-What the scripts of `coordinator` and their tests rely on outside Claude Code.
+What the scripts of `coordinator` and `code-index` and their tests rely on outside
+Claude Code.
 
 - **`git check-ignore` answers for a file that does not exist yet.** Seen, git
   2.54.0, in a scratch repository: `git check-ignore -q <absolute path>`, run from the
@@ -390,6 +414,27 @@ What the scripts of `coordinator` and their tests rely on outside Claude Code.
 - **A lock on a directory.** Seen, Linux, local file system: `fcntl.flock` on a
   descriptor of a directory excludes another process that locks the same directory,
   the `flock` command included, and creates no file.
+- **codegraph's own `.gitignore` re-includes itself unless its folder is ignored.**
+  Seen, codegraph 1.6.2 and git 2.56.0, on 2026-11-22, in scratch repositories with no
+  system or global git configuration but the ignore file of each case: codegraph
+  writes `.codegraph/.gitignore` holding `*` and `!.gitignore`. After
+  `codegraph init -y .` in a linked worktree, `git status` is clean and
+  `git worktree remove` succeeds without `--force` where `/.codegraph/` or `.codegraph`
+  is in `.gitignore`, or `.codegraph/` is in the global ignore file. With no rule, or
+  with `.codegraph/*` in either, it shows `?? .codegraph/` and the removal is refused.
+  `git check-ignore -q .codegraph/` succeeds before the index under every rule but the
+  absent one.
+- **`codegraph init` writes into an existing empty `.codegraph/`, and nothing under
+  the home directory.** Seen, codegraph 1.6.2, on 2026-11-22: over an empty folder made
+  before, it exits 0 and writes its database and `.gitignore` there; under a scratch
+  home directory, it wrote nothing there. A first index took 0.7 seconds of wall time
+  for this repository and 1.7 seconds for one of 434 files.
+- **codegraph's MCP server answers from a worktree's index when given its path, and
+  outlives the worktree.** Seen, codegraph 1.6.2, on 2026-11-22, with the server of a
+  desktop session rooted elsewhere: given the path of a linked worktree indexed after
+  the server started, it answered with a function committed only on that branch; after
+  `git worktree remove` of that worktree, without `--force`, it answered for the main
+  worktree and recreated nothing.
 - **jq prints a number as it was written.** Seen, jq 1.8.2: `30.0` stays `30.0`, so it
   does not compare equal to `30` as text.
 
@@ -689,6 +734,12 @@ are marked doc.
   compatibility. On the page `com.openai` is each time a key of a manifest and never
   a directory: "Plugin structure" keeps the hook files and the other files of Codex
   at the root of the plugin.
+- **A hook at the start of a session is given the same fields as in Claude Code.**
+  Doc, read on 2026-11-22 through a fetch that summarises the page: the page on hooks,
+  which `developers.openai.com/codex/hooks` leads to, documents `SessionStart` and
+  `PreToolUse`. Every event holds `session_id`, `transcript_path`, `cwd`,
+  `hook_event_name` and `model`; `SessionStart` adds `source` and `permission_mode`.
+  An event after a shell command was not found on it.
 - **Marketplace files.** Doc: "How local marketplaces work": a marketplace file is
   read from `.agents/plugins/marketplace.json` of a repository, from
   `.claude-plugin/marketplace.json` of a repository as a legacy-compatible place,

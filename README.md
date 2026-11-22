@@ -25,6 +25,7 @@ Cursor and GitHub Copilot read. Each plugin can be installed on its own.
 | [`workflow`](plugins/workflow) | A skill for the life of a change: one plan, one branch and one worktree, an independent review, a merge only on your word | git |
 | [`learning`](plugins/learning) | A learning mode, started only by you, in which the agent teaches rather than does | nothing |
 | [`coordinator`](plugins/coordinator) | Scripts that record what reviews found and what workflow runs cost | Python 3.14+, git |
+| [`code-index`](plugins/code-index) | Hooks that give each linked git worktree a codegraph index of its own when an agent adds it or a session starts in it, and a skill that says how to query it | Python 3.10+, git 2.36+, codegraph |
 
 <details>
 <summary>More about each plugin</summary>
@@ -65,6 +66,13 @@ a time and gives the least help that moves you forward. Start it with `/learning
 one JSON file checked against a schema, and `minutes.py`, which reads the wall and agent minutes of ended workflow runs
 from the records that Claude Code keeps. `codebook.md` defines the labels given to a finding afterwards.
 
+**`code-index`.** codegraph answers from the nearest index at or above a path, so a linked worktree inside the main
+worktree is answered as the main branch stands until it has an index of its own. Where you have indexed the main
+worktree and git ignores `.codegraph/`, a hook indexes each worktree that an agent adds, and tells the agent to query it
+by its path; another hook does the same when a session starts in one. Nothing happens at a removal: the ignored index
+leaves with the worktree. The skill `code-index` says how to query, and how to index by hand in another client.
+[How to give each worktree its own code index](docs/how-to/code-index-worktrees.md) sets it up.
+
 </details>
 
 ## Light on context
@@ -78,7 +86,9 @@ An agent's context is its working memory, so nothing here is loaded in full up f
   meaningful verification. The agent opens a principle's guide, with its definition, two worked examples and a review
   question, only when a decision depends on it.
 - The reviewer works in a context of its own and hands back only its findings.
-- The hook runs outside the model and reports only what an edit made worse.
+- The hooks run outside the model. The one of `quality-ratchet` reports only what an edit made worse; those of
+  `code-index` add one line to the context when a worktree is indexed, or when a session starts in a linked worktree
+  of an indexed repository.
 - The learning mode never loads unless you start it.
 
 ## Install in Claude Code
@@ -92,6 +102,7 @@ claude plugin install quality-ratchet@shift-left
 claude plugin install workflow@shift-left
 claude plugin install learning@shift-left
 claude plugin install coordinator@shift-left
+claude plugin install code-index@shift-left
 ```
 
 `claude plugin update <plugin>@shift-left` takes a new release later. These commands record the marketplace and the
@@ -121,7 +132,7 @@ claude plugin enable quality-ratchet@shift-left
 
 ## Codex, Cursor and GitHub Copilot
 
-`principles`, `workflow`, `learning` and `coordinator` each carry a `plugin.json` of the
+`principles`, `workflow`, `learning`, `coordinator` and `code-index` each carry a `plugin.json` of the
 [Agent Plugins](https://agent-plugins.org/specification) standard, and their skills follow
 [Agent Skills](https://agentskills.io/specification), so each client can add them as its own documentation describes.
 `install.sh`, at the root of a clone, also links the skills and the shared instructions where Codex and VS Code read
@@ -168,9 +179,10 @@ Plugins, says that the client reads it; not yet tried here. *Not read*: its docu
 
 | | Claude Code | Codex | Cursor | GitHub Copilot in VS Code | GitHub Copilot CLI |
 |---|---|---|---|---|---|
-| The five skills | tested | tested for `principles`, through `install.sh`; documented for the others | documented | documented | documented |
+| The six skills | tested | tested for `principles`, through `install.sh`; documented for the others | documented | documented | documented |
 | The reviewer agent of `principles` | tested | unknown | unknown | not read | not read |
 | The hook of `quality-ratchet` | tested | documented | unknown | documented; runs after every tool call there, not only after an edit | documented |
+| The hooks of `code-index` | documented | documented at a session start; unknown after a command | unknown | not read: with a root manifest, hooks come from `com.github.copilot/` | not read, for the same reason |
 | The shared instructions | tested | tested, through `install.sh` | unknown | unknown | unknown |
 
 Where the reviewer agent is not available, `workflow` asks for the review in a fresh context instead. `minutes.py` of
