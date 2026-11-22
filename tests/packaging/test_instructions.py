@@ -7,10 +7,9 @@ skill or an agent of a plugin as `<plugin>:<name>` between backticks, and each n
 repository: a skill, `plugins/<plugin>/skills/<name>/SKILL.md`, or an agent,
 `plugins/<plugin>/agents/<name>.md`, so that a rename leaves no name that leads nowhere. Among them
 are `workflow:plans` and `learning:learning-mode`, which the file is to name. The file has at most
-84 lines; of those two skills, the first has at most 157 lines and the second at most 170. Until
-2026-11-22 the file's limit was 80 lines and that of the first skill 120: the rule on published
-attribution of 2026-11-16 took the file to 83, and plan 023 added a line to it and its rules on
-plans to the skill.
+84 lines; of those two skills, the first has at most 159 lines and the second at most 170. The
+first two limits are the lengths of the file and of `plans` when plan 023 changed their rules,
+on 2026-11-22, so that any further line is a decision.
 
 Those decisions also put rules in the file, and a cut made to keep it within its length must drop
 none unseen. Each of these is found by a phrase of it, in the text read with every run of blanks
@@ -69,7 +68,7 @@ class SharedRules(unittest.TestCase):
         self.assertLessEqual(len(TEXT.splitlines()), 84)
 
     def test_each_of_the_two_skills_that_the_file_is_to_name_keeps_within_its_length(self):
-        for plugin, name, limit in (("workflow", "plans", 157), ("learning", "learning-mode", 170)):
+        for plugin, name, limit in (("workflow", "plans", 159), ("learning", "learning-mode", 170)):
             with self.subTest(name=f"{plugin}:{name}"):
                 skill = ROOT / "plugins" / plugin / "skills" / name / "SKILL.md"
                 self.assertLessEqual(len(skill.read_text(encoding="utf-8").splitlines()), limit)
@@ -143,6 +142,10 @@ class SkillContents(unittest.TestCase):
             "without those skills",
             "Whoever reviews also checks the change against each acceptance criterion",
             "`NNN-checks.sh`",
+            "about 400 lines",
+            "listed as manual",
+            "The *evidence* lens",
+            "the checks and `NNN-checks.sh` again",
             "Name code by its symbol",
             "Take no count at the base",
             "plan drafted without a script",

@@ -42,12 +42,13 @@ that `AGENTS.md` gives.
 - Name code by its symbol, such as a function, a type or a test; give a line number
   only where no symbol names the place. Take no count at the base: the next merge
   makes both stale.
-- The acceptance criteria are a script beside the plan, `NNN-checks.sh`, run from the
-  worktree's root: each check exits non-zero and names itself when the plan is not
-  met, and the plan lists the checks in one line each. Behaviour is checked by tests
-  that the steps name, which the script runs by name; the repository's checks stay
-  outside it. A criterion that no command can check is listed as manual, with why. A
-  plan drafted without a script keeps its criteria as written, in the script's stead.
+- The acceptance criteria are a script beside the plan, `NNN-checks.sh`, run by its
+  path from the worktree's root: each check exits non-zero and names itself when the
+  plan is not met, and the plan lists the checks in one line each. Behaviour is
+  checked by tests that the steps name, which the script runs by name; the
+  repository's checks stay outside it. A criterion that no command can check is
+  listed as manual, with why. A plan drafted without a script keeps its criteria as
+  written, in the script's stead.
 
 ## 2. Approval
 
@@ -93,10 +94,8 @@ the script's latest output, with its command.
 
 ## 5. Review
 
-An independent review of `git diff main...HEAD`, without the plan and its script
-where git tracks them, given the base, the intent and the plan's decisions, steps,
-acceptance criteria and what it leaves out; the rest of the plan only where a finding
-depends on it:
+An independent review of the diff `git diff main...HEAD`, the plan and its script
+left out of it where git tracks them:
 
 - in Claude Code, the agent `principles:principles-reviewer`, whose requirements lens
   a plan with acceptance criteria turns on;
@@ -104,9 +103,12 @@ depends on it:
   `principles:karpathy-guidelines`;
 - without those skills, a fresh context that checks the change against the intent.
 
-Whoever reviews runs `NNN-checks.sh` once at the tip, a failing check being a
-finding; a reviewer that may not run commands that write is given its latest output
-verbatim, with its command.
+Whoever reviews is given the base, the intent and the plan's decisions, steps,
+acceptance criteria and what it leaves out, and opens the rest of the plan only where
+a finding depends on it. It runs `NNN-checks.sh` once at the tip, a failing check
+being a finding; a reviewer that may not run commands that write is given its latest
+output verbatim, with its command.
+
 Whoever reviews also checks the change against each acceptance criterion of the plan,
 with at most three findings of its own. Fix the blocking and major findings; each fix
 is reviewed again. At most three rounds, unless `AGENTS.md` says otherwise. A serious
