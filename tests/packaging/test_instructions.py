@@ -7,9 +7,11 @@ skill or an agent of a plugin as `<plugin>:<name>` between backticks, and each n
 repository: a skill, `plugins/<plugin>/skills/<name>/SKILL.md`, or an agent,
 `plugins/<plugin>/agents/<name>.md`, so that a rename leaves no name that leads nowhere. Among them
 are `workflow:plans` and `learning:learning-mode`, which the file is to name. The file has at most
-80 lines; of those two skills, the first has at most 120 lines and the second at most 170.
+83 lines; of those two skills, the first has at most 120 lines and the second at most 170. The
+file's limit was 80 lines until 2026-11-22, when it became the 83 lines that the rule on
+published attribution of 2026-11-16 had made.
 
-Those decisions also put rules in the file, and a cut made to keep it within 80 lines must drop
+Those decisions also put rules in the file, and a cut made to keep it within its length must drop
 none unseen. Each of these is found by a phrase of it, in the text read with every run of blanks
 as one space, since a phrase may wrap: the precedence of a repository's instructions; the skills
 and the agent of `principles` and the hook of Claude Code; the rules on tests, on commits and on
@@ -60,8 +62,8 @@ class SharedRules(unittest.TestCase):
                     "no skill and no agent of that name",
                 )
 
-    def test_the_file_has_at_most_80_lines(self):
-        self.assertLessEqual(len(TEXT.splitlines()), 80)
+    def test_the_file_keeps_within_its_length(self):
+        self.assertLessEqual(len(TEXT.splitlines()), 83)
 
     def test_each_of_the_two_skills_that_the_file_is_to_name_keeps_within_its_length(self):
         for plugin, name, limit in (("workflow", "plans", 120), ("learning", "learning-mode", 170)):
