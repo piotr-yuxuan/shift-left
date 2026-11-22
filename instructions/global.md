@@ -49,6 +49,7 @@ Before presenting a change of more than about 50 changed lines, or when asked fo
 review, have it reviewed independently with the base commit and the intent: in
 Claude Code by the agent `principles:principles-reviewer`, elsewhere by a fresh
 context that loads both principles skills. Fix its blocking findings or report them.
+Under `workflow:plans`, step 5 is that review, unless the user asks for another.
 
 # Commits and writing
 
