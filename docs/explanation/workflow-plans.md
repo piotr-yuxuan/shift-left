@@ -132,8 +132,8 @@ change to read.
 The moves themselves, split and merge, unify and specialize, tighten and loosen, are
 Daniel Jackson's, from "Concept Design Moves" (2022), each a trade-off of one quality
 against another; the skill `principles:concept-design` names them, where it is
-installed. Jackson's concepts are what a user sees of a system, and he sets his moves apart from refactoring: applying
-them to the concepts of a code base is an adaptation.
+installed. Jackson's concepts are what a user sees of a system, and he sets his moves
+apart from refactoring: applying them to the concepts of a code base is an adaptation.
 
 ## Why the merge is a merge commit, and nobody pushes
 

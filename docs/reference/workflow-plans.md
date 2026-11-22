@@ -138,13 +138,13 @@ and `git branch --show-current` prints `NNN-slug`.
 - No `Co-Authored-By` or other attribution trailer.
 - A move of code changes nothing but what its plan lists. Any other change to a moved
   file is a separate commit, made once a test of the existing behaviour exists.
-- A move on a concept that the plan declares comes first, so that the requested
-  change is easy. Its commits change no behaviour: existing tests change only where
-  they name or build what the move replaces, and no assertion changes; behaviour that
-  no test covers is pinned first. By its last commit no code, test or current
-  document uses a retired name, or a split name in its old sense. Records keep
-  theirs, and a name read outside the repository, such as an option or a field of a
-  format, stays unless a decision says how it changes.
+- A move on a concept that the plan declares comes first, so that the requested change
+  is easy. Its commits change no behaviour: existing tests change only where they
+  name or build what the move replaces, and no assertion changes; behaviour that no
+  test covers is pinned first. By its last commit no code, test or current document
+  uses a retired name, or a split name in its old sense. Records keep theirs, and so
+  does a name read outside the repository, such as an option or a field of a format,
+  unless a decision says how it changes.
 
 The checks and `NNN-checks.sh` run in full before step 5 and after each fix. Their
 latest output is kept, with its command.
