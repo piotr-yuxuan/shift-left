@@ -7,9 +7,9 @@ skill or an agent of a plugin as `<plugin>:<name>` between backticks, and each n
 repository: a skill, `plugins/<plugin>/skills/<name>/SKILL.md`, or an agent,
 `plugins/<plugin>/agents/<name>.md`, so that a rename leaves no name that leads nowhere. Among them
 are `workflow:plans` and `learning:learning-mode`, which the file is to name. The file has at most
-83 lines; of those two skills, the first has at most 120 lines and the second at most 170. The
-file's limit was 80 lines until 2026-11-22, when it became the 83 lines that the rule on
-published attribution of 2026-11-16 had made.
+83 lines; of those two skills, the first has at most 143 lines and the second at most 170. Until
+2026-11-22 the file's limit was 80 lines and that of the first skill 120: the rule on published
+attribution of 2026-11-16 took the file to 83, and plan 023 added its rules on plans to the skill.
 
 Those decisions also put rules in the file, and a cut made to keep it within its length must drop
 none unseen. Each of these is found by a phrase of it, in the text read with every run of blanks
@@ -27,10 +27,11 @@ The same decisions fix what the two skills hold, so that a cut made to keep eith
 length drops nothing unseen; both are read as the file is, with every run of blanks as one space.
 `plans` has its nine steps as the headings `## 1.` to `## 9.`, in that order, and holds the
 commands of steps 3 and 9, `reports back`, `without those skills` and the sentence by which whoever
-reviews checks each acceptance criterion. `learning-mode`, read ignoring case, holds a phrase of
-each of its rules, `no user` and `clarifying` among them, and none of what named the owner's own
-files and tools where it came from: `~/pvt`, `todo.org`, `Codex`, `I use`, nor a character outside
-ASCII.
+reviews checks each acceptance criterion; since plan 023, also a phrase of each of its rules on
+what a plan holds, its checks script, its critics and its review. `learning-mode`, read ignoring
+case, holds a phrase of each of its rules, `no user` and `clarifying` among them, and none of what
+named the owner's own files and tools where it came from: `~/pvt`, `todo.org`, `Codex`, `I use`,
+nor a character outside ASCII.
 """
 
 import re
@@ -66,7 +67,7 @@ class SharedRules(unittest.TestCase):
         self.assertLessEqual(len(TEXT.splitlines()), 83)
 
     def test_each_of_the_two_skills_that_the_file_is_to_name_keeps_within_its_length(self):
-        for plugin, name, limit in (("workflow", "plans", 120), ("learning", "learning-mode", 170)):
+        for plugin, name, limit in (("workflow", "plans", 143), ("learning", "learning-mode", 170)):
             with self.subTest(name=f"{plugin}:{name}"):
                 skill = ROOT / "plugins" / plugin / "skills" / name / "SKILL.md"
                 self.assertLessEqual(len(skill.read_text(encoding="utf-8").splitlines()), limit)
@@ -138,6 +139,14 @@ class SkillContents(unittest.TestCase):
             "reports back",
             "without those skills",
             "Whoever reviews also checks the change against each acceptance criterion",
+            "`NNN-checks.sh`",
+            "Name code by its symbol",
+            "Take no count at the base",
+            "plan drafted without a script",
+            "else one with both lenses",
+            "the plan and its script",
+            "given its latest output verbatim",
+            "after each fix",
         )
         for phrase in phrases:
             with self.subTest(phrase=phrase):

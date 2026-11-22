@@ -36,13 +36,28 @@ that `AGENTS.md` gives.
 
 - `NNN` is one more than the highest number that `ls docs/work/*/` in the primary
   checkout, `git branch -a` and `git worktree list` show; never reuse a number.
-- The plan holds its status, goal, decisions, steps and acceptance criteria, each
-  criterion a check and its expected result.
+- The plan holds its status, goal, decisions, steps, acceptance criteria and what it
+  leaves out, in at most about 400 lines. The last four stand alone for the review of
+  step 5; context and evidence go in a section of their own.
+- Name code by its symbol, such as a function, a type or a test; give a line number
+  only where no symbol names the place. Take no count at the base: the next merge
+  makes both stale.
+- The acceptance criteria are a script beside the plan, `NNN-checks.sh`, run from the
+  worktree's root: each check exits non-zero and names itself when the plan is not
+  met, and the plan lists the checks in one line each. Behaviour is checked by tests
+  that the steps name, which the script runs by name; the repository's checks stay
+  outside it. A criterion that no command can check is listed as manual, with why. A
+  plan drafted without a script keeps its criteria as written, in the script's stead.
 
 ## 2. Approval
 
 The user approves the plan before it is built. A substantial plan is first checked by
-independent critics, then revised.
+independent critics, then revised: two, one per lens, when it changes behaviour or a
+contract, else one with both lenses. The *evidence* lens checks each claim about the
+code at the base, each list in the plan for completeness, and that the steps pass the
+checks in their order; the *design* lens, that the plan does its goal and no more,
+that each decision holds against the principles and the repository's rules, and that
+each check would fail were the plan not met.
 
 ## 3. Worktree
 
@@ -54,9 +69,10 @@ Before any edit, in the worktree, `git rev-parse --show-toplevel` prints the wor
 and `git branch --show-current` prints `NNN-slug`.
 
 If `git check-ignore -q docs/work/plans/NNN-slug.<ext>` fails in the primary checkout,
-git tracks plans: move the plan file into the worktree and commit it, as the first
-commit of the branch, since an untracked copy left there would stop the merge of
-step 9. An untracked plan stays in the primary checkout, with its notes.
+git tracks plans: move the plan and its script into the worktree and commit them, as
+the first commit of the branch, since an untracked copy left there would stop the
+merge of step 9. An untracked plan stays in the primary checkout, with its notes and
+its script.
 
 ## 4. Implement
 
@@ -72,12 +88,15 @@ checks:
 - A move changes nothing but what its plan lists. Any other change to a moved file is
   a separate commit, made once a test of the existing behaviour exists.
 
-Run the checks in full before step 5.
+Run the checks in full, and `NNN-checks.sh`, before step 5 and after each fix; keep
+the script's latest output, with its command.
 
 ## 5. Review
 
-An independent review of `git diff main...HEAD`, given the base, the intent and the
-plan:
+An independent review of `git diff main...HEAD`, without the plan and its script
+where git tracks them, given the base, the intent and the plan's decisions, steps,
+acceptance criteria and what it leaves out; the rest of the plan only where a finding
+depends on it:
 
 - in Claude Code, the agent `principles:principles-reviewer`, whose requirements lens
   a plan with acceptance criteria turns on;
@@ -85,6 +104,9 @@ plan:
   `principles:karpathy-guidelines`;
 - without those skills, a fresh context that checks the change against the intent.
 
+Whoever reviews runs `NNN-checks.sh` once at the tip, a failing check being a
+finding; a reviewer that may not run commands that write is given its latest output
+verbatim, with its command.
 Whoever reviews also checks the change against each acceptance criterion of the plan,
 with at most three findings of its own. Fix the blocking and major findings; each fix
 is reviewed again. At most three rounds, unless `AGENTS.md` says otherwise. A serious
@@ -94,15 +116,16 @@ the last round goes to the user at step 8: never accept one silently.
 ## 6. Catch up
 
 If `main` moved since the branch began, run `git merge --no-edit main` in the
-worktree, then the checks again.
+worktree, then the checks and `NNN-checks.sh` again.
 
 ## 7. Record
 
 Append implementation notes to the plan: what each step did, with its commits;
 decisions and rejected alternatives; deviations; test results; what was surprising or
 undocumented; limitations; follow-ups. Once the user confirms the merge at step 8,
-and right before it, move the plan to `docs/work/changelog/`: by `git mv` and a
-commit in the worktree when git tracks it, else by `mv` in the primary checkout.
+and right before it, move the plan and its script to `docs/work/changelog/`: by
+`git mv` and a commit in the worktree when git tracks them, else by `mv` in the
+primary checkout.
 
 ## 8. Pre-merge summary
 
