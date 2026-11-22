@@ -7,15 +7,17 @@ skill or an agent of a plugin as `<plugin>:<name>` between backticks, and each n
 repository: a skill, `plugins/<plugin>/skills/<name>/SKILL.md`, or an agent,
 `plugins/<plugin>/agents/<name>.md`, so that a rename leaves no name that leads nowhere. Among them
 are `workflow:plans` and `learning:learning-mode`, which the file is to name. The file has at most
-83 lines; of those two skills, the first has at most 157 lines and the second at most 170. Until
+84 lines; of those two skills, the first has at most 157 lines and the second at most 170. Until
 2026-11-22 the file's limit was 80 lines and that of the first skill 120: the rule on published
-attribution of 2026-11-16 took the file to 83, and plan 023 added its rules on plans to the skill.
+attribution of 2026-11-16 took the file to 83, and plan 023 added a line to it and its rules on
+plans to the skill.
 
 Those decisions also put rules in the file, and a cut made to keep it within its length must drop
 none unseen. Each of these is found by a phrase of it, in the text read with every run of blanks
 as one space, since a phrase may wrap: the precedence of a repository's instructions; the skills
 and the agent of `principles` and the hook of Claude Code; the rules on tests, on commits and on
-writing; the invariants; `C` and the scratch configurations. The rule on the primary checkout
+writing; the invariants; `C` and the scratch configurations; since plan 023, that step 5 of
+`workflow:plans` is the independent review of a plan. The rule on the primary checkout
 binds only a repository whose instructions name `workflow:plans`: the list item that holds
 `primary checkout` begins with those words.
 
@@ -64,7 +66,7 @@ class SharedRules(unittest.TestCase):
                 )
 
     def test_the_file_keeps_within_its_length(self):
-        self.assertLessEqual(len(TEXT.splitlines()), 83)
+        self.assertLessEqual(len(TEXT.splitlines()), 84)
 
     def test_each_of_the_two_skills_that_the_file_is_to_name_keeps_within_its_length(self):
         for plugin, name, limit in (("workflow", "plans", 157), ("learning", "learning-mode", 170)):
@@ -96,6 +98,7 @@ class SharedRules(unittest.TestCase):
             "CLAUDE_CODE_EXECPATH",
             "at the start of each command that uses it",
             "CODEX_HOME",
+            "step 5 is that review",
         )
         for phrase in phrases:
             with self.subTest(phrase=phrase):
