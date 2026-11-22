@@ -1,0 +1,5 @@
+{
+  "name": "code-index",
+  "description": "A codegraph index of its own for each linked git worktree, made when an agent adds the worktree or a session starts in it, and a skill that says how to query it",
+  "license": "EUPL-1.2"
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "code-index",
+  "version": "0.0.9",
+  "description": "A codegraph index of its own for each linked git worktree",
+  "license": "EUPL-1.2",
+  "repository": "https://github.com/piotr-yuxuan/shift-left"
+}

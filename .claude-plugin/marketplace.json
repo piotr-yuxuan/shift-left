@@ -26,6 +26,10 @@
     {
       "name": "learning",
       "source": "./plugins/learning"
+    },
+    {
+      "name": "code-index",
+      "source": "./plugins/code-index"
     }
   ]
 }

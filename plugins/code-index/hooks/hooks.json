@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(*worktree add*)",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/skills/code-index/code_index.py\" --hook",
+            "timeout": 600,
+            "statusMessage": "Indexing the new worktree"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/skills/code-index/code_index.py\" --hook",
+            "timeout": 600,
+            "statusMessage": "Checking the code index of the worktree"
+          }
+        ]
+      }
+    ]
+  }
+}
