@@ -652,6 +652,7 @@ read as page text on 2026-10-11.
 - **A language server needs `fileExtensions`.** Doc: "LSP server configuration": the
   field `fileExtensions`, from file extensions to language names, is required. The
   entry of `basedpyright-lsp` has `extensionToLanguage` in its place.
+  Since plan 022, on 2026-11-22, the marketplace has no language server entry.
 - **What its install command takes.** Doc: "Plugin specification for install
   command": a plugin of a registered marketplace, as `plugin@marketplace`; a
   repository on GitHub, or a subdirectory of one; a git address; a local path.
