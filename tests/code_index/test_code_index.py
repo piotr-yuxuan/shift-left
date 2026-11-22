@@ -25,9 +25,11 @@ import importlib.util
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -337,6 +339,27 @@ class CodeIndex(unittest.TestCase):
         self.assertEqual(self.calls(), [f"{worktree} init -y ."])
         self.assertFalse((worktree / ".codegraph").exists())
         self.assertIn("not indexed", line)
+
+    def test_a_hook_stopped_by_sigterm_while_it_indexes_leaves_no_folder(self):
+        # A client that ends a hook at its timeout: a folder left behind would pass for an
+        # index at every later run.
+        worktree = self.worktree(self.repository())
+        process = subprocess.Popen(
+            [sys.executable, str(SCRIPT), "--hook"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            env=self.environment | {"FAKE_SLEEP": "30"},
+            text=True,
+        )
+        process.stdin.write(json.dumps(session(worktree)))
+        process.stdin.close()
+        deadline = time.monotonic() + 30
+        while not self.calls() and time.monotonic() < deadline:
+            time.sleep(0.05)
+        process.send_signal(signal.SIGTERM)
+        self.assertEqual(process.wait(timeout=30), 0)
+        self.assertEqual(self.calls(), [f"{worktree} init -y ."])
+        self.assertFalse((worktree / ".codegraph").exists())
 
     def test_the_command_line_acts_for_the_worktree_that_holds_the_path(self):
         worktree = self.worktree(self.repository())

@@ -25,6 +25,7 @@ of codegraph or of this script ends with one line on standard error.
 
 import json
 import shutil
+import signal
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -209,6 +210,9 @@ def main(arguments: list[str]) -> None:
 
 
 if __name__ == "__main__":
+    # A client that ends the hook at its timeout sends SIGTERM: as an exit, it unwinds
+    # through `act`, which stops codegraph and removes the folder that would pass for an index.
+    signal.signal(signal.SIGTERM, lambda _number, _frame: sys.exit(0))
     try:
         main(sys.argv[1:])
     except Exception as error:  # Fail open: no error of git, codegraph or this script blocks.
