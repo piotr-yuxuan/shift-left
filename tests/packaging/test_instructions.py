@@ -7,7 +7,7 @@ skill or an agent of a plugin as `<plugin>:<name>` between backticks, and each n
 repository: a skill, `plugins/<plugin>/skills/<name>/SKILL.md`, or an agent,
 `plugins/<plugin>/agents/<name>.md`, so that a rename leaves no name that leads nowhere. Among them
 are `workflow:plans` and `learning:learning-mode`, which the file is to name. The file has at most
-84 lines; of those two skills, the first has at most 181 lines and the second at most 170. The
+84 lines; of those two skills, the first has at most 183 lines and the second at most 170. The
 first limit is the length of the file when plan 023 changed its rules, on 2026-11-22, and the
 second that of `plans` when plan 026 added its rules on a move on a concept, on 2026-11-23, so
 that any further line is a decision.
@@ -31,7 +31,7 @@ length drops nothing unseen; both are read as the file is, with every run of bla
 commands of steps 3 and 9, `reports back`, `without those skills` and the sentence by which whoever
 reviews checks each acceptance criterion; since plan 023, also a phrase of each of its rules on
 what a plan holds, its checks script, its critics, its review and chains of plans; since plan 026,
-a phrase of each of its five rules on a move on a concept, in steps 1, 2, 4, 5 and 8.
+phrases of each of its five rules on a move on a concept, in steps 1, 2, 4, 5 and 8.
 `learning-mode`, read ignoring case, holds a phrase of each of its rules, `no user` and
 `clarifying` among them, and none of what named the owner's own files and tools where it came
 from: `~/pvt`, `todo.org`, `Codex`, `I use`, nor a character outside ASCII.
@@ -70,7 +70,7 @@ class SharedRules(unittest.TestCase):
         self.assertLessEqual(len(TEXT.splitlines()), 84)
 
     def test_each_of_the_two_skills_that_the_file_is_to_name_keeps_within_its_length(self):
-        for plugin, name, limit in (("workflow", "plans", 181), ("learning", "learning-mode", 170)):
+        for plugin, name, limit in (("workflow", "plans", 183), ("learning", "learning-mode", 170)):
             with self.subTest(name=f"{plugin}:{name}"):
                 skill = ROOT / "plugins" / plugin / "skills" / name / "SKILL.md"
                 self.assertLessEqual(len(skill.read_text(encoding="utf-8").splitlines()), limit)
@@ -165,6 +165,9 @@ class SkillContents(unittest.TestCase):
             "make the change easy, then make the easy change",
             "each commit of a declared move on a concept on its own",
             "the move on a concept, if any",
+            "follow-up of step 7",
+            "no assertion changes",
+            "over and above its three",
         )
         for phrase in phrases:
             with self.subTest(phrase=phrase):

@@ -67,9 +67,10 @@ independent critics, then revised: two, one per lens, when it changes behaviour 
 contract, else one with both lenses. The *evidence* lens checks each claim about the
 code at the base, each list in the plan for completeness, and that the steps pass the
 checks in their order; the *design* lens, that the plan does its goal and no more,
-save a move on a concept that meets every condition of step 1, which it checks, that
-each decision holds against the principles and the repository's rules, and that each
-check would fail were the plan not met.
+save a move on a concept that meets every condition of step 1, which the lens checks
+one by one (a single move, on a concept whose code the change edits and that does its
+job worse, declared in a decision); that each decision holds against the principles
+and the repository's rules; and that each check would fail were the plan not met.
 
 ## 3. Worktree
 
@@ -97,15 +98,16 @@ checks:
   lost otherwise: why, provenance, what was not tried; never what the code, the
   comments or the docs already say.
 - No `Co-Authored-By` or any other attribution trailer.
-- A move changes nothing but what its plan lists. Any other change to a moved file is
-  a separate commit, made once a test of the existing behaviour exists.
+- A move of code changes nothing but what its plan lists. Any other change to a moved
+  file is a separate commit, made once a test of the existing behaviour exists.
 - A move on a concept that the plan declares comes first, so that the requested
-  change is easy: make the change easy, then make the easy change. Its commits
-  change no behaviour: existing tests change only by its renames, and no assertion
-  changes; behaviour that no test covers is pinned first, as before another change
-  to a moved file. By its last commit no code, test or current document uses a
-  retired name, or a split name in its old sense; records keep theirs, and a name
-  read outside the repository goes only where a decision says how.
+  change is easy: make the change easy, then make the easy change. Its commits change
+  no behaviour: existing tests change only where they name or build what the move
+  replaces, and no assertion changes; behaviour that no test covers is pinned first,
+  as before another change to a moved file. By its last commit no code, test or
+  current document uses a retired name, or a split name in its old sense; records
+  keep theirs, and a name read outside the repository, such as an option or a field
+  of a format, stays unless a decision says how it changes.
 
 Run the checks in full, and `NNN-checks.sh`, before step 5 and after each fix; keep
 the script's latest output, with its command.
