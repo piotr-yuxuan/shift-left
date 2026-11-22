@@ -48,7 +48,8 @@ a substantial plan is checked before it is approved, and revised.
 The critics read with two lenses. The *evidence* lens asks whether each claim about the
 code is true at the base, whether each list is complete, and whether the steps can pass
 the checks in their order. The *design* lens asks whether the plan does its goal and no
-more, and whether each check would fail were the plan not met. A plan that changes
+more, save a move on a concept that meets the conditions of step 1, and whether each
+check would fail were the plan not met. A plan that changes
 behaviour or a contract gets one critic per lens, any other substantial plan one critic
 with both lenses, and a small plan none.
 
@@ -95,10 +96,44 @@ is not an oracle that converges on its own. Rounds are bounded, at three unless 
 repository says otherwise, and a serious finding still open after the last one goes to
 the user. It is never accepted silently. Within a round, the reviewer's findings of its
 own are limited to three, so that unmet criteria and problems of the code do not crowd
-each other out.
+each other out. A commit of a move on a concept that changes an assertion or a behaviour
+is a finding over and above those three, since the larger diff was approved on the
+promise that it would not.
 
 The builder does not review its own diff before step 5: that would be one review too
 many per plan.
+
+## Why a plan may make a move on a concept
+
+The shared rules and the guideline *Surgical changes* of `principles:karpathy-guidelines`
+keep each changed line to the request. Held alone, they reward the dilution of concepts:
+an agent that meets a second name for one concept, or one type that serves two purposes,
+leaves it as it is, since merging or splitting it would widen the diff and a duplicate
+breaks no review. Each change stays small, and the code grows harder to change.
+
+So a plan may make one move on a concept whose code its change edits, when that concept
+does its job worse than what the move gives. Fewer and sharper concepts make every later
+change cheaper: that is the conviction of shift-left's owner, and the reason such a move
+is worth a larger diff than the request alone needs. The move is declared in a decision,
+with what it gains and what it costs, so that the user approves it with the plan. Once
+approved, it is part of the request, and the rule that each changed line traces to the
+request still holds: the move widens the request, in the open, rather than overriding
+the rule. Its bounds keep it from becoming a licence for sweeping rewrites: one move per
+plan, on code that the change already edits, any other concept a follow-up. The
+boy-scout rule, which licenses cleaning whatever a change passes, was rejected for that
+reason.
+
+The move comes first, after Kent Beck's "make the change easy (warning: this may be
+hard), then make the easy change", and his *Tidy First?*, which keeps tidying apart from
+changes of behaviour as an economic choice. Its commits change no behaviour, and the
+reviewer reads each on its own, so the plan's diff grows while each commit stays a small
+change to read.
+
+The moves themselves, split and merge, unify and specialize, tighten and loosen, are
+Daniel Jackson's, from "Concept Design Moves" (2022), each a trade-off of one quality
+against another; the skill `principles:concept-design` names them, where it is
+installed. Jackson's concepts are what a user sees of a system, and he sets his moves
+apart from refactoring: applying them to the concepts of a code base is an adaptation.
 
 ## Why the merge is a merge commit, and nobody pushes
 

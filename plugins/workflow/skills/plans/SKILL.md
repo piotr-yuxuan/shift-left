@@ -49,6 +49,16 @@ that `AGENTS.md` gives.
   repository's checks stay outside it. A criterion that no command can check is
   listed as manual, with why. A plan drafted without a script keeps its criteria as
   written, in the script's stead.
+- A plan may make one move on a concept whose code its change edits, when that
+  concept does its job worse than what the move gives: retire it into another,
+  existing or added, split it, or another move that `principles:concept-design`
+  names, where it is installed. A decision names the concept, what replaces it,
+  what the move gains and costs, and the change that edits it, as the plan's
+  section *Concepts* does too where the repository's plans have one. Fewer and
+  sharper concepts make every later change cheaper, so such a move is worth a
+  larger diff than the request alone needs; once approved, it is part of the
+  request that each changed line traces to. Any other concept that the plan
+  notices becomes a follow-up of step 7.
 
 ## 2. Approval
 
@@ -57,8 +67,10 @@ independent critics, then revised: two, one per lens, when it changes behaviour 
 contract, else one with both lenses. The *evidence* lens checks each claim about the
 code at the base, each list in the plan for completeness, and that the steps pass the
 checks in their order; the *design* lens, that the plan does its goal and no more,
-that each decision holds against the principles and the repository's rules, and that
-each check would fail were the plan not met.
+save a move on a concept that meets every condition of step 1, which the lens checks
+one by one (a single move, on a concept whose code the change edits and that does its
+job worse, declared in a decision); that each decision holds against the principles
+and the repository's rules; and that each check would fail were the plan not met.
 
 ## 3. Worktree
 
@@ -86,8 +98,16 @@ checks:
   lost otherwise: why, provenance, what was not tried; never what the code, the
   comments or the docs already say.
 - No `Co-Authored-By` or any other attribution trailer.
-- A move changes nothing but what its plan lists. Any other change to a moved file is
-  a separate commit, made once a test of the existing behaviour exists.
+- A move of code changes nothing but what its plan lists. Any other change to a moved
+  file is a separate commit, made once a test of the existing behaviour exists.
+- A move on a concept that the plan declares comes first, so that the requested change
+  is easy: make the change easy, then make the easy change. Its commits change no
+  behaviour: existing tests change only where they name or build what the move
+  replaces, and no assertion changes otherwise; behaviour that no test covers is
+  pinned first, as before another change to a moved file. By its last commit no code,
+  test or current document uses a retired name, or a split name in its old sense;
+  records keep theirs, and so does a name read outside the repository, such as an
+  option or a field of a format, unless a decision says how it changes.
 
 Run the checks in full, and `NNN-checks.sh`, before step 5 and after each fix; keep
 the script's latest output, with its command.
@@ -110,10 +130,13 @@ being a finding; a reviewer that may not run commands that write is given its la
 output verbatim, with its command.
 
 Whoever reviews also checks the change against each acceptance criterion of the plan,
-with at most three findings of its own. Fix the blocking and major findings; each fix
-is reviewed again. At most three rounds, unless `AGENTS.md` says otherwise. A serious
-finding, one that blocks, or shows a defect or an unmet criterion, still open after
-the last round goes to the user at step 8: never accept one silently.
+with at most three findings of its own. It reads each commit of a declared move on a
+concept on its own, with `git log -p main..HEAD`, and checks that it changes no
+assertion and no behaviour; a breach is a finding over and above its three. Fix the
+blocking and major findings; each fix is reviewed again. At most three rounds, unless
+`AGENTS.md` says otherwise. A serious finding, one that blocks, or shows a defect or
+an unmet criterion, still open after the last round goes to the user at step 8: never
+accept one silently.
 
 ## 6. Catch up
 
@@ -132,8 +155,9 @@ primary checkout.
 ## 8. Pre-merge summary
 
 Tell the user what changed and why; the assumptions; the trade-offs and the
-alternatives not taken; the tests run and their results; the limitations; the manual
-checks the user should make. Then wait for the user's word.
+alternatives not taken; the tests run and their results; the limitations; the move on
+a concept, if any, with its commits; the manual checks the user should make. Then
+wait for the user's word.
 
 ## 9. Merge
 
