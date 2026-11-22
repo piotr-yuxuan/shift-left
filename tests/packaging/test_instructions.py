@@ -7,7 +7,7 @@ skill or an agent of a plugin as `<plugin>:<name>` between backticks, and each n
 repository: a skill, `plugins/<plugin>/skills/<name>/SKILL.md`, or an agent,
 `plugins/<plugin>/agents/<name>.md`, so that a rename leaves no name that leads nowhere. Among them
 are `workflow:plans` and `learning:learning-mode`, which the file is to name. The file has at most
-83 lines; of those two skills, the first has at most 143 lines and the second at most 170. Until
+83 lines; of those two skills, the first has at most 157 lines and the second at most 170. Until
 2026-11-22 the file's limit was 80 lines and that of the first skill 120: the rule on published
 attribution of 2026-11-16 took the file to 83, and plan 023 added its rules on plans to the skill.
 
@@ -28,10 +28,10 @@ length drops nothing unseen; both are read as the file is, with every run of bla
 `plans` has its nine steps as the headings `## 1.` to `## 9.`, in that order, and holds the
 commands of steps 3 and 9, `reports back`, `without those skills` and the sentence by which whoever
 reviews checks each acceptance criterion; since plan 023, also a phrase of each of its rules on
-what a plan holds, its checks script, its critics and its review. `learning-mode`, read ignoring
-case, holds a phrase of each of its rules, `no user` and `clarifying` among them, and none of what
-named the owner's own files and tools where it came from: `~/pvt`, `todo.org`, `Codex`, `I use`,
-nor a character outside ASCII.
+what a plan holds, its checks script, its critics, its review and chains of plans. `learning-mode`,
+read ignoring case, holds a phrase of each of its rules, `no user` and `clarifying` among them, and
+none of what named the owner's own files and tools where it came from: `~/pvt`, `todo.org`,
+`Codex`, `I use`, nor a character outside ASCII.
 """
 
 import re
@@ -67,7 +67,7 @@ class SharedRules(unittest.TestCase):
         self.assertLessEqual(len(TEXT.splitlines()), 83)
 
     def test_each_of_the_two_skills_that_the_file_is_to_name_keeps_within_its_length(self):
-        for plugin, name, limit in (("workflow", "plans", 143), ("learning", "learning-mode", 170)):
+        for plugin, name, limit in (("workflow", "plans", 157), ("learning", "learning-mode", 170)):
             with self.subTest(name=f"{plugin}:{name}"):
                 skill = ROOT / "plugins" / plugin / "skills" / name / "SKILL.md"
                 self.assertLessEqual(len(skill.read_text(encoding="utf-8").splitlines()), limit)
@@ -147,6 +147,11 @@ class SkillContents(unittest.TestCase):
             "the plan and its script",
             "given its latest output verbatim",
             "after each fix",
+            "Chains of plans",
+            "Draft only the next plan",
+            "goes back to the user",
+            "becomes a step of the next plan",
+            "a probe observes",
         )
         for phrase in phrases:
             with self.subTest(phrase=phrase):

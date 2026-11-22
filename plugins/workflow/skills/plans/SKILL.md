@@ -141,3 +141,17 @@ that the merge commit groups the plan's commits and gives them one revertable ha
     git merge --no-ff NNN-slug -m "Merge plan NNN, <short sentence>"
     git worktree remove .worktree/NNN-slug
     git branch -d NNN-slug
+
+## Chains of plans
+
+When the user approves several plans to be built one after another:
+
+- Draft only the next plan while one is built. Its builder first checks it against
+  its predecessor as merged.
+- Before a plan that rests on behaviour not yet observed is built, a probe observes
+  that behaviour, and the plan is revised to what the probe found.
+- A revision that changes a decision or a criterion goes back to the user, as at
+  step 2.
+- A minor finding of the last round becomes a step of the next plan, recorded at
+  step 7, rather than the cause of another round; with no next plan, it is a
+  follow-up of step 7.
