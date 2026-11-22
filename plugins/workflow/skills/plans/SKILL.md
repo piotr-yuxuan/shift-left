@@ -103,11 +103,11 @@ checks:
 - A move on a concept that the plan declares comes first, so that the requested change
   is easy: make the change easy, then make the easy change. Its commits change no
   behaviour: existing tests change only where they name or build what the move
-  replaces, and no assertion changes; behaviour that no test covers is pinned first,
-  as before another change to a moved file. By its last commit no code, test or
-  current document uses a retired name, or a split name in its old sense; records
-  keep theirs, and so does a name read outside the repository, such as an option or a
-  field of a format, unless a decision says how it changes.
+  replaces, and no assertion changes otherwise; behaviour that no test covers is
+  pinned first, as before another change to a moved file. By its last commit no code,
+  test or current document uses a retired name, or a split name in its old sense;
+  records keep theirs, and so does a name read outside the repository, such as an
+  option or a field of a format, unless a decision says how it changes.
 
 Run the checks in full, and `NNN-checks.sh`, before step 5 and after each fix; keep
 the script's latest output, with its command.
