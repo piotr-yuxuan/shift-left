@@ -54,13 +54,16 @@ A sign suggests a move to weigh, not one to make: whether to make it belongs to 
 request, and, where `workflow:plans` is installed, to its step 1. The signs are this
 skill's reading for code, not Jackson's list.
 
-- Two names for one concept, with the same state and actions: retire one name. That
-  trades nothing and is none of the six moves, though a plan declares it as it would
-  any move on a concept.
+- Two names for one concept, with the same state and actions: the candidate is to
+  retire one name. That is none of the six moves and trades nothing, though a plan
+  declares it as it would any move on a concept, with none as its cost.
 - Two concepts that serve one purpose and differ in a few cases are variants: unify is
-  the candidate, at the cost of specificity.
+  the candidate, at the cost of specificity. A shared purpose decides, not a shared
+  shape: look-alikes that serve different purposes stay apart, as the guide on
+  duplication of `principles:programming-principles` says.
 - One type or module that serves two purposes, which change for different reasons, is
-  overloaded, Jackson's word too: split is the candidate.
+  overloaded; Jackson speaks of overloading by piggybacking, a feature put onto a
+  concept that is not its own: split is the candidate.
 - A general concept whose callers keep testing which case they hold: specialize is the
   candidate.
 - Callers that always perform two actions together, or keep an invariant between two
@@ -68,15 +71,15 @@ skill's reading for code, not Jackson's list.
 - A caller that works around a coupling to act on one concept: loosen is the candidate.
 
 Retiring a concept is a merge when another concept takes on its purpose, and a
-unification when both were variants. Of two unifications, Jackson notes that the move may
-factor out the shared aspect as a concept of its own and leave the rest of each concept
-in place.
+unification when both were variants. Jackson notes that a unification, as of Apple
+Mail's filters or Moira's lists, may instead factor out the shared aspect as a concept of
+its own, each concept keeping the rest of its identity.
 
-Choose a move by the quality that the code's purpose needs, and name the quality it gives
-up. A move serves the purposes that the code has now: a split, a specialization or a
-loosening for a use still to come is what YAGNI rules out. Where the trade-off is close,
-lean towards fewer and sharper concepts: they make every later change cheaper. That is
-this skill's stance, not Jackson's.
+A move is chosen by the quality that the code's purpose needs, naming the quality it
+gives up. A move serves the purposes that the code has now: a split, a specialization or
+a loosening for a use still to come is what YAGNI rules out. Where the trade-off is
+close, lean towards fewer and sharper concepts: they make every later change cheaper.
+That is this skill's stance, not Jackson's.
 
 ## In a plan
 
