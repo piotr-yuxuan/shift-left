@@ -1,11 +1,12 @@
 """The page of sources, `docs/reference/sources.md`, checked against the citations of the skills.
 
-The expectations come from the decision of plan 028 that the page lists every work that a skill or
+The expectations come from the decision that the page lists every work that a skill or
 a guide cites, and not from the page. Each guide of `programming-principles` ends with a section
 "References", whose links are its sources; the page has one row per guide, whose first link leads
 to the guide and whose other links are exactly the guide's, so that a source dropped from a guide
 leaves the page too. `karpathy-guidelines` links its author's post in its first line, and its
-`NOTICE.md` names the repository that it was copied from; both addresses appear in the page.
+`NOTICE.md` names the repository and the commit that it was copied from; both addresses and the
+commit appear in the page.
 `concept-design` ends with a line "Sources" that names its works, each title in quotes or in
 italics; each title appears in the page. The page links files of this repository by relative
 paths, from its own directory, and each such link leads to a file that exists, so that a rename
@@ -47,6 +48,10 @@ class Sources(unittest.TestCase):
         notice = (SKILLS / "karpathy-guidelines/NOTICE.md").read_text(encoding="utf-8")
         body = skill.split("---", 2)[2]
         first = next(line for line in body.splitlines() if line and not line.startswith("#"))
+        commits = re.findall(r"\b[0-9a-f]{40}\b", notice)
+        self.assertTrue(commits, "no commit in NOTICE.md")
+        for commit in commits:
+            self.assertIn(commit, PAGE)
         for name, text in (("SKILL.md", first), ("NOTICE.md", notice)):
             urls = URL.findall(text)
             with self.subTest(file=name):

@@ -10,7 +10,7 @@ checked against what it came from.
 **Larry Smith, "Shift-Left Testing", 2001.** *Dr. Dobb's Journal*, September 2001,
 [drdobbs.com/shiftleft-testing/184404768](https://drdobbs.com/shiftleft-testing/184404768).
 
-- Taken: the name, and the aim of moving quality earlier in the work.
+- Taken: the name, and its direction: quality moved earlier.
 - Where: the repository's name, and the question that
   [About `workflow:plans`](../explanation/workflow-plans.md) opens with.
 - Departs: Smith moves testing towards the start of a project; shift-left moves what
@@ -60,9 +60,9 @@ first address, `github.com/forrestchang/andrej-karpathy-skills`, leads there.
 - Taken: the whole file, copied unchanged at commit
   `2c606141936f1eeef17fa3043a72095b4765b9c2`, as
   [`NOTICE.md`](../../plugins/principles/skills/karpathy-guidelines/NOTICE.md) records.
-- Where: `plugins/principles/skills/karpathy-guidelines/`; the reviewer agent applies
-  its test that every changed line traces to the request, and the shared instructions
-  name it.
+- Where: `plugins/principles/skills/karpathy-guidelines/`; the reviewer agent loads it,
+  and the shared instructions name it, with its rule that every changed line traces to
+  the request.
 - Departs: not in the file. Around it, `workflow:plans` counts a move on a concept that
   the user approved with a plan as part of the request, as
   [About `workflow:plans`](../explanation/workflow-plans.md) explains.
@@ -116,9 +116,6 @@ O'Reilly Media, [oreilly.com/library/view/tidy-first/9781098151232](https://www.
   judgement; a move on a concept may reach across many files, and `workflow:plans`
   allows one per plan, on a concept whose code the change edits, declared in a decision
   that the user approves.
-
-Daniel Jackson's paper, above, gives the moves that step 1 of `workflow:plans` points to
-through `concept-design`.
 
 ## `learning`: `learning-mode`
 
