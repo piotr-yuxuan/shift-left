@@ -1,5 +1,5 @@
 # The pipeline: the gate at every push, then a release for a push to main that passes.
-# It holds no rule: the checks are in ci/gate.sh, and the release is in ci/release.py.
+# It holds no rule: the checks are in .github/scripts/gate.sh, and the release is in .github/scripts/release.py.
 name: ci
 
 on:
@@ -28,7 +28,7 @@ jobs:
           python-version: "3.14"
       - run: python3 -m pip install ruff==0.16.10
       # A runner has no Claude Code CLI: the check of the manifests is skipped, and says so.
-      - run: ci/gate.sh --no-cli
+      - run: .github/scripts/gate.sh --no-cli
 
   release:
     needs: gate
@@ -53,6 +53,6 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-      - run: python3 ci/release.py
+      - run: python3 .github/scripts/release.py
         env:
           GH_TOKEN: ${{ github.token }}

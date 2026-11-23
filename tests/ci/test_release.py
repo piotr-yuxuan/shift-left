@@ -24,7 +24,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-CI = Path(__file__).resolve().parents[2] / "ci"
+CI = Path(__file__).resolve().parents[2] / ".github" / "scripts"
 SCRIPT = CI / "release.py"
 NEXT_VERSION = CI / "next_version.py"
 

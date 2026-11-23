@@ -1,6 +1,6 @@
 """Carry out the release of one push to `main`, or what is left of it.
 
-    python3 ci/release.py
+    python3 .github/scripts/release.py
 
 The pipeline runs it in a checkout of the repository, with `git` and `gh` on PATH. It takes the
 pushed commit from `GITHUB_SHA` and the repository from `GITHUB_REPOSITORY`; `gh` takes its

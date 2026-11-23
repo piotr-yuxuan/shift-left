@@ -1,6 +1,6 @@
 """The gate, through its command line.
 
-Each case runs `ci/gate.sh` in a scratch repository that passes every check, then with one
+Each case runs `.github/scripts/gate.sh` in a scratch repository that passes every check, then with one
 defect seeded, and reads the exit status and standard output. The expectations come from the
 header of the script: `== <check>` before each check; one line per rule, which ends with
 `none` or is followed by what the rule found; `gate: the check <name> failed` as the last line
@@ -22,7 +22,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-GATE = Path(__file__).resolve().parents[2] / "ci" / "gate.sh"
+GATE = Path(__file__).resolve().parents[2] / ".github" / "scripts" / "gate.sh"
 CLI = os.environ.get("CLAUDE_CODE_EXECPATH") or shutil.which("claude")
 CHECKS = ["tests", "lint", "contained", "dashes", "private", "version", "messages", "manifests"]
 

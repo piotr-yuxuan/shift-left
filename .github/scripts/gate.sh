@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The gate: the checks that a change passes before it is handed over or released.
 #
-#     ci/gate.sh [--no-cli] [check ...]
+#     .github/scripts/gate.sh [--no-cli] [check ...]
 #
 # It checks the repository that holds the working directory, from its root. With no name
 # it runs every check, in the order below; with names, those only, in the order given.

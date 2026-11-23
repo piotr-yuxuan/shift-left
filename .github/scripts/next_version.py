@@ -1,6 +1,6 @@
 """Decide the next version of the repository.
 
-    python3 ci/next_version.py <file> [tag ...]
+    python3 .github/scripts/next_version.py <file> [tag ...]
 
 `<file>` holds the current version, in the one form that is accepted: `MAJOR.MINOR.PATCH`,
 three numbers with no leading zero, and a line break. The script prints the same version with
