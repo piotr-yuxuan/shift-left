@@ -88,8 +88,9 @@ plugins/<name>/plugin.json        the manifest of the standard, where there is a
 instructions/global.md            user-level rules, imported from a user-level CLAUDE.md
 install.sh                        the installer, for Claude Code, Codex and VS Code
 tests/                            tests of the plugins' scripts, outside the plugins
-tests/packaging/                  tests of the manifests and of the skills
+tests/packaging/                  tests of the manifests, the skills and the page of sources
 docs/harness-facts.md             what was observed about each client and the standards
+docs/reference/sources.md         the works that the plugins and the documentation rely on
 docs/<type>/<plugin>-<page>.md    documentation of a plugin, one Diátaxis type per directory
 ruff.toml                         lint and format configuration
 .version                          the version of the marketplace, raised by the pipeline
