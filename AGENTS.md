@@ -9,7 +9,7 @@ observed about each client and about the standards, and how.
 
 Every change follows the skill `workflow:plans`; load it before the first edit. In this
 repository: plans are `docs/work/plans/NNN-slug.md`, not tracked; the checks are
-`ci/gate.sh`; the extra steps are the plan's row in `docs/work/README.md`, whose rules
+`.github/scripts/gate.sh`; the extra steps are the plan's row in `docs/work/README.md`, whose rules
 hold under `docs/work/`, added at step 1 and its link changed at step 7, and after step
 6 the `version` of each root `plugin.json` that the branch adds set to `.version`.
 
@@ -94,7 +94,7 @@ docs/reference/sources.md         the works that the plugins and the documentati
 docs/<type>/<plugin>-<page>.md    documentation of a plugin, one Diátaxis type per directory
 ruff.toml                         lint and format configuration
 .version                          the version of the marketplace, raised by the pipeline
-ci/                               the gate, and the scripts of a release
+.github/scripts/                  the gate, and the scripts of a release
 .github/workflows/ci.yml          the pipeline: the gate, then a release from main
 docs/work/                        ignored: plans, notes, measurements
 .worktree/                        ignored: one linked worktree per plan
@@ -110,7 +110,7 @@ same script at each push. Its header describes each check, and says how to run o
 alone and how it finds the CLI:
 
 ```
-ci/gate.sh
+.github/scripts/gate.sh
 ```
 
 The commands below are what four of its eight checks run: `tests`, `lint`, `manifests`

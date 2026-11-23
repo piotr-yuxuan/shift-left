@@ -209,7 +209,7 @@ backslash:
 
 ## Releases
 
-Every push to `main` that passes `ci/gate.sh` becomes a release: the pipeline raises the patch number in `.version`,
+Every push to `main` that passes `.github/scripts/gate.sh` becomes a release: the pipeline raises the patch number in `.version`,
 then tags and releases that commit. For Claude Code a plugin's version is its commit, so
 `claude plugin update <plugin>@shift-left` takes the latest release.
 
