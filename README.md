@@ -213,6 +213,16 @@ Every push to `main` that passes `ci/gate.sh` becomes a release: the pipeline ra
 then tags and releases that commit. For Claude Code a plugin's version is its commit, so
 `claude plugin update <plugin>@shift-left` takes the latest release.
 
+## Sources
+
+shift-left stands on other people's work. Its name and aim come from Larry Smith's shift-left testing. The Karpathy
+guidelines are Jiayuan Zhang's (forrestchang), derived from Andrej Karpathy's observations of coding with a language
+model, and copied unchanged. The six moves on concepts are Daniel Jackson's; the order in which a plan makes such a
+move follows Kent Beck; the documentation follows Daniele Procida's Diátaxis; each guide of `programming-principles`
+names the work it rests on; and the learning mode's techniques have research behind them, which the page names.
+[Sources](docs/reference/sources.md) lists every work, what shift-left takes from it, where, and where it departs from
+it, and says which rules rest on no published work, so that each rule can be checked against what it came from.
+
 ## Licence
 
 EUPL 1.2, see [`LICENSE`](LICENSE). The skill `karpathy-guidelines` of `principles` is under MIT, as the notice beside

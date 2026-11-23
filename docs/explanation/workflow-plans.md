@@ -123,17 +123,21 @@ plan, on code that the change already edits, any other concept a follow-up. The
 boy-scout rule, which licenses cleaning whatever a change passes, was rejected for that
 reason.
 
-The move comes first, after Kent Beck's "make the change easy (warning: this may be
-hard), then make the easy change", and his *Tidy First?*, which keeps tidying apart from
-changes of behaviour as an economic choice. Its commits change no behaviour, and the
-reviewer reads each on its own, so the plan's diff grows while each commit stays a small
-change to read.
+The move comes first, after Kent Beck's ["make the change easy (warning: this may be
+hard), then make the easy change"](https://x.com/KentBeck/status/250733358307500032),
+and his [*Tidy First?*](https://www.oreilly.com/library/view/tidy-first/9781098151232/),
+which keeps tidying apart from changes of behaviour as an economic choice. Its commits
+change no behaviour, and the reviewer reads each on its own, so the plan's diff grows
+while each commit stays a small change to read.
 
 The moves themselves, split and merge, unify and specialize, tighten and loosen, are
-Daniel Jackson's, from "Concept Design Moves" (2022), each a trade-off of one quality
-against another; the skill `principles:concept-design` names them, where it is
+Daniel Jackson's, from ["Concept Design
+Moves"](https://doi.org/10.1007/978-3-031-06773-0_3) (2022), each a trade-off of one
+quality against another; the skill `principles:concept-design` names them, where it is
 installed. Jackson's concepts are what a user sees of a system, and he sets his moves
 apart from refactoring: applying them to the concepts of a code base is an adaptation.
+[Sources](../reference/sources.md) lists these works, what shift-left takes from each,
+and where it departs from them.
 
 ## Why the merge is a merge commit, and nobody pushes
 
